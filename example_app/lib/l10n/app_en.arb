@@ -595,6 +595,24 @@
   "libraryPdfTooLarge": "PDF is too large. Maximum size: 200 MB",
   "libraryPdfOpening": "Opening PDF...",
   "libraryPdfImportFailed": "Couldn't import the PDF",
+  "incomingPdfStorageFull": "Not enough storage to import {name}. Free up space and try again.",
+  "@incomingPdfStorageFull": {
+    "description": "SnackBar when a PDF opened or shared from another app could not be copied because storage is full. name = file name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomingPdfUnreadable": "Could not open {name}. Try sharing it again.",
+  "@incomingPdfUnreadable": {
+    "description": "SnackBar when a PDF opened or shared from another app could not be read. name = file name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "libraryOpening": "Opening {title}",
   "@libraryOpening": {
     "placeholders": {

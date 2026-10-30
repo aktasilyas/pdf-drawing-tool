@@ -26,10 +26,18 @@ void main() {
     });
   }
 
-  Future<void> pushFromPlatform(Object? arguments) {
+  Map<String, Object?> errorMap(String name, Object? reason) => {
+        'name': name,
+        'reason': reason,
+      };
+
+  IncomingPdfFailure failure(String name, IncomingPdfFailureReason reason) =>
+      IncomingPdfFailure(name: name, reason: reason);
+
+  Future<void> pushFromPlatform(Object? arguments, {String method = 'onPdf'}) {
     return messenger.handlePlatformMessage(
       channel.name,
-      channel.codec.encodeMethodCall(MethodCall('onPdf', arguments)),
+      channel.codec.encodeMethodCall(MethodCall(method, arguments)),
       (_) {},
     );
   }
@@ -41,7 +49,7 @@ void main() {
 
   test('cold start: PDFs returned by ready are emitted in order', () async {
     answerReady(() => [map('a.pdf'), map('b.pdf')]);
-    final items = <IncomingPdf>[];
+    final items = <IncomingPdfEvent>[];
     final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
     addTearDown(sub.cancel);
     await pumpEventQueue();
@@ -50,7 +58,7 @@ void main() {
 
   test('warm start: onPdf from the platform is emitted', () async {
     answerReady(() => <Object?>[]);
-    final items = <IncomingPdf>[];
+    final items = <IncomingPdfEvent>[];
     final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
     addTearDown(sub.cancel);
     await pumpEventQueue();
@@ -61,7 +69,7 @@ void main() {
 
   test('cold and warm PDFs both arrive', () async {
     answerReady(() => [map('a.pdf')]);
-    final items = <IncomingPdf>[];
+    final items = <IncomingPdfEvent>[];
     final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
     addTearDown(sub.cancel);
     await pumpEventQueue();
@@ -85,12 +93,72 @@ void main() {
       map('ok.pdf'),
     ];
     answerReady(() => replies);
-    final items = <IncomingPdf>[];
+    final items = <IncomingPdfEvent>[];
     final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
     addTearDown(sub.cancel);
     await pumpEventQueue();
     await pushFromPlatform('garbage');
     await pumpEventQueue();
     expect(items, [pdf('ok.pdf')]);
+  });
+
+  test('cold start: failures returned by ready keep their place', () async {
+    answerReady(
+      () => [
+        map('a.pdf'),
+        errorMap('full.pdf', 'storageFull'),
+        errorMap('gone.pdf', 'unreadable'),
+      ],
+    );
+    final items = <IncomingPdfEvent>[];
+    final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
+    addTearDown(sub.cancel);
+    await pumpEventQueue();
+    expect(items, [
+      pdf('a.pdf'),
+      failure('full.pdf', IncomingPdfFailureReason.storageFull),
+      failure('gone.pdf', IncomingPdfFailureReason.unreadable),
+    ]);
+  });
+
+  test('warm start: onPdfError from the platform is emitted', () async {
+    answerReady(() => <Object?>[]);
+    final items = <IncomingPdfEvent>[];
+    final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
+    addTearDown(sub.cancel);
+    await pumpEventQueue();
+    await pushFromPlatform(
+      errorMap('full.pdf', 'storageFull'),
+      method: 'onPdfError',
+    );
+    await pumpEventQueue();
+    expect(items, [failure('full.pdf', IncomingPdfFailureReason.storageFull)]);
+  });
+
+  test('an unknown failure reason is reported as unreadable', () async {
+    answerReady(() => [errorMap('odd.pdf', 'somethingNew')]);
+    final items = <IncomingPdfEvent>[];
+    final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
+    addTearDown(sub.cancel);
+    await pumpEventQueue();
+    expect(items, [failure('odd.pdf', IncomingPdfFailureReason.unreadable)]);
+  });
+
+  test('malformed failure payloads are skipped', () async {
+    answerReady(
+      () => [
+        {'reason': 'storageFull'},
+        errorMap('no-reason.pdf', 42),
+        {'name': 7, 'reason': 'unreadable'},
+      ],
+    );
+    final items = <IncomingPdfEvent>[];
+    final sub = MethodChannelIncomingPdfSource().watch().listen(items.add);
+    addTearDown(sub.cancel);
+    await pumpEventQueue();
+    await pushFromPlatform('garbage', method: 'onPdfError');
+    await pushFromPlatform({'name': 'x.pdf'}, method: 'onPdfError');
+    await pumpEventQueue();
+    expect(items, isEmpty);
   });
 }

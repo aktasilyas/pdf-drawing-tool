@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/utils/logger.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/features/documents/domain/entities/incoming_pdf.dart';
 import 'package:example_app/core/session/active_editor_leave_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/incoming_pdf_provider.dart';
@@ -26,7 +27,9 @@ typedef DocumentQuotaCheck = Future<bool> Function(BuildContext context);
 /// Mount it above the routes (`MaterialApp.router` builder) so it is alive on
 /// every screen. Dialogs and routing use the context of [navigatorKey]. When an
 /// editor is open it is left first through [activeEditorLeaveProvider], so its
-/// save-and-reset path runs before the new document opens.
+/// save-and-reset path runs before the new document opens. A PDF the platform
+/// could not copy ([IncomingPdfFailure]) and an import that throws show a
+/// localized SnackBar instead; the open editor is not left for those.
 class IncomingPdfListener extends ConsumerStatefulWidget {
   const IncomingPdfListener({
     super.key,
@@ -75,7 +78,7 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<List<IncomingPdf>>(
+    ref.listen<List<IncomingPdfEvent>>(
       incomingPdfQueueProvider,
       (_, __) => _drain(),
     );
@@ -98,7 +101,13 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
         if (queue.isEmpty || !widget.isRouterReady()) break;
         final context = widget.navigatorKey.currentContext;
         if (context == null || !context.mounted) break;
-        final pdf = queue.first;
+        final event = queue.first;
+        if (event is IncomingPdfFailure) {
+          ref.read(incomingPdfQueueProvider.notifier).remove(event);
+          _showError(context, _failureMessage(context.l10n, event));
+          continue;
+        }
+        final pdf = event as IncomingPdf;
         if (!await _leaveEditor()) {
           // Save failed: the editor stays open and the PDF stays queued
           // (its copy is kept) until the next incoming PDF or app start.
@@ -115,8 +124,8 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
   }
 
   Future<void> _process(IncomingPdf pdf) async {
+    final context = widget.navigatorKey.currentContext;
     try {
-      final context = widget.navigatorKey.currentContext;
       if (context == null || !context.mounted) return;
       if (!await widget.ensureQuota(context)) return;
       if (!mounted || !context.mounted) return;
@@ -128,9 +137,32 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
       );
     } catch (e, st) {
       logger.e('Incoming PDF import failed', error: e, stackTrace: st);
+      // The importer reports its own errors; this one escaped it.
+      if (context != null && context.mounted) {
+        _showError(context, context.l10n.libraryPdfImportFailed);
+      }
     } finally {
       _deleteCopy(pdf.path);
     }
+  }
+
+  static String _failureMessage(AppLocalizations l10n, IncomingPdfFailure f) {
+    switch (f.reason) {
+      case IncomingPdfFailureReason.storageFull:
+        return l10n.incomingPdfStorageFull(f.name);
+      case IncomingPdfFailureReason.unreadable:
+        return l10n.incomingPdfUnreadable(f.name);
+    }
+  }
+
+  void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   /// Closes the open editor, if any. False when it could not be left.

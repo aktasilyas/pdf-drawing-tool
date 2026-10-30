@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/l10n/l10n.dart';
 import '../../../../helpers/fake_incoming_pdf_source.dart';
 import '../../../../helpers/l10n.dart';
 
@@ -52,6 +53,7 @@ void main() {
     EditorLeave? leave,
     bool Function()? ready,
     Listenable? routeChanges,
+    Locale locale = testLocale,
   }) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
@@ -61,6 +63,7 @@ void main() {
           activeEditorLeaveProvider.overrideWith((ref) => leave),
         ],
         child: localizedApp(
+          locale: locale,
           navigatorKey: navigatorKey,
           builder: (context, child) => IncomingPdfListener(
             navigatorKey: navigatorKey,
@@ -199,6 +202,94 @@ void main() {
     await settle(tester);
     expect(imported, ['bad.pdf', 'next.pdf']);
     expect(File(first.path).existsSync(), isFalse);
+  });
+
+  for (final locale in const [Locale('tr'), Locale('en')]) {
+    final l10n = lookupAppLocalizations(locale);
+
+    testWidgets('storage full SnackBar (${locale.languageCode})',
+        (tester) async {
+      var leaveCalls = 0;
+      await pumpListener(
+        tester,
+        locale: locale,
+        leave: () async {
+          leaveCalls++;
+          return true;
+        },
+      );
+      source.emit(
+        const IncomingPdfFailure(
+          name: 'full.pdf',
+          reason: IncomingPdfFailureReason.storageFull,
+        ),
+      );
+      await settle(tester);
+      final message = l10n.incomingPdfStorageFull('full.pdf');
+      expect(find.text(message), findsOneWidget);
+      expect(imported, isEmpty);
+      expect(leaveCalls, 0);
+    });
+
+    testWidgets('unreadable file SnackBar (${locale.languageCode})',
+        (tester) async {
+      await pumpListener(tester, locale: locale);
+      source.emit(
+        const IncomingPdfFailure(
+          name: 'gone.pdf',
+          reason: IncomingPdfFailureReason.unreadable,
+        ),
+      );
+      await settle(tester);
+      final message = l10n.incomingPdfUnreadable('gone.pdf');
+      expect(find.text(message), findsOneWidget);
+      expect(imported, isEmpty);
+    });
+  }
+
+  testWidgets('a failure does not block the PDFs queued after it',
+      (tester) async {
+    await pumpListener(tester);
+    source.emit(
+      const IncomingPdfFailure(
+        name: 'gone.pdf',
+        reason: IncomingPdfFailureReason.unreadable,
+      ),
+    );
+    source.emit(makePdf('next.pdf'));
+    await settle(tester);
+    expect(imported, ['next.pdf']);
+  });
+
+  testWidgets('router not ready: a failure waits, then shows', (tester) async {
+    var isReady = false;
+    final routes = ChangeNotifier();
+    await pumpListener(tester, ready: () => isReady, routeChanges: routes);
+    source.emit(
+      const IncomingPdfFailure(
+        name: 'cold.pdf',
+        reason: IncomingPdfFailureReason.storageFull,
+      ),
+    );
+    await settle(tester);
+    final l10n = lookupAppLocalizations(testLocale);
+    final message = l10n.incomingPdfStorageFull('cold.pdf');
+    expect(find.text(message), findsNothing);
+    isReady = true;
+    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+    routes.notifyListeners();
+    await settle(tester);
+    expect(find.text(message), findsOneWidget);
+  });
+
+  testWidgets('an importer exception shows the generic import error',
+      (tester) async {
+    importThrows = true;
+    await pumpListener(tester);
+    source.emit(makePdf('bad.pdf'));
+    await settle(tester);
+    final l10n = lookupAppLocalizations(testLocale);
+    expect(find.text(l10n.libraryPdfImportFailed), findsOneWidget);
   });
 }
 

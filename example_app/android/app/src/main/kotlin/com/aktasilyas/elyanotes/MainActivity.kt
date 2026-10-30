@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.OpenableColumns
+import android.system.ErrnoException
+import android.system.OsConstants
 import android.util.Log
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -19,14 +21,16 @@ import java.util.concurrent.Executors
  *
  * The content URI is copied into cacheDir/incoming on a background thread and
  * handed to Dart over the `elyanotes/incoming_pdf` channel as
- * {path, name, size}. Dart imports it into app storage and deletes the copy,
- * so no persistable URI permission is needed. Items received before Dart is
- * listening (cold start) are buffered until Dart calls `ready`.
+ * {path, name, size} (`onPdf`). Dart imports it into app storage and deletes
+ * the copy, so no persistable URI permission is needed. A PDF that cannot be
+ * copied is reported as {name, reason: storageFull|unreadable} (`onPdfError`).
+ * Items received before Dart is listening (cold start) are buffered until Dart
+ * calls `ready`, which returns both kinds; failures carry the `reason` key.
  */
 class MainActivity : FlutterFragmentActivity() {
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val pending = mutableListOf<Map<String, Any>>()
+    private val pending = mutableListOf<Pending>()
     private var channel: MethodChannel? = null
     private var dartReady = false
 
@@ -37,7 +41,7 @@ class MainActivity : FlutterFragmentActivity() {
                 setMethodCallHandler { call, result ->
                     if (call.method == "ready") {
                         dartReady = true
-                        result.success(pending.toList())
+                        result.success(pending.map { it.payload })
                         pending.clear()
                     } else {
                         result.notImplemented()
@@ -82,14 +86,27 @@ class MainActivity : FlutterFragmentActivity() {
         executor.execute {
             val item =
                 try {
-                    copyToCache(uri)
+                    Pending(ON_PDF, copyToCache(uri))
                 } catch (e: Exception) {
                     Log.w(TAG, "Could not read incoming PDF", e)
-                    null
+                    val reason = if (isStorageFull(e)) "storageFull" else "unreadable"
+                    Pending(ON_PDF_ERROR, mapOf("name" to safeName(uri), "reason" to reason))
                 }
-            if (item != null) mainHandler.post { deliver(item) }
+            mainHandler.post { deliver(item) }
         }
     }
+
+    /** True when [e] or one of its causes is ENOSPC (disk full during copy). */
+    private fun isStorageFull(e: Throwable): Boolean =
+        generateSequence(e) { it.cause }.take(MAX_CAUSE_DEPTH).any {
+            (it is ErrnoException && it.errno == OsConstants.ENOSPC) ||
+                it.message?.contains("ENOSPC") == true
+        }
+
+    /** The display name, if the provider still answers; for error messages. */
+    private fun safeName(uri: Uri): String =
+        runCatching { displayName(uri) }.getOrNull()?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_NAME
 
     private fun pdfUri(intent: Intent?): Uri? {
         if (intent == null) return null
@@ -119,7 +136,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun copyToCache(uri: Uri): Map<String, Any> {
         // `name` keeps the user's file name (title); only the cache file name
         // is sanitized.
-        val name = displayName(uri)?.takeIf { it.isNotBlank() } ?: "document.pdf"
+        val name = displayName(uri)?.takeIf { it.isNotBlank() } ?: DEFAULT_NAME
         val safe = name.replace(Regex("[^A-Za-z0-9 ._-]"), "_").take(MAX_FILE_NAME)
         val fileName = if (safe.endsWith(".pdf", true)) safe else "$safe.pdf"
         val dir = File(cacheDir, INCOMING_DIR).apply { mkdirs() }
@@ -134,13 +151,24 @@ class MainActivity : FlutterFragmentActivity() {
         return mapOf("path" to target.absolutePath, "name" to name, "size" to target.length())
     }
 
-    private fun deliver(item: Map<String, Any>) {
+    private fun deliver(item: Pending) {
         val ch = channel
-        if (dartReady && ch != null) ch.invokeMethod("onPdf", item) else pending.add(item)
+        if (dartReady && ch != null) {
+            ch.invokeMethod(item.method, item.payload)
+        } else {
+            pending.add(item)
+        }
     }
+
+    /** A channel call waiting for Dart: `onPdf` or `onPdfError` with its map. */
+    private data class Pending(val method: String, val payload: Map<String, Any>)
 
     private companion object {
         const val CHANNEL = "elyanotes/incoming_pdf"
+        const val ON_PDF = "onPdf"
+        const val ON_PDF_ERROR = "onPdfError"
+        const val DEFAULT_NAME = "document.pdf"
+        const val MAX_CAUSE_DEPTH = 10
         const val PDF_MIME = "application/pdf"
         const val TAG = "IncomingPdf"
         const val MAX_FILE_NAME = 100
