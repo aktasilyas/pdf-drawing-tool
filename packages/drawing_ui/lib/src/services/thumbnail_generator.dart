@@ -43,7 +43,10 @@ class ThumbnailGenerator {
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     PdfDocumentPool? pdfDocuments,
   }) async {
-    final ownPool = pdfDocuments == null ? PdfDocumentPool(maxOpen: 1) : null;
+    final ownPool =
+        pdfDocuments == null && page.background.type == BackgroundType.pdf
+            ? PdfDocumentPool(maxOpen: 1)
+            : null;
     try {
       return await PageRasterizer.renderPng(
         page,
