@@ -4,6 +4,7 @@ import 'package:drawing_ui/src/panels/infinite_background_panel.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/widgets/color_swatch_target.dart';
 import 'package:drawing_ui/src/widgets/text_style_popup.dart';
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
