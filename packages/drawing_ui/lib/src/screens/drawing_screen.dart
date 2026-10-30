@@ -260,7 +260,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                   ),
                 ],
               ),
-
               if (isCompactMode)
                 ...buildPhoneDrawers(
                   externalLeftSidebar: widget.externalLeftSidebar,
