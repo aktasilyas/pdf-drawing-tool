@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/sticker_catalog.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
