@@ -185,6 +185,12 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     }
   }
 
+  /// Drops history entries of pages that no longer exist in the document.
+  void discardDeletedPages() {
+    _historyManager.discardMissingPages(_ref.read(documentProvider));
+    _updateState();
+  }
+
   /// Clear all history.
   ///
   /// This resets both undo and redo stacks.
