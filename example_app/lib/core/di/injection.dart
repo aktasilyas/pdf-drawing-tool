@@ -113,6 +113,8 @@ void _registerRepositories() {
       getIt<DocumentLocalDatasource>(),
       getIt<FolderLocalDatasource>(),
       getIt<LocalTransactionRunner>(),
+      null,
+      getIt<PdfPathResolver>(),
     ),
   );
 

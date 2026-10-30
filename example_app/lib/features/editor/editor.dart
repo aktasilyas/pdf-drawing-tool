@@ -21,6 +21,7 @@ export 'presentation/l10n/app_toolbar_strings.dart';
 export 'presentation/providers/editor_paper_format.dart';
 export 'presentation/providers/editor_provider.dart';
 export 'presentation/providers/editor_session.dart';
+export 'presentation/providers/library_thumbnail_writer.dart';
 export 'presentation/providers/pdf_relink_handler.dart';
 export 'presentation/screens/editor_screen.dart';
 export 'presentation/widgets/editor_leave_guard.dart';

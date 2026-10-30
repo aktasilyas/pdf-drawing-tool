@@ -27,7 +27,8 @@ class LibraryFixture {
     );
     folderDs = FolderLocalDatasourceImpl(db);
     trashDs = TrashedPageLocalDatasourceImpl(db);
-    documents = DocumentRepositoryImpl(documentDs, folderDs, runner);
+    documents =
+        DocumentRepositoryImpl(documentDs, folderDs, runner, null, pdfPaths);
     folders = FolderRepositoryImpl(folderDs, documentDs, runner);
     pageTrash = PageTrashRepositoryImpl(trashDs, documentDs, runner);
   }

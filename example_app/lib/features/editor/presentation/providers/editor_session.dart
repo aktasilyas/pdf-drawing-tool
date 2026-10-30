@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/library_thumbnail_writer.dart';
 
 /// Reads a provider; both `WidgetRef.read` and `ProviderContainer.read`
 /// tear off to this type.
@@ -20,6 +21,7 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(canvasTransformProvider.notifier).resetForNewDocument();
   read(documentProvider.notifier).updateDocument(document);
   read(currentDocumentProvider.notifier).state = document;
+  read(libraryThumbnailWriterProvider).baseline(document);
   final pageManager = read(pageManagerProvider.notifier);
   pageManager.initializeFromDocument(
     document.pages,

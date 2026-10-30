@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
@@ -85,6 +87,10 @@ abstract class DocumentRepository {
 
   /// Permanently delete document
   Future<Either<Failure, void>> permanentlyDelete(String id);
+
+  /// Stores [png] as the library thumbnail of [id] and returns the stored
+  /// relative path. Does not change the edited date or the folder.
+  Future<Either<Failure, String>> saveThumbnail(String id, Uint8List png);
 
   /// Permanently deletes every document in the trash; returns how many.
   Future<Either<Failure, int>> emptyTrash();

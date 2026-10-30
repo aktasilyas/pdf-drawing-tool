@@ -4,12 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/editor.dart';
 
 class _MockSave extends Mock implements SaveDocumentUseCase {}
 
+class _MockThumbnails extends Mock implements LibraryThumbnailWriter {}
+
 void main() {
   late _MockSave save;
+  late _MockThumbnails thumbnails;
   late ProviderContainer container;
   late DrawingDocument doc;
 
@@ -19,9 +23,13 @@ void main() {
 
   setUp(() {
     save = _MockSave();
+    thumbnails = _MockThumbnails();
     when(() => save(any())).thenAnswer((_) async => const Right(null));
     container = ProviderContainer(
-      overrides: [saveDocumentUseCaseProvider.overrideWithValue(save)],
+      overrides: [
+        saveDocumentUseCaseProvider.overrideWithValue(save),
+        libraryThumbnailWriterProvider.overrideWithValue(thumbnails),
+      ],
     );
     doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
   });
@@ -106,5 +114,17 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
 
     verifyNever(() => save(any()));
+  });
+
+  testWidgets('a successful save asks for a library thumbnail', (tester) async {
+    await notifier().saveNow(doc);
+    verify(() => thumbnails.request(doc)).called(1);
+  });
+
+  testWidgets('a failed save does not ask for a thumbnail', (tester) async {
+    when(() => save(any()))
+        .thenAnswer((_) async => const Left(CacheFailure('disk full')));
+    await notifier().saveNow(doc);
+    verifyNever(() => thumbnails.request(any()));
   });
 }
