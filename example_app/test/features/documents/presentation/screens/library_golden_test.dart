@@ -1,4 +1,5 @@
-import 'package:drawing_ui/drawing_ui.dart' show CoverTextureStore;
+import 'package:drawing_ui/drawing_ui.dart'
+    show CoverTextureStore, sharedPreferencesProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,13 +65,17 @@ void main() {
       SharedPreferences.setMockInitialValues(
         c.list ? {StorageKeys.viewMode: 'list'} : {},
       );
+      final prefs = await SharedPreferences.getInstance();
       tester.view.physicalSize = c.size;
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: libraryOverrides(empty: c.empty, selection: c.selection),
+          overrides: [
+            ...libraryOverrides(empty: c.empty, selection: c.selection),
+            sharedPreferencesProvider.overrideWithValue(prefs),
+          ],
           child: localizedApp(
             theme: c.dark ? AppTheme.dark : AppTheme.light,
             debugShowCheckedModeBanner: false,

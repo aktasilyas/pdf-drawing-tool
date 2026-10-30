@@ -1,5 +1,5 @@
 import 'package:drawing_ui/drawing_ui.dart'
-    show CoverTextureStore, ElyanotesIcons;
+    show CoverTextureStore, ElyanotesIcons, sharedPreferencesProvider;
 import 'package:drawing_core/drawing_core.dart' show PaperSize;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +44,7 @@ void main() {
     SharedPreferences.setMockInitialValues({
       if (list) StorageKeys.viewMode: 'list',
     });
+    final prefs = await SharedPreferences.getInstance();
     useTextScale(tester, 1.3);
     tester.view.physicalSize = _phone;
     tester.view.devicePixelRatio = 1;
@@ -55,6 +56,7 @@ void main() {
           trashDocumentsProvider
               .overrideWith((ref) => libraryRootDocuments.take(2).toList()),
           trashedPagesProvider.overrideWith((ref) => const <TrashedPage>[]),
+          sharedPreferencesProvider.overrideWithValue(prefs),
         ],
         child: localizedApp(
           theme: AppTheme.light,
