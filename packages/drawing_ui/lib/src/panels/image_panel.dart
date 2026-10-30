@@ -132,6 +132,16 @@ class _ImageSourceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    // One button node announcing "label\nsubtitle".
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        child: _tile(cs),
+      ),
+    );
+  }
+
+  Widget _tile(ColorScheme cs) {
     return Material(
       color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
       borderRadius: BorderRadius.circular(10),

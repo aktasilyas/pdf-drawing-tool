@@ -1,6 +1,7 @@
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/sticker_panel_parts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -81,6 +82,110 @@ void main() {
       const Center(child: SizedBox(width: 300, child: panel)),
     );
     expectMinTapTarget(tester, find.byType(StickerCell));
+  });
+
+  testWidgets('cells announce as selectable buttons; semantics tap selects',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(tester, panel);
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('😃')),
+      isSemantics(
+        label: '😃',
+        isButton: true,
+        hasSelectedState: true,
+        isSelected: false,
+        hasTapAction: true,
+      ),
+    );
+
+    tester.semantics.tap(find.semantics.byLabel('😃'));
+    await tester.pump();
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('😃')),
+      isSemantics(
+        label: '😃',
+        isButton: true,
+        hasSelectedState: true,
+        isSelected: true,
+        hasTapAction: true,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('a cell offers an insert custom action (no double tap needed)',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final c = await pumpPanel(tester, panel, setup: _openSticker);
+
+    final node = tester.getSemantics(find.bySemanticsLabel('😃'));
+    final insert = CustomSemanticsAction(label: 'Çıkartma Ekle');
+    final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
+    owner.performAction(
+      node.id,
+      SemanticsAction.customAction,
+      CustomSemanticsAction.getIdentifier(insert),
+    );
+    await tester.pumpAndSettle();
+
+    expect(c.read(stickerPlacementProvider).selectedEmoji, '😃');
+    expect(c.read(activePanelProvider), isNull);
+    handle.dispose();
+  });
+
+  testWidgets('insert button is one labelled button node', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(tester, panel);
+    await tester.tap(find.text('😃'));
+    await tester.pump(_tapDelay);
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Çıkartma Ekle')),
+      isSemantics(
+        label: 'Çıkartma Ekle',
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+      ),
+    );
+    handle.dispose();
+  });
+
+  // Pumped on their own: the grid clips its last row, and a clipped cell's
+  // semantics rect is smaller than the cell itself.
+  testWidgets('cell and insert button meet the tap-target guidelines',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(
+      tester,
+      Row(
+        children: [
+          SizedBox.square(
+            dimension: 56,
+            child: StickerCell(
+              emoji: '😀',
+              selected: true,
+              onTap: () {},
+              onDoubleTap: () {},
+            ),
+          ),
+          Expanded(
+            child: StickerActionButton(
+              label: 'Çıkartma Ekle',
+              icon: Icons.add,
+              onPressed: () {},
+            ),
+          ),
+        ],
+      ),
+    );
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    handle.dispose();
   });
 
   testWidgets('no overflow with textScaler 1.3', (tester) async {
