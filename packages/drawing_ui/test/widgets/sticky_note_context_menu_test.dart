@@ -23,9 +23,7 @@ void main() {
     tester.view.physicalSize = _screen;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    // find.bySemanticsLabel needs the semantics tree.
-    final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
+    // testWidgets enables semantics by default, so bySemanticsLabel works.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
