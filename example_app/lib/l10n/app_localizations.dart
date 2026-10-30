@@ -2534,6 +2534,12 @@ abstract class AppLocalizations {
   /// **'Go'**
   String get editorPageGo;
 
+  /// No description provided for @editorPageGoToPageOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a page between 1 and {count}'**
+  String editorPageGoToPageOutOfRange(int count);
+
   /// No description provided for @editorPageListPageOf.
   ///
   /// In en, this message translates to:
