@@ -127,6 +127,7 @@ void main() {
     expect(widths, [greaterThanOrEqualTo(240 * 2)]);
     expect(find.byType(Image), findsOneWidget);
   });
+
   testWidgets('a DPR change re-renders the PDF tile at the new width',
       (tester) async {
     answer(Right(PageBackground.pdfLazy(pageIndex: 1, pdfFilePath: 'a.pdf')));
