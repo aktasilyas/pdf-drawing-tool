@@ -1738,6 +1738,53 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPdfRelinkFailed => 'PDF yeniden bağlanamadı';
 
   @override
+  String editorPdfRangeTitle(int count) {
+    return 'Bu PDF $count sayfa';
+  }
+
+  @override
+  String editorPdfRangeLimitHint(int max) {
+    return 'Bir seferde en fazla $max sayfa içe aktarılabilir.';
+  }
+
+  @override
+  String editorPdfRangeImportFirst(int max) {
+    return 'İlk $max sayfayı içe aktar';
+  }
+
+  @override
+  String get editorPdfRangeChoose => 'Aralık seç';
+
+  @override
+  String get editorPdfRangeStart => 'Başlangıç';
+
+  @override
+  String get editorPdfRangeEnd => 'Bitiş';
+
+  @override
+  String get editorPdfRangeImport => 'İçe aktar';
+
+  @override
+  String get editorPdfRangeCancel => 'Vazgeç';
+
+  @override
+  String get editorPdfRangeErrorStartBelowOne => 'Başlangıç en az 1 olmalı';
+
+  @override
+  String get editorPdfRangeErrorStartAfterEnd =>
+      'Başlangıç, bitişten büyük olamaz';
+
+  @override
+  String editorPdfRangeErrorEndAfterTotal(int total) {
+    return 'Bitiş $total sayfadan büyük olamaz';
+  }
+
+  @override
+  String editorPdfRangeErrorTooLong(int max) {
+    return 'En fazla $max sayfa seçilebilir';
+  }
+
+  @override
   String get editorErrorPdfLoadFailed => 'PDF Yüklenemedi';
 
   @override

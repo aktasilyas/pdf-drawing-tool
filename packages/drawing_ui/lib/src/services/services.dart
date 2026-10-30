@@ -14,6 +14,8 @@ export 'pdf_export_models.dart';
 export 'pdf_exporter.dart';
 export 'pdf_import_failure.dart';
 export 'pdf_import_service.dart';
+export 'pdf_import_with_limit.dart';
+export 'pdf_page_range.dart';
 export 'pdf_raster_layer_renderer.dart';
 export 'pdf_vector_shapes.dart';
 export 'pdf_loader.dart';

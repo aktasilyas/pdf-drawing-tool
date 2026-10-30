@@ -102,4 +102,40 @@ class AppPageStrings extends PageStrings {
 
   @override
   String get go => _l10n.editorPageGo;
+
+  @override
+  String pdfRangeTitle(int count) => _l10n.editorPdfRangeTitle(count);
+
+  @override
+  String pdfRangeLimitHint(int max) => _l10n.editorPdfRangeLimitHint(max);
+
+  @override
+  String pdfRangeImportFirst(int max) => _l10n.editorPdfRangeImportFirst(max);
+
+  @override
+  String get pdfRangeChoose => _l10n.editorPdfRangeChoose;
+
+  @override
+  String get pdfRangeStart => _l10n.editorPdfRangeStart;
+
+  @override
+  String get pdfRangeEnd => _l10n.editorPdfRangeEnd;
+
+  @override
+  String get pdfRangeImport => _l10n.editorPdfRangeImport;
+
+  @override
+  String get pdfRangeCancel => _l10n.editorPdfRangeCancel;
+
+  @override
+  String pdfRangeError(PdfPageRangeError error, int total, int max) =>
+      switch (error) {
+        PdfPageRangeError.startBelowOne =>
+          _l10n.editorPdfRangeErrorStartBelowOne,
+        PdfPageRangeError.startAfterEnd =>
+          _l10n.editorPdfRangeErrorStartAfterEnd,
+        PdfPageRangeError.endAfterTotal =>
+          _l10n.editorPdfRangeErrorEndAfterTotal(total),
+        PdfPageRangeError.tooLong => _l10n.editorPdfRangeErrorTooLong(max),
+      };
 }

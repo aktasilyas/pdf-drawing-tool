@@ -3182,6 +3182,78 @@ abstract class AppLocalizations {
   /// **'Couldn\'t re-link the PDF'**
   String get editorPdfRelinkFailed;
 
+  /// No description provided for @editorPdfRangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This PDF has {count} pages'**
+  String editorPdfRangeTitle(int count);
+
+  /// No description provided for @editorPdfRangeLimitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can import up to {max} pages at a time.'**
+  String editorPdfRangeLimitHint(int max);
+
+  /// No description provided for @editorPdfRangeImportFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Import first {max} pages'**
+  String editorPdfRangeImportFirst(int max);
+
+  /// No description provided for @editorPdfRangeChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose range'**
+  String get editorPdfRangeChoose;
+
+  /// No description provided for @editorPdfRangeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get editorPdfRangeStart;
+
+  /// No description provided for @editorPdfRangeEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get editorPdfRangeEnd;
+
+  /// No description provided for @editorPdfRangeImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get editorPdfRangeImport;
+
+  /// No description provided for @editorPdfRangeCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get editorPdfRangeCancel;
+
+  /// No description provided for @editorPdfRangeErrorStartBelowOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Start must be at least 1'**
+  String get editorPdfRangeErrorStartBelowOne;
+
+  /// No description provided for @editorPdfRangeErrorStartAfterEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Start can\'t be after end'**
+  String get editorPdfRangeErrorStartAfterEnd;
+
+  /// No description provided for @editorPdfRangeErrorEndAfterTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'End can\'t be past page {total}'**
+  String editorPdfRangeErrorEndAfterTotal(int total);
+
+  /// No description provided for @editorPdfRangeErrorTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'You can select up to {max} pages'**
+  String editorPdfRangeErrorTooLong(int max);
+
   /// No description provided for @editorErrorPdfLoadFailed.
   ///
   /// In en, this message translates to:
