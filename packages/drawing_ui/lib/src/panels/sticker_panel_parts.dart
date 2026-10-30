@@ -42,27 +42,27 @@ class StickerActionButton extends StatelessWidget {
 
   Widget _content(BuildContext context, Color color, BorderRadius radius) {
     return Container(
-        constraints: const BoxConstraints(
-          minHeight: ChromeSizes.minTouchTarget,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: enabled ? 0.1 : 0.05),
-          borderRadius: radius,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: ChromeIconSizes.sm, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: color,
-                  ),
-            ),
-          ],
-        ),
+      constraints: const BoxConstraints(
+        minHeight: ChromeSizes.minTouchTarget,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: enabled ? 0.1 : 0.05),
+        borderRadius: radius,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: ChromeIconSizes.sm, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: color,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -136,26 +136,26 @@ class StickerCell extends StatelessWidget {
       customSemanticsActions: {insert: onDoubleTap},
       excludeSemantics: true,
       child: GestureDetector(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.12)
-              : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(ChromeRadius.sm),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outlineVariant,
-            width: selected ? 1.5 : 1,
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: selected
+                ? cs.primary.withValues(alpha: 0.12)
+                : cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(ChromeRadius.sm),
+            border: Border.all(
+              color: selected ? cs.primary : cs.outlineVariant,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              emoji,
+              style: textTheme.titleMedium?.copyWith(fontSize: 18),
+            ),
           ),
         ),
-        child: Center(
-          child: Text(
-            emoji,
-            style: textTheme.titleMedium?.copyWith(fontSize: 18),
-          ),
-        ),
-      ),
       ),
     );
   }
