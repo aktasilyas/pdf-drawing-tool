@@ -33,6 +33,12 @@ abstract class CanvasStrings {
   String get textStyleTitle;
   String get emojiSize;
   String get textPreviewSample;
+  String get stickyNoteColorYellow;
+  String get stickyNoteColorPink;
+  String get stickyNoteColorBlue;
+  String get stickyNoteColorGreen;
+  String get stickyNoteColorOrange;
+  String get stickyNoteColorPurple;
 
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
@@ -64,6 +70,12 @@ abstract class CanvasStrings {
         'textStyleTitle': textStyleTitle,
         'emojiSize': emojiSize,
         'textPreviewSample': textPreviewSample,
+        'stickyNoteColorYellow': stickyNoteColorYellow,
+        'stickyNoteColorPink': stickyNoteColorPink,
+        'stickyNoteColorBlue': stickyNoteColorBlue,
+        'stickyNoteColorGreen': stickyNoteColorGreen,
+        'stickyNoteColorOrange': stickyNoteColorOrange,
+        'stickyNoteColorPurple': stickyNoteColorPurple,
       };
 }
 
@@ -154,4 +166,22 @@ class CanvasStringsTr extends CanvasStrings {
 
   @override
   String get textPreviewSample => 'Merhaba';
+
+  @override
+  String get stickyNoteColorYellow => 'Sarı';
+
+  @override
+  String get stickyNoteColorPink => 'Pembe';
+
+  @override
+  String get stickyNoteColorBlue => 'Mavi';
+
+  @override
+  String get stickyNoteColorGreen => 'Yeşil';
+
+  @override
+  String get stickyNoteColorOrange => 'Turuncu';
+
+  @override
+  String get stickyNoteColorPurple => 'Mor';
 }

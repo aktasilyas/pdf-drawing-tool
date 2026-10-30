@@ -1861,6 +1861,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorCanvasTextPreviewSample => 'Hello';
 
   @override
+  String get editorCanvasStickyNoteColorYellow => 'Yellow';
+
+  @override
+  String get editorCanvasStickyNoteColorPink => 'Pink';
+
+  @override
+  String get editorCanvasStickyNoteColorBlue => 'Blue';
+
+  @override
+  String get editorCanvasStickyNoteColorGreen => 'Green';
+
+  @override
+  String get editorCanvasStickyNoteColorOrange => 'Orange';
+
+  @override
+  String get editorCanvasStickyNoteColorPurple => 'Purple';
+
+  @override
   String get libraryManageFolders => 'Manage folders';
 
   @override
