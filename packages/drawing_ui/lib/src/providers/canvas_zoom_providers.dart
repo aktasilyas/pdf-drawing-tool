@@ -18,24 +18,6 @@ final zoomPercentageProvider = Provider<String>((ref) {
   return '$percentage%';
 });
 
-/// Whether canvas is at baseline zoom (what user sees as "100%").
-final isDefaultZoomProvider = Provider<bool>((ref) {
-  final transform = ref.watch(canvasTransformProvider);
-  return (transform.zoom - transform.baselineZoom).abs() < 0.01;
-});
-
-/// Whether canvas can zoom in further.
-final canZoomInProvider = Provider<bool>((ref) {
-  final zoom = ref.watch(zoomLevelProvider);
-  return zoom < CanvasTransform.maxZoom;
-});
-
-/// Whether canvas can zoom out further.
-final canZoomOutProvider = Provider<bool>((ref) {
-  final zoom = ref.watch(zoomLevelProvider);
-  return zoom > CanvasTransform.minZoom;
-});
-
 /// Whether zoom gesture is currently active.
 final isZoomingProvider = StateProvider<bool>((ref) => false);
 

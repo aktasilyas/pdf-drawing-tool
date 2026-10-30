@@ -351,50 +351,6 @@ void main() {
     });
   });
 
-  // ===========================================================================
-  // isPenToolProvider Tests
-  // ===========================================================================
-
-  group('isPenToolProvider', () {
-    test('returns true for all pen types', () {
-      for (final toolType in [
-        ToolType.ballpointPen,
-        ToolType.gelPen,
-        ToolType.pencil,
-        ToolType.brushPen,
-        ToolType.highlighter,
-      ]) {
-        final container = ProviderContainer(
-          overrides: [
-            currentToolProvider.overrideWith(
-                (ref) => CurrentToolNotifier(null, initialTool: toolType)),
-          ],
-        );
-        expect(container.read(isPenToolProvider), true,
-            reason: '$toolType should be a pen tool');
-        container.dispose();
-      }
-    });
-
-    test('returns false for eraser tools', () {
-      for (final toolType in [
-        ToolType.pixelEraser,
-        ToolType.strokeEraser,
-        ToolType.lassoEraser,
-      ]) {
-        final container = ProviderContainer(
-          overrides: [
-            currentToolProvider.overrideWith(
-                (ref) => CurrentToolNotifier(null, initialTool: toolType)),
-          ],
-        );
-        expect(container.read(isPenToolProvider), false,
-            reason: '$toolType should not be a pen tool');
-        container.dispose();
-      }
-    });
-  });
-
   group('strokeStyleForToolProvider', () {
     test('returns the style of the requested tool, not the current one', () {
       final container = ProviderContainer();

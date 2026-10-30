@@ -29,6 +29,7 @@ enum LibraryAction {
   saveFolderOrder,
   moveFolder,
   deleteFolder,
+  exportDocument,
 }
 
 /// A failed library mutation (trash, rename, folder create, ...) waiting to

@@ -182,6 +182,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryErrorMoveDocument => 'Couldn\'t move the notebook';
 
   @override
+  String get libraryErrorExportDocument =>
+      'Couldn\'t export the notebook as PDF';
+
+  @override
+  String get libraryExportAsPdf => 'Export as PDF';
+
+  @override
   String get libraryErrorToggleFavorite => 'Couldn\'t update favorites';
 
   @override

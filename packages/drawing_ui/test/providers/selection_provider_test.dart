@@ -88,75 +88,6 @@ void main() {
       });
     });
 
-    group('derived providers', () {
-      test('hasSelectionProvider returns false when null', () {
-        expect(container.read(hasSelectionProvider), isFalse);
-      });
-
-      test('hasSelectionProvider returns true when selection exists', () {
-        final selection = Selection.create(
-          type: SelectionType.rectangle,
-          selectedStrokeIds: ['stroke1'],
-          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
-        );
-
-        container.read(selectionProvider.notifier).setSelection(selection);
-
-        expect(container.read(hasSelectionProvider), isTrue);
-      });
-
-      test('selectionCountProvider returns 0 when no selection', () {
-        expect(container.read(selectionCountProvider), equals(0));
-      });
-
-      test('selectionCountProvider returns correct count', () {
-        final selection = Selection.create(
-          type: SelectionType.rectangle,
-          selectedStrokeIds: ['stroke1', 'stroke2', 'stroke3'],
-          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
-        );
-
-        container.read(selectionProvider.notifier).setSelection(selection);
-
-        expect(container.read(selectionCountProvider), equals(3));
-      });
-
-      test('selectionBoundsProvider returns null when no selection', () {
-        expect(container.read(selectionBoundsProvider), isNull);
-      });
-
-      test('selectionBoundsProvider returns bounds', () {
-        const bounds = BoundingBox(left: 10, top: 20, right: 110, bottom: 120);
-        final selection = Selection.create(
-          type: SelectionType.rectangle,
-          selectedStrokeIds: ['stroke1'],
-          bounds: bounds,
-        );
-
-        container.read(selectionProvider.notifier).setSelection(selection);
-
-        expect(container.read(selectionBoundsProvider), equals(bounds));
-      });
-
-      test('selectedStrokeIdsProvider returns empty list when no selection',
-          () {
-        expect(container.read(selectedStrokeIdsProvider), isEmpty);
-      });
-
-      test('selectedStrokeIdsProvider returns stroke ids', () {
-        final selection = Selection.create(
-          type: SelectionType.rectangle,
-          selectedStrokeIds: ['stroke1', 'stroke2'],
-          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
-        );
-
-        container.read(selectionProvider.notifier).setSelection(selection);
-
-        expect(container.read(selectedStrokeIdsProvider),
-            equals(['stroke1', 'stroke2']));
-      });
-    });
-
     group('selection tool providers', () {
       test('default selection tool type is lasso (matches LassoMode.freeform)',
           () {
@@ -173,13 +104,11 @@ void main() {
             equals(SelectionType.rectangle));
       });
 
-      test('lassoSelectionToolProvider returns lasso tool', () {
-        final tool = container.read(lassoSelectionToolProvider);
-        expect(tool.selectionType, equals(SelectionType.lasso));
-      });
-
-      test('rectSelectionToolProvider returns rectangle tool', () {
-        final tool = container.read(rectSelectionToolProvider);
+      test('activeSelectionToolProvider returns rectangle tool when selected',
+          () {
+        container.read(activeSelectionToolTypeProvider.notifier).state =
+            SelectionType.rectangle;
+        final tool = container.read(activeSelectionToolProvider);
         expect(tool.selectionType, equals(SelectionType.rectangle));
       });
 

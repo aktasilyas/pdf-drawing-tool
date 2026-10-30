@@ -52,4 +52,9 @@ void main() {
     expect(find.text('Favorilerden Kaldır'), findsOneWidget);
     expect(find.text('Favorilere Ekle'), findsNothing);
   });
+
+  testWidgets('does not offer PDF export', (tester) async {
+    await openMenu(tester, favorite: false);
+    expect(find.text('PDF olarak dışa aktar'), findsNothing);
+  });
 }

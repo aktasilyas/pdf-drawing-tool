@@ -422,6 +422,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t move the notebook'**
   String get libraryErrorMoveDocument;
 
+  /// No description provided for @libraryErrorExportDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t export the notebook as PDF'**
+  String get libraryErrorExportDocument;
+
+  /// No description provided for @libraryExportAsPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get libraryExportAsPdf;
+
   /// No description provided for @libraryErrorToggleFavorite.
   ///
   /// In en, this message translates to:

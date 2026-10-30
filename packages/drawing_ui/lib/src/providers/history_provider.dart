@@ -253,8 +253,3 @@ final canRedoProvider = Provider<bool>((ref) {
 final undoCountProvider = Provider<int>((ref) {
   return ref.watch(historyManagerProvider).undoCount;
 });
-
-/// Redo count - convenience provider.
-final redoCountProvider = Provider<int>((ref) {
-  return ref.watch(historyManagerProvider).redoCount;
-});
