@@ -124,5 +124,66 @@ void main() {
       await tester.pump();
       expect(calls, [false]);
     });
+
+    testWidgets('row is one labelled switch node with on/off state',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      var value = false;
+      final calls = <bool>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => CompactToggle(
+                label: 'Pressure sensitivity',
+                value: value,
+                onChanged: (v) {
+                  calls.add(v);
+                  setState(() => value = v);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final node = find.bySemanticsLabel('Pressure sensitivity');
+      expect(node, findsOneWidget);
+      expect(
+        tester.getSemantics(node),
+        isSemantics(
+          label: 'Pressure sensitivity',
+          hasToggledState: true,
+          isToggled: false,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSize(find.byType(CompactToggle)).height,
+        greaterThanOrEqualTo(48),
+      );
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+
+      // TalkBack double-tap runs the node's tap action: one toggle.
+      tester.semantics.tap(find.semantics.byLabel('Pressure sensitivity'));
+      await tester.pump();
+      expect(calls, [true]);
+      expect(
+        tester.getSemantics(node),
+        isSemantics(
+          label: 'Pressure sensitivity',
+          hasToggledState: true,
+          isToggled: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
+    });
   });
 }
