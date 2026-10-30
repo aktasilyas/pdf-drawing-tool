@@ -6,7 +6,7 @@ import 'package:drawing_ui/src/l10n/l10n.dart';
 /// Asks for a page number of a [pageCount]-page document.
 ///
 /// Returns the chosen page as a 0-based index, or null when cancelled.
-Future<int?> showGoToPageDialog(
+Future<int?> pickGoToPageIndex(
   BuildContext context, {
   required int pageCount,
 }) =>

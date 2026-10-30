@@ -168,7 +168,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
   Future<void> _showGoToPageDialog(
       BuildContext context, WidgetRef ref, int pageCount) async {
-    final index = await showGoToPageDialog(context, pageCount: pageCount);
+    final index = await pickGoToPageIndex(context, pageCount: pageCount);
     if (index != null && mounted) _navigateTo(index, ref);
   }
 }

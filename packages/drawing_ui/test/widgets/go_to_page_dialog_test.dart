@@ -19,7 +19,7 @@ Future<void> _open(
         builder: (context) => Scaffold(
           body: TextButton(
             onPressed: () async => results
-                .add(await showGoToPageDialog(context, pageCount: pageCount)),
+                .add(await pickGoToPageIndex(context, pageCount: pageCount)),
             child: const Text('open'),
           ),
         ),
