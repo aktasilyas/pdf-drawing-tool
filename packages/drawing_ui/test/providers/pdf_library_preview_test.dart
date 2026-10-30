@@ -43,6 +43,19 @@ void main() {
         hasLength(maxLibraryPreviews));
   });
 
+  test('the widest preview is the widest tile at the highest DPR', () {
+    expect(
+      maxLibraryPreviewWidth,
+      (libraryPreviewTileWidth * libraryPreviewMaxDpr).ceil(),
+    );
+  });
+
+  test('preview width follows the DPR within 1..max', () {
+    expect(libraryPreviewWidth(0.5), libraryPreviewTileWidth.ceil());
+    expect(libraryPreviewWidth(2), (libraryPreviewTileWidth * 2).ceil());
+    expect(libraryPreviewWidth(4), maxLibraryPreviewWidth);
+  });
+
   test('failure returns null and is not cached', () async {
     final c = ProviderContainer(overrides: [
       pdfWidthRasterizerProvider.overrideWithValue((_, __, ___) async => null),

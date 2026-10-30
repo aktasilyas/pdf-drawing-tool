@@ -3,18 +3,23 @@ import 'dart:typed_data';
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart'
-    show ThumbnailGenerator, pdfPathResolverProvider;
+    show
+        ThumbnailGenerator,
+        libraryPreviewMaxDpr,
+        libraryPreviewTileWidth,
+        pdfPathResolverProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/core.dart' show logger;
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
-/// Widest library tile (logical px) the stored preview must stay sharp at.
-const double libraryThumbnailTileWidth = 240;
+/// Widest library tile (logical px) the stored preview must stay sharp at;
+/// the same tile the PDF tile preview is rendered for.
+const double libraryThumbnailTileWidth = libraryPreviewTileWidth;
 
 /// Highest device pixel ratio the stored preview must stay sharp at.
-const double libraryThumbnailMaxDpr = 3.0;
+const double libraryThumbnailMaxDpr = libraryPreviewMaxDpr;
 
 /// Pixel size of the stored library preview for a page of [pageW] x [pageH].
 ///

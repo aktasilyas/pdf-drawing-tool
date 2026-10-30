@@ -11,8 +11,23 @@ import 'package:drawing_ui/src/utils/drawing_log.dart';
 /// Most library previews kept in memory (each is a few hundred KB).
 const int maxLibraryPreviews = 24;
 
-/// Widest library preview that is rendered, in pixels.
+/// Widest library tile (logical px) a preview must stay sharp at. Shared by
+/// the PDF tile render and the stored library preview of the host app.
+const double libraryPreviewTileWidth = 240;
+
+/// Highest device pixel ratio a library preview must stay sharp at.
+const double libraryPreviewMaxDpr = 3;
+
+/// Widest library preview that is rendered, in pixels:
+/// [libraryPreviewTileWidth] x [libraryPreviewMaxDpr].
 const int maxLibraryPreviewWidth = 720;
+
+/// Pixel width a library preview needs on a screen with [devicePixelRatio]
+/// (clamped to 1..[libraryPreviewMaxDpr]).
+int libraryPreviewWidth(double devicePixelRatio) =>
+    (libraryPreviewTileWidth *
+            devicePixelRatio.clamp(1.0, libraryPreviewMaxDpr))
+        .ceil();
 
 /// Library previews by `'<width>|<filePath>|<page>'`. Separate from
 /// [pdfThumbnailCacheProvider] so sidebar thumbnails stay small and cheap.

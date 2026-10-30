@@ -33,6 +33,9 @@ export 'pdf_library_preview.dart'
         PdfWidthRasterizer,
         renderLibraryPreview,
         libraryPreviewKey,
+        libraryPreviewMaxDpr,
+        libraryPreviewTileWidth,
+        libraryPreviewWidth,
         maxLibraryPreviews,
         maxLibraryPreviewWidth;
 export 'pdf_render_provider.dart'

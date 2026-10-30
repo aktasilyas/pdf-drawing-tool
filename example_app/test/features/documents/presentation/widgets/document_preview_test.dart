@@ -127,4 +127,37 @@ void main() {
     expect(widths, [greaterThanOrEqualTo(240 * 2)]);
     expect(find.byType(Image), findsOneWidget);
   });
+  testWidgets('a DPR change re-renders the PDF tile at the new width',
+      (tester) async {
+    answer(Right(PageBackground.pdfLazy(pageIndex: 1, pdfFilePath: 'a.pdf')));
+    final widths = <int>[];
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    Widget app() => ProviderScope(
+          overrides: [
+            documentRepositoryProvider.overrideWithValue(repository),
+            pdfWidthRasterizerProvider
+                .overrideWithValue((path, page, width) async {
+              widths.add(width);
+              return _png;
+            }),
+          ],
+          child: MaterialApp(
+            home: SizedBox(
+              width: 240,
+              height: 320,
+              child: DocumentPreview(document: _doc(DateTime(2026, 10, 2))),
+            ),
+          ),
+        );
+
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    tester.view.devicePixelRatio = 3;
+    await tester.pumpAndSettle();
+
+    expect(widths, [240, 720]);
+    expect(find.byType(Image), findsOneWidget);
+  });
 }
