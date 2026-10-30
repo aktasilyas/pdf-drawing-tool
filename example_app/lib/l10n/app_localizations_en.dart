@@ -1391,6 +1391,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPageGo => 'Go';
 
   @override
+  String editorPageGoToPageOutOfRange(int count) {
+    return 'Enter a page between 1 and $count';
+  }
+
+  @override
   String editorPageListPageOf(int page, int count) {
     return 'Page $page of $count';
   }
