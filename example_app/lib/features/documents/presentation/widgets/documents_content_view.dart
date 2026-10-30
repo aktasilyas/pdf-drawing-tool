@@ -234,7 +234,9 @@ class _FavoritesView extends ConsumerWidget {
                 : folders.where((f) => matchesSearch(f.name, query)).toList();
             final shownDocs = query.isEmpty
                 ? documents
-                : documents.where((d) => matchesSearch(d.title, query)).toList();
+                : documents
+                    .where((d) => matchesSearch(d.title, query))
+                    .toList();
             if (shownFolders.isEmpty && shownDocs.isEmpty) {
               return DocumentsEmptySearchResult(query: query);
             }

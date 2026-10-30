@@ -62,8 +62,7 @@ void main() {
     expect(f, ['f1']);
   });
 
-  testWidgets('favorites with unmatched query selects nothing',
-      (tester) async {
+  testWidgets('favorites with unmatched query selects nothing', (tester) async {
     final (d, f) = await ids(tester, SidebarSection.favorites, 'xyz');
     expect(d, isEmpty);
     expect(f, isEmpty);
