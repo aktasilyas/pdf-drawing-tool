@@ -69,7 +69,12 @@ void main() {
         _s('b', 700, 100),
         _s('c', 100, 700),
         _s('d', 700, 700),
-      ], elementOrder: const ['a', 'b', 'c', 'd']));
+      ], elementOrder: const [
+        'a',
+        'b',
+        'c',
+        'd'
+      ]));
       cache.setViewport(const Rect.fromLTWH(0, 0, 500, 500), 1,
           interacting: false);
       final before = cache.cachedBytes;
