@@ -109,4 +109,22 @@ void main() {
     line(1, touch, 200);
     expect(container.read(activeLayerStrokesProvider), isEmpty);
   });
+
+  testWidgets('pen stroke commits while a finger is down (finger drawing on)',
+      (tester) async {
+    await pump(tester);
+    container.read(inputModeProvider.notifier).setDrawWithFinger(true);
+    down(5, const Offset(300, 500), touch);
+    line(2, pen, 200);
+    up(5, const Offset(300, 500), touch);
+    expect(container.read(activeLayerStrokesProvider), hasLength(1));
+  });
+
+  testWidgets('pen going down outside nothing leaves the count intact',
+      (tester) async {
+    await pump(tester);
+    line(1, pen, 100);
+    line(2, pen, 200);
+    expect(state.pointerCount, 0);
+  });
 }

@@ -55,6 +55,7 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
     }
 
     pointerCount++;
+    countPointer(event.pointer);
 
     // Only handle with single finger
     if (pointerCount != 1) return;

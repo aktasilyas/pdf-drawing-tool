@@ -7,7 +7,10 @@ part of 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 /// even if the mode changes mid-gesture.
 mixin _PointerKindGate<T extends ConsumerStatefulWidget>
     on ConsumerState<T>, _GestureState<T> {
-  final Set<int> _ignoredPointers = <int>{};
+  /// Pointers that were accepted by [handlePointerDown] and are counted in
+  /// `pointerCount`. Everything else (ignored touches, out-of-page downs) is
+  /// skipped on move/up/cancel so the count can neither drift up nor down.
+  final Set<int> _countedPointers = <int>{};
   int _stylusPointer = -1;
 
   /// True while a stylus is down (palm touches must not zoom/pan then).
@@ -18,19 +21,24 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
     if (InputMode.isStylus(event.kind)) {
       ref.read(inputModeProvider.notifier).stylusSeen();
       _stylusPointer = event.pointer;
+      if (_countedPointers.isNotEmpty) {
+        // A palm or finger got there first: the pen takes over.
+        if (drawingController.isDrawing) drawingController.cancelStroke();
+        _countedPointers.clear();
+        pointerCount = 0;
+      }
       return false;
     }
-    if (ref.read(inputModeProvider).ignores(event.kind)) {
-      _ignoredPointers.add(event.pointer);
-      return true;
-    }
-    return false;
+    return ref.read(inputModeProvider).ignores(event.kind);
   }
+
+  /// Marks an accepted down so its move/up/cancel are processed.
+  void countPointer(int pointer) => _countedPointers.add(pointer);
 
   /// Returns true when move/up/cancel of [pointer] must be skipped.
   bool gateOther(int pointer, {bool end = false}) {
-    if (pointer == _stylusPointer && end) _stylusPointer = -1;
-    if (end) return _ignoredPointers.remove(pointer);
-    return _ignoredPointers.contains(pointer);
+    if (end && pointer == _stylusPointer) _stylusPointer = -1;
+    if (end) return !_countedPointers.remove(pointer);
+    return !_countedPointers.contains(pointer);
   }
 }
