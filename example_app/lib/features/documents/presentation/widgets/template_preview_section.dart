@@ -151,6 +151,10 @@ class TemplatePreviewSection extends StatelessWidget {
   Widget _buildSettingsPanel(BuildContext context) {
     final textSecondary = context.palette.textMuted;
     final l10n = context.l10n;
+    final formatSummary = l10n.libraryFormatSummary(
+      paperSize.isLandscape ? l10n.libraryLandscape : l10n.libraryPortrait,
+      paperSize.preset.label(l10n),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,45 +165,56 @@ class TemplatePreviewSection extends StatelessWidget {
           onChanged: onTitleChanged,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.libraryCover, style: AppTypography.caption),
-            Transform.scale(
-              scale: 0.8,
-              child: Switch(
-                value: hasCover,
-                activeTrackColor: AppColors.primary,
-                onChanged: onCoverToggle,
-              ),
+        MergeSemantics(
+          child: ConstrainedBox(
+            constraints:
+                const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.libraryCover, style: AppTypography.caption),
+                Switch(
+                  key: const Key('template_cover_switch'),
+                  value: hasCover,
+                  activeTrackColor: context.palette.accent,
+                  onChanged: onCoverToggle,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.libraryFormat, style: AppTypography.caption),
-            GestureDetector(
-              onTap: () => _showFormatPicker(context),
+        Semantics(
+          button: true,
+          label: '${l10n.libraryFormat}, $formatSummary',
+          excludeSemantics: true,
+          onTap: () => _showFormatPicker(context),
+          child: InkWell(
+            key: const Key('template_format_button'),
+            onTap: () => _showFormatPicker(context),
+            child: ConstrainedBox(
+              constraints:
+                  const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    l10n.libraryFormatSummary(
-                      paperSize.isLandscape
-                          ? l10n.libraryLandscape
-                          : l10n.libraryPortrait,
-                      paperSize.preset.label(l10n),
-                    ),
-                    style: AppTypography.caption.copyWith(color: textSecondary),
+                  Text(l10n.libraryFormat, style: AppTypography.caption),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formatSummary,
+                        style: AppTypography.caption
+                            .copyWith(color: textSecondary),
+                      ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Icon(Icons.keyboard_arrow_down,
+                          size: AppIconSize.sm, color: textSecondary),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.xxs),
-                  Icon(Icons.keyboard_arrow_down,
-                      size: AppIconSize.sm, color: textSecondary),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ],
     );
