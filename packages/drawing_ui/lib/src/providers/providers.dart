@@ -26,6 +26,15 @@ export 'toolbar_config_provider.dart';
 export 'tool_style_provider.dart';
 
 // PDF render providers
+export 'pdf_library_preview.dart'
+    show
+        pdfLibraryPreviewCacheProvider,
+        pdfWidthRasterizerProvider,
+        PdfWidthRasterizer,
+        renderLibraryPreview,
+        libraryPreviewKey,
+        maxLibraryPreviews,
+        maxLibraryPreviewWidth;
 export 'pdf_render_provider.dart'
     show
         pdfPageCacheProvider,

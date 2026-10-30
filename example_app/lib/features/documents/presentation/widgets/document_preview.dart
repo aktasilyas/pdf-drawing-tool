@@ -59,6 +59,15 @@ class _PdfThumbnail extends ConsumerStatefulWidget {
 class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
   bool _renderFailed = false;
 
+  /// Widest tile (dp) and DPR the preview must stay sharp at; mirrors the
+  /// stored library preview (`libraryThumbnailPixels`).
+  static const double _tileWidth = 240;
+  static const double _maxDpr = 3;
+
+  int get _width =>
+      (_tileWidth * MediaQuery.devicePixelRatioOf(context).clamp(1.0, _maxDpr))
+          .ceil();
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +77,11 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
   Future<void> _triggerRender() async {
     if (!mounted) return;
     final container = ProviderScope.containerOf(context);
-    final result = await renderThumbnail(container, widget.cacheKey);
+    final result = await renderLibraryPreview(
+      container,
+      widget.cacheKey,
+      width: _width,
+    );
     if (!mounted) return;
     if (result == null) {
       setState(() => _renderFailed = true);
@@ -77,8 +90,8 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final cache = ref.watch(pdfThumbnailCacheProvider);
-    final cached = cache[widget.cacheKey];
+    final cache = ref.watch(pdfLibraryPreviewCacheProvider);
+    final cached = cache[libraryPreviewKey(widget.cacheKey, _width)];
 
     if (cached != null) {
       return Image.memory(
