@@ -66,6 +66,36 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     );
   }
 
+  /// Creates a thin-lined, white, portrait quick note in [folderId].
+  /// Returns the new document id, or null if creation failed.
+  Future<String?> createQuickNote({
+    required String title,
+    String? folderId,
+  }) {
+    return createDocument(
+      title: title,
+      templateId: 'thin_lined',
+      folderId: folderId,
+      paperColor: PaperColor.white.storageKey,
+      documentType: DocumentType.quickNote,
+    );
+  }
+
+  /// Creates a blank, white whiteboard (infinite canvas) in [folderId].
+  /// Returns the new document id, or null if creation failed.
+  Future<String?> createWhiteboard({
+    required String title,
+    String? folderId,
+  }) {
+    return createDocument(
+      title: title,
+      templateId: 'blank',
+      folderId: folderId,
+      paperColor: PaperColor.white.storageKey,
+      documentType: DocumentType.whiteboard,
+    );
+  }
+
   Future<bool> moveDocument(String documentId, String? targetFolderId) async {
     state = const AsyncValue.loading();
     final result = await repository.moveDocument(documentId, targetFolderId);
