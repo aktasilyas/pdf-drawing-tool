@@ -42,17 +42,23 @@ jobs:
           prs=$(gh api --paginate "repos/$REPO/pulls?state=open&per_page=100" --jq \
             '.[] | select(.head.repo.full_name == env.REPO)
                  | select(.head.ref | startswith("claude/"))
+                 | select(.draft | not)
                  | select(any(.labels[]; .name == "architect-approved"))
                  | .number' | sort -n)
           echo "Approved PRs: ${prs:-none}"
           merged=0
           failed=""
+          echo "merged=0" >> "$GITHUB_ENV"
           for pr in $prs; do
             ok=""
             for attempt in 1 2 3 4 5; do
-              if gh api -X PUT "repos/$REPO/pulls/$pr/merge" -f merge_method=squash --silent; then
+              if out=$(gh api -X PUT "repos/$REPO/pulls/$pr/merge" -f merge_method=squash 2>&1); then
                 ok=1; break
               fi
+              echo "PR #$pr attempt $attempt: $out"
+              # Only "Base branch was modified" (409) is worth retrying; a
+              # conflict or red required check (405/422) will not fix itself.
+              case "$out" in *"HTTP 409"*) ;; *) break ;; esac
               [ "$attempt" = 5 ] || sleep $((attempt * 20))
             done
             if [ -z "$ok" ]; then
@@ -61,11 +67,12 @@ jobs:
               continue
             fi
             merged=$((merged + 1))
-            ref=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.ref')
-            gh api -X DELETE "repos/$REPO/git/refs/heads/$ref" --silent || true
+            echo "merged=$merged" >> "$GITHUB_ENV"
+            ref=$(gh api "repos/$REPO/pulls/$pr" --jq '.head.ref') || ref=""
+            [ -z "$ref" ] || gh api -X DELETE "repos/$REPO/git/refs/heads/$ref" --silent || true
 
             # A merge made with GITHUB_TOKEN does not auto-close linked issues.
-            body=$(gh api "repos/$REPO/pulls/$pr" --jq '.body // ""')
+            body=$(gh api "repos/$REPO/pulls/$pr" --jq '.body // ""') || body=""
             for n in $(printf '%s' "$body" \
                 | grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?):? +#[0-9]+' \
                 | grep -oE '[0-9]+' | sort -u); do
@@ -74,7 +81,6 @@ jobs:
               gh api -X DELETE "repos/$REPO/issues/$n/labels/in-review" --silent || true
             done
           done
-          echo "merged=$merged" >> "$GITHUB_ENV"
           if [ -n "$failed" ]; then
             echo "Not merged:$failed"
             echo "failed=1" >> "$GITHUB_ENV"
@@ -86,5 +92,5 @@ jobs:
         run: gh api -X POST "repos/$REPO/actions/workflows/ci.yml/dispatches" -f ref=main
 
       - name: Fail if a PR was skipped
-        if: env.failed == '1'
+        if: always() && env.failed == '1'
         run: exit 1
