@@ -14,11 +14,11 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleScaleStart(ScaleStartDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2 || isStylusActive) return;
+    // Two fingers, or one finger in stylus mode
+    if (!navigatesWith(details.pointerCount)) return;
 
     // Show zoom indicator
-    ref.read(isZoomingProvider.notifier).state = true;
+    ref.read(isZoomingProvider.notifier).state = details.pointerCount >= 2;
 
     // Cancel any ongoing operations when zoom/pan starts
     if (drawingController.isDrawing) {
@@ -49,6 +49,7 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
       finishTextEditing();
     }
 
+    navPreempted = false;
     lastFocalPoint = details.localFocalPoint;
     lastScale = 1.0;
     scaleStartFocalPoint = details.localFocalPoint;
@@ -57,8 +58,7 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
   }
 
   void handleScaleUpdate(ScaleUpdateDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2 || isStylusActive) return;
+    if (!navigatesWith(details.pointerCount)) return;
     if (!mounted) return;
 
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
@@ -193,6 +193,13 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
       ref
           .read(zoomBasedRenderProvider.notifier)
           .onZoomChanged(currentZoom, cacheKey);
+    }
+
+    if (navPreempted) {
+      navPreempted = false;
+      lastScale = null;
+      scaleStartFocalPoint = null;
+      return;
     }
 
     // End interactive swipe drag if active
