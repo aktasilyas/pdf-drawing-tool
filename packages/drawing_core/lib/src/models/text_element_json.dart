@@ -32,7 +32,9 @@ TextElement _textElementFromJson(Map<String, dynamic> json) {
     isBold: json['isBold'] ?? false,
     isItalic: json['isItalic'] ?? false,
     isUnderline: json['isUnderline'] ?? false,
-    alignment: TextAlignment.values.byName(json['alignment'] ?? 'left'),
+    // Unknown values (e.g. from a newer app version) fall back to left.
+    alignment: TextAlignment.values.asNameMap()[json['alignment']] ??
+        TextAlignment.left,
     width: json['width'] != null ? _parseDouble(json['width'], 0.0) : null,
     height: json['height'] != null ? _parseDouble(json['height'], 0.0) : null,
     rotation: _parseDouble(json['rotation'], 0.0),

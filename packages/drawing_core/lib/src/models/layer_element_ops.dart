@@ -25,6 +25,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -46,6 +47,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -75,6 +77,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -106,6 +109,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -124,6 +128,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -149,6 +154,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -180,6 +186,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -198,6 +205,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -223,6 +231,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
