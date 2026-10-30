@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
-import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_quota.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_importers.dart';
-import 'package:example_app/features/premium/premium.dart';
 
 /// Dropdown menü item'ları
 enum NewDocumentOption {
@@ -137,65 +133,35 @@ void _handleNewDocumentOption(
   }
 }
 
-void _createQuickNote(BuildContext context) async {
+void _createQuickNote(BuildContext context) => _createAndOpen(
+      context,
+      (controller, folderId) => controller.createQuickNote(
+        title: context.l10n.libraryQuickNoteTitle(_nowStamp()),
+        folderId: folderId,
+      ),
+    );
+
+void _createWhiteboard(BuildContext context) => _createAndOpen(
+      context,
+      (controller, folderId) => controller.createWhiteboard(
+        title: context.l10n.libraryWhiteboardTitle(_nowStamp()),
+        folderId: folderId,
+      ),
+    );
+
+/// Runs [create] in the current folder and opens the new document.
+/// The controller refreshes the document lists itself.
+Future<void> _createAndOpen(
+  BuildContext context,
+  Future<String?> Function(DocumentsController controller, String? folderId)
+      create,
+) async {
   if (!context.mounted) return;
-  final l10n = context.l10n;
-
   final container = ProviderScope.containerOf(context);
-  final controller = container.read(documentsControllerProvider.notifier);
-  final folderId = container.read(currentFolderIdProvider);
-
-  // Varsayılan ayarlarla hızlı not oluştur (beyaz kağıt + ince çizgili)
-  final documentId = await controller.createDocument(
-    title: l10n.libraryQuickNoteTitle(_nowStamp()),
-    templateId: 'thin_lined', // İnce çizgili şablon
-    folderId: folderId,
-    paperColor: PaperColor.white.storageKey,
-    isPortrait: true,
-    documentType: drawing_core.DocumentType.quickNote,
+  final documentId = await create(
+    container.read(documentsControllerProvider.notifier),
+    container.read(currentFolderIdProvider),
   );
-
-  // Refresh providers to update folder counts and document lists
-  if (documentId != null) {
-    container.invalidate(foldersProvider);
-    container.invalidate(documentsProvider);
-    container.invalidate(totalDocumentCountProvider);
-    container.invalidate(notebookCountProvider);
-  }
-
-  // Doküman oluşturulduysa direkt editor'e git
-  if (documentId != null && context.mounted) {
-    context.push(RouteNames.editorPath(documentId));
-  }
-}
-
-void _createWhiteboard(BuildContext context) async {
-  if (!context.mounted) return;
-  final l10n = context.l10n;
-
-  final container = ProviderScope.containerOf(context);
-  final controller = container.read(documentsControllerProvider.notifier);
-  final folderId = container.read(currentFolderIdProvider);
-
-  // Beyaz tahta oluştur (infinite canvas + blank background)
-  final documentId = await controller.createDocument(
-    title: l10n.libraryWhiteboardTitle(_nowStamp()),
-    templateId: 'blank', // Boş arka plan
-    folderId: folderId,
-    paperColor: PaperColor.white.storageKey,
-    isPortrait: true,
-    documentType: drawing_core.DocumentType.whiteboard, // Infinite canvas
-  );
-
-  // Refresh providers to update folder counts and document lists
-  if (documentId != null) {
-    container.invalidate(foldersProvider);
-    container.invalidate(documentsProvider);
-    container.invalidate(totalDocumentCountProvider);
-    container.invalidate(notebookCountProvider);
-  }
-
-  // Doküman oluşturulduysa direkt editor'e git
   if (documentId != null && context.mounted) {
     context.push(RouteNames.editorPath(documentId));
   }
