@@ -5,7 +5,9 @@ import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
-import 'unified_color_picker.dart';
+import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/text_style_toggle_button.dart';
+import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 
 /// Popup for editing text style (color, bold, italic, underline)
 class TextStylePopup extends StatefulWidget {
@@ -31,6 +33,13 @@ class TextStylePopup extends StatefulWidget {
   @override
   State<TextStylePopup> createState() => _TextStylePopupState();
 }
+
+/// Four quick colours plus the palette button: five 48dp targets in a row.
+const int _quickColorCount = 4;
+const double _swatchSize = 28;
+const double _swatchRowInset = ChromeSpacing.sm;
+const double _popupWidth =
+    (_quickColorCount + 1) * ChromeSizes.minTouchTarget + 2 * _swatchRowInset;
 
 class _TextStylePopupState extends State<TextStylePopup> {
   late Color _selectedColor;
@@ -83,7 +92,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            width: 240,
+            width: _popupWidth,
             decoration: BoxDecoration(
               color: cs.surface,
               borderRadius: BorderRadius.circular(12),
@@ -124,30 +133,37 @@ class _TextStylePopupState extends State<TextStylePopup> {
                 const Divider(height: 1),
 
                 // Color Section (hidden in sticker mode)
-                if (!widget.stickerMode)
+                if (!widget.stickerMode) ...[
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s.panels.textColor,
-                          style: textTheme.bodySmall
-                              ?.copyWith(color: cs.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: 8),
-                        UnifiedColorPicker(
-                          selectedColor: _selectedColor,
-                          onColorSelected: (color) {
-                            setState(() => _selectedColor = color);
-                            _updateStyle();
-                          },
-                          chipSize: 28,
-                          spacing: 8,
-                        ),
-                      ],
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Text(
+                      s.panels.textColor,
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: cs.onSurfaceVariant),
                     ),
                   ),
+                  // The 48dp hit areas pad the 28dp dots by 10dp, so this
+                  // row uses a smaller inset and fits on one line.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _swatchRowInset,
+                    ),
+                    child: UnifiedColorPicker(
+                      key: const ValueKey('text-style-colors'),
+                      selectedColor: _selectedColor,
+                      onColorSelected: (color) {
+                        setState(() => _selectedColor = color);
+                        _updateStyle();
+                      },
+                      quickColors: ColorPresets.quickAccess
+                          .take(_quickColorCount)
+                          .toList(),
+                      chipSize: _swatchSize,
+                      spacing: 0,
+                      compactMoreButton: true,
+                    ),
+                  ),
+                ],
 
                 // Font Size Section
                 Padding(
@@ -176,8 +192,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
                           trackHeight: 4,
                           thumbShape: const RoundSliderThumbShape(
                               enabledThumbRadius: 8),
+                          // 24dp overlay keeps the slider track 48dp tall.
                           overlayShape:
-                              const RoundSliderOverlayShape(overlayRadius: 16),
+                              const RoundSliderOverlayShape(overlayRadius: 24),
                         ),
                         child: Slider(
                           value: _fontSize,
@@ -208,7 +225,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            _StyleButton(
+                            TextStyleToggleButton(
                               icon: Icons.format_bold,
                               label: 'B', // l10n-ignore
                               semanticLabel: s.panels.bold,
@@ -219,7 +236,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                               },
                             ),
                             const SizedBox(width: 8),
-                            _StyleButton(
+                            TextStyleToggleButton(
                               icon: Icons.format_italic,
                               label: 'I', // l10n-ignore
                               semanticLabel: s.panels.italic,
@@ -231,7 +248,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                               },
                             ),
                             const SizedBox(width: 8),
-                            _StyleButton(
+                            TextStyleToggleButton(
                               icon: Icons.format_underlined,
                               label: 'U', // l10n-ignore
                               semanticLabel: s.panels.underline,
@@ -248,73 +265,6 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     ),
                   ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Style toggle button (B, I, U)
-class _StyleButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String semanticLabel;
-  final bool isSelected;
-  final FontStyle? fontStyle;
-  final TextDecoration? decoration;
-  final VoidCallback onTap;
-
-  const _StyleButton({
-    required this.icon,
-    required this.label,
-    required this.semanticLabel,
-    required this.isSelected,
-    this.fontStyle,
-    this.decoration,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
-    return Semantics(
-      button: true,
-      toggled: isSelected,
-      label: semanticLabel,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox.square(
-          dimension: ChromeSizes.minTouchTarget,
-          child: Center(
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected ? cs.primary : cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSelected ? cs.primary : cs.outlineVariant,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  label,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontSize: 18,
-                    fontWeight:
-                        label == 'B' ? FontWeight.bold : FontWeight.normal,
-                    fontStyle: fontStyle,
-                    decoration: decoration,
-                    color: isSelected ? cs.onPrimary : cs.onSurface,
-                  ),
-                ),
-              ),
             ),
           ),
         ),
