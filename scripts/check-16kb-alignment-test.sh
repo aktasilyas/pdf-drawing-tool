@@ -41,10 +41,30 @@ if ! "$CHECK" "$work/aligned16k.aab"; then
   status=1
 fi
 
-if "$CHECK" "$work/missing.apk" >/dev/null 2>&1; then
-  echo "::error title=16 KB self-test::missing input passed the check"
-  status=1
-fi
+# $1 = description; the rest = command expected to fail.
+expect_fail() {
+  local what="$1"
+  shift
+  if "$@" >/dev/null 2>&1; then
+    echo "::error title=16 KB self-test::$what passed the check"
+    status=1
+  fi
+}
+
+expect_fail "missing input" "$CHECK" "$work/missing.apk"
+
+# Bundle without any native library (wrong layout must not pass silently).
+mkdir -p "$work/empty/base/manifest" && touch "$work/empty/base/manifest/AndroidManifest.xml"
+(cd "$work/empty" && zip -q -r "$work/nolibs.aab" base) || exit 1
+expect_fail "bundle without native libraries" "$CHECK" "$work/nolibs.aab"
+
+# APK path: aligned ELF but no zipalign available must fail closed.
+(cd "$work/b16384/base" && zip -q -0 -r "$work/aligned16k.apk" lib) || exit 1
+expect_fail "APK without zipalign" env ZIPALIGN=/nonexistent "$CHECK" "$work/aligned16k.apk"
+
+# .apks without universal.apk.
+cp "$work/aligned16k.aab" "$work/nouniversal.apks"
+expect_fail ".apks without universal.apk" "$CHECK" "$work/nouniversal.apks"
 
 [ "$status" -eq 0 ] && echo "16 KB alignment self-test passed."
 exit "$status"

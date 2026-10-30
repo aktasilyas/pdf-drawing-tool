@@ -50,7 +50,9 @@ unzip -q -o "$archive" 'lib/arm64-v8a/*.so' 'lib/x86_64/*.so' \
   'base/lib/arm64-v8a/*.so' 'base/lib/x86_64/*.so' -d "$work/x" 2>/dev/null
 mapfile -t libs < <(cd "$work/x" && find . -name '*.so' -type f | sed 's|^\./||' | sort)
 if [ "${#libs[@]}" -eq 0 ]; then
-  echo "No arm64-v8a/x86_64 native libraries in $input."
+  # Flutter always ships libflutter.so: an empty list means a wrong layout.
+  echo "::error title=16 KB page size::no arm64-v8a/x86_64 native libraries in $input"
+  status=1
 fi
 for lib in "${libs[@]}"; do
   aligns=$("$READELF" -lW "$work/x/$lib" 2>/dev/null | awk '$1 == "LOAD" { print $NF }')
@@ -76,8 +78,17 @@ if [ -n "$apk" ]; then
   zipalign="${ZIPALIGN:-}"
   if [ -z "$zipalign" ]; then
     sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
-    bt=$(ls -d "$sdk"/build-tools/*/ 2>/dev/null | sort -V | tail -n 1)
-    [ -n "$bt" ] && zipalign="${bt}zipalign"
+    # Stable releases only (no -rc); -P needs build-tools 35+.
+    bt=$(ls -d "$sdk"/build-tools/*/ 2>/dev/null | grep -E '/[0-9]+(\.[0-9]+)*/$' |
+      sort -V | tail -n 1)
+    if [ -n "$bt" ]; then
+      major=$(basename "$bt" | cut -d. -f1)
+      if [ "$major" -lt 35 ]; then
+        echo "::error title=16 KB page size::newest build-tools is $(basename "$bt"); zipalign -P needs 35+"
+        status=1
+      fi
+      zipalign="${bt}zipalign"
+    fi
   fi
   if [ -z "$zipalign" ] || [ ! -x "$zipalign" ]; then
     echo "::error title=16 KB page size::zipalign not found (set ANDROID_HOME or ZIPALIGN)"
