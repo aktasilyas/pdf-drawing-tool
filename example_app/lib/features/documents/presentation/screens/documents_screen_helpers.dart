@@ -222,17 +222,20 @@ List<String> getCurrentDocumentIds(
   SidebarSection section,
   String? folderId,
 ) {
+  final searchQuery = ref.watch(searchQueryProvider);
+  final searchAll =
+      section == SidebarSection.documents && searchQuery.isNotEmpty;
   final documentsAsync = switch (section) {
+    SidebarSection.documents when searchAll => ref.watch(searchResultsProvider),
     SidebarSection.documents => ref.watch(documentsProvider(null)),
     SidebarSection.favorites => ref.watch(favoriteDocumentsProvider),
     SidebarSection.trash => ref.watch(trashDocumentsProvider),
     SidebarSection.folder => ref.watch(documentsProvider(folderId)),
   };
-  final searchQuery = ref.watch(searchQueryProvider);
   return documentsAsync.when(
     data: (docs) {
       var filtered = docs;
-      if (searchQuery.isNotEmpty) {
+      if (searchQuery.isNotEmpty && !searchAll) {
         filtered =
             docs.where((d) => matchesSearch(d.title, searchQuery)).toList();
       }
@@ -255,7 +258,11 @@ List<String> getCurrentFolderIds(
     data: (folders) {
       List<Folder> visible;
       if (section == SidebarSection.documents) {
-        visible = folders.where((f) => f.parentId == null).toList();
+        visible = searchQuery.isNotEmpty
+            ? folders
+            : folders.where((f) => f.parentId == null).toList();
+      } else if (section == SidebarSection.favorites) {
+        visible = ref.watch(favoriteFoldersProvider).valueOrNull ?? const [];
       } else if (section == SidebarSection.folder) {
         visible = folders.where((f) => f.parentId == folderId).toList();
       } else {
