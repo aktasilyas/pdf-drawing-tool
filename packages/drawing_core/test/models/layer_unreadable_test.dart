@@ -129,6 +129,22 @@ void main() {
       expect(edited.unreadableElements, layer.unreadableElements);
     });
 
+    test('a duplicated page does not copy unreadable elements', () {
+      final layer = _decode(_layerJson(
+        strokes: [_stroke('a')],
+        shapes: [
+          {'id': 'heart-1', 'type': 'heart'},
+        ],
+      ));
+      final page = Page.create(index: 0).copyWith(layers: [layer]);
+
+      final copy = page.copyWithFreshIds().layers.single;
+
+      expect(copy.strokes, hasLength(1));
+      expect(copy.unreadableElements, isEmpty);
+      expect(page.layers.single.unreadableElements, hasLength(1));
+    });
+
     test('a valid layer has no unreadable elements', () {
       final layer = _decode(_layerJson(
         strokes: [_stroke('a')],

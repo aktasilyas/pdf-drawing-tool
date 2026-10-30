@@ -28,5 +28,5 @@ We do the same; nothing is user-visible.
    `example_app/test/.../load_document_unreadable_element_test.dart` (real
    Drift DB through `LibraryFixture`).
 
-Out of scope: page-level decode failures; `Page.copyWithFreshIds` (duplicate
-page) does not copy unreadable elements because their ids cannot be remapped.
+Out of scope: page-level decode failures. `Page.copyWithFreshIds` (duplicate
+page) explicitly drops unreadable elements: their ids cannot be remapped (tested).
