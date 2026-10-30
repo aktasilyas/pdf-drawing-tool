@@ -43,11 +43,13 @@ void main() {
       var taps = 0;
       await _pump(
         t,
-        ColorSwatchTarget(
-          color: _red,
-          isSelected: true,
-          onTap: () => taps++,
-          child: const SizedBox.square(dimension: 20),
+        Center(
+          child: ColorSwatchTarget(
+            color: _red,
+            isSelected: true,
+            onTap: () => taps++,
+            child: const SizedBox.square(dimension: 20),
+          ),
         ),
       );
 
@@ -58,8 +60,15 @@ void main() {
       expect(
         t.getSemantics(find.byType(ColorSwatchTarget)),
         containsSemantics(
-            label: _label(_red), isButton: true, isSelected: true),
+          label: _label(_red),
+          isButton: true,
+          isSelected: true,
+          hasTapAction: true,
+        ),
       );
+      // TalkBack's double-tap goes through the semantics tap action.
+      t.semantics.tap(find.semantics.byLabel(_label(_red)));
+      expect(taps, 2);
       await _expectGuidelines(t);
       handle.dispose();
     });
@@ -92,7 +101,7 @@ void main() {
       );
       expect(
         t.getSemantics(find.bySemanticsLabel(_strings.selection.more)),
-        containsSemantics(isButton: true),
+        containsSemantics(isButton: true, hasTapAction: true),
       );
 
       await t.tap(find.bySemanticsLabel(_label(_blue)));
@@ -151,13 +160,15 @@ void main() {
       await _expectGuidelines(t);
       expect(
         t.getSemantics(find.bySemanticsLabel(_label(_red))),
-        containsSemantics(isButton: true, isSelected: true),
+        containsSemantics(
+            isButton: true, isSelected: true, hasTapAction: true),
       );
       expect(
         t.getSemantics(find.bySemanticsLabel(_label(_blue))),
         containsSemantics(isButton: true, isSelected: false),
       );
-      await t.tap(find.bySemanticsLabel(_label(_blue)));
+      // Newest first: slot 0 is blue.
+      await t.tap(find.byKey(const ValueKey('recentColorSlot0')));
       expect(picked, _blue);
       handle.dispose();
     });

@@ -10,9 +10,9 @@ import 'package:drawing_ui/src/widgets/color_swatch_target.dart';
 
 /// Recent-colour slots (newest first) + eyedropper glyph.
 ///
-/// Each filled slot is a [ChromeSizes.minTouchTarget] hit area around a 32dp
-/// swatch announced by [ColorSwatchTarget]; the outer padding is reduced by the same amount so the swatches
-/// keep their 16dp inset from the panel edge.
+/// Each filled slot is a [ColorSwatchTarget]: a 48dp hit area around a
+/// 32dp swatch, announced with its colour. The outer padding is reduced by
+/// the same amount so the swatches keep their 16dp inset from the panel edge.
 class ColorPickerRecentRow extends ConsumerWidget {
   const ColorPickerRecentRow({
     super.key,
@@ -78,7 +78,8 @@ class ColorPickerRecentRow extends ConsumerWidget {
       key: ValueKey('recentColorSlot$index'),
       color: color,
       isSelected: selectedColor != null &&
-          color.toARGB32() == selectedColor!.toARGB32(),
+          (color.toARGB32() & 0xFFFFFF) ==
+              (selectedColor!.toARGB32() & 0xFFFFFF),
       onTap: () => onColorSelected(color),
       child: swatch,
     );

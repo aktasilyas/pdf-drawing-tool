@@ -191,6 +191,7 @@ class _MoreButton extends StatelessWidget {
       button: true,
       label: context.drawingStrings.selection.more,
       excludeSemantics: true,
+      onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,

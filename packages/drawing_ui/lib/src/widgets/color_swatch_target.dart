@@ -40,6 +40,9 @@ class ColorSwatchTarget extends StatelessWidget {
       selected: isSelected,
       label: context.drawingStrings.toolbar.color(colorHex(color)),
       excludeSemantics: true,
+      // excludeSemantics drops the detector's action; expose it here so
+      // TalkBack's double-tap activates the swatch.
+      onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
