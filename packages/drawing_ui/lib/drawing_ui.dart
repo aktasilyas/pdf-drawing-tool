@@ -88,7 +88,8 @@ export 'src/panels/highlighter_settings_panel.dart';
 export 'src/panels/eraser_settings_panel.dart';
 export 'src/panels/shapes_settings_panel.dart';
 export 'src/panels/sticker_panel.dart';
-export 'src/panels/export_panel.dart' show ExportPanel;
+export 'src/panels/export_panel.dart'
+    show ExportPanel, PDFExportRunner, pdfExportRunnerProvider;
 export 'src/panels/page_options_panel.dart' show PageOptionsPanel;
 export 'src/panels/sticky_note_panel.dart';
 export 'src/panels/text_settings_panel.dart';

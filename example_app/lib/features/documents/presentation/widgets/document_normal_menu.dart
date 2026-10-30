@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/providers/document_export_actions.dart';
 import 'package:example_app/features/documents/presentation/providers/document_menu_actions.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_menu_common.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/documents/presentation/widgets/rename_document_dialog.dart';
+import 'package:example_app/features/editor/presentation/l10n/app_export_strings.dart';
 import 'package:example_app/features/premium/premium.dart';
 import 'package:example_app/l10n/l10n.dart';
 
@@ -90,6 +92,19 @@ void showNormalDocumentMenu(
         onTap: () {
           Navigator.pop(ctx);
           actions.toggleFavorite(document);
+        },
+      ),
+      softDivider(context),
+      MenuTile(
+        icon: Icons.ios_share,
+        label: l10n.libraryExportAsPdf,
+        onTap: () {
+          Navigator.pop(ctx);
+          // A failed load is shown by LibraryErrorListener.
+          ref.read(documentExportActionsProvider).exportAsPdf(
+                document.id,
+                strings: AppExportStrings(l10n),
+              );
         },
       ),
       softDivider(context),

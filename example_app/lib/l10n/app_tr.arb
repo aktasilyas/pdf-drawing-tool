@@ -54,6 +54,8 @@
   "libraryErrorCreateDocument": "Belge oluşturulamadı",
   "libraryErrorImportDocument": "Belge içe aktarılamadı",
   "libraryErrorMoveDocument": "Belge taşınamadı",
+  "libraryErrorExportDocument": "Belge PDF olarak dışa aktarılamadı",
+  "libraryExportAsPdf": "PDF olarak dışa aktar",
   "libraryErrorToggleFavorite": "Favori durumu değiştirilemedi",
   "libraryErrorTrashDocument": "Belge çöpe taşınamadı",
   "libraryErrorDeleteDocument": "Belge silinemedi",

@@ -1,3 +1,4 @@
+import 'package:drawing_ui/drawing_ui.dart' show FloatingExportProgress;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,8 +64,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               ),
             )
           : null,
-      body: SafeArea(
-        child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          SafeArea(
+            child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
+          ),
+          // Progress / result card of "Export as PDF" from the document menu.
+          const FloatingExportProgress(),
+        ],
       ),
     );
   }

@@ -135,6 +135,8 @@
   "libraryErrorCreateDocument": "Couldn't create the notebook",
   "libraryErrorImportDocument": "Couldn't import the document",
   "libraryErrorMoveDocument": "Couldn't move the notebook",
+  "libraryErrorExportDocument": "Couldn't export the notebook as PDF",
+  "libraryExportAsPdf": "Export as PDF",
   "libraryErrorToggleFavorite": "Couldn't update favorites",
   "libraryErrorTrashDocument": "Couldn't move the notebook to the trash",
   "libraryErrorDeleteDocument": "Couldn't delete the notebook",

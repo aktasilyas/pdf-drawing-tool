@@ -59,10 +59,13 @@ void main() {
 
   Future<void> open(
     WidgetTester tester,
-    void Function(BuildContext, WidgetRef) show,
-  ) async {
-    tester.view.physicalSize = const Size(800, 1200);
+    void Function(BuildContext, WidgetRef) show, {
+    Size size = const Size(800, 1200),
+    FakeViewPadding padding = FakeViewPadding.zero,
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
+    tester.view.padding = padding;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
@@ -103,6 +106,7 @@ void main() {
         'Çoğalt',
         'Taşı',
         'Favorilere Ekle',
+        'PDF olarak dışa aktar',
         'Çöpe Taşı',
       ]) {
         expect(find.text(label), findsOneWidget);
@@ -112,6 +116,27 @@ void main() {
         );
         expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
       }
+    });
+
+    testWidgets(
+        'fits a landscape tablet without overflow and every action is '
+        'tappable', (tester) async {
+      // Pixel Tablet in landscape with a 48dp navigation bar: a sheet capped
+      // at 9/16 of the height cannot hold all seven actions.
+      await open(
+        tester,
+        (c, r) => showDocumentMenu(c, r, testDocument, isTrash: false),
+        size: const Size(1280, 800),
+        padding: const FakeViewPadding(top: 24, bottom: 48),
+      );
+      expect(tester.takeException(), isNull);
+
+      final trash = find.text('Çöpe Taşı');
+      const viewBottom = 800 - 48.0;
+      expect(tester.getRect(trash).bottom, lessThanOrEqualTo(viewBottom));
+      await tester.tap(trash);
+      await tester.pumpAndSettle();
+      verify(() => repo.moveToTrash(testDocument.id)).called(1);
     });
 
     testWidgets('rename saves the new title', (tester) async {
@@ -160,6 +185,11 @@ void main() {
   });
 
   group('trash document menu', () {
+    testWidgets('does not offer PDF export', (tester) async {
+      await openDocMenu(tester, isTrash: true);
+      expect(find.text('PDF olarak dışa aktar'), findsNothing);
+    });
+
     testWidgets('restore calls the action and confirms', (tester) async {
       await openDocMenu(tester, isTrash: true);
       await tester.tap(find.text('Kurtar'));
