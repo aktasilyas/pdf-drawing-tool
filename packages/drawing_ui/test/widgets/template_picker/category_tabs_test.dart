@@ -184,7 +184,7 @@ void main() {
             .first,
       );
 
-      expect(sizedBox.height, 40);
+      expect(sizedBox.height, 48);
     });
 
     testWidgets('animates chip style on selection change', (tester) async {
