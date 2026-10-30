@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:drawing_core/drawing_core.dart';
 
+import 'package:drawing_ui/src/rendering/element_paint_order.dart';
 import 'package:drawing_ui/src/rendering/tiles/element_bounds.dart';
 
 /// One visible element of an [ElementScene] in paint order.
@@ -38,9 +39,8 @@ class SceneEntry {
 
 /// Immutable snapshot of the committed content of one (page, layer).
 ///
-/// [entries] resolves z-order exactly like `ElementSceneRenderer`: ids in
-/// [elementOrder] first, then elements missing from it sorted by id (or, with
-/// an empty [elementOrder], strokes, shapes, then images/texts by id).
+/// [entries] resolves z-order with [elementPaintOrder], like the canvas
+/// renderer and the vector PDF export.
 class ElementScene {
   ElementScene({
     this.strokes = const [],
@@ -111,32 +111,13 @@ class ElementScene {
         if (visible(t.id)) t.id: t,
     };
 
-    final result = <SceneEntry>[];
-    if (elementOrder.isNotEmpty) {
-      final listed = <String>{};
-      for (final id in elementOrder) {
-        listed.add(id);
-        final e = strokeMap[id] ?? shapeMap[id] ?? imageMap[id] ?? textMap[id];
-        if (e != null) result.add(SceneEntry(id, e));
-      }
-      final rest = <SceneEntry>[
-        for (final m in [strokeMap, shapeMap, imageMap, textMap])
-          for (final e in m.entries)
-            if (!listed.contains(e.key)) SceneEntry(e.key, e.value),
-      ]..sort((a, b) => a.id.compareTo(b.id));
-      result.addAll(rest);
-    } else {
-      for (final m in [strokeMap, shapeMap]) {
-        for (final e in m.entries) {
-          result.add(SceneEntry(e.key, e.value));
-        }
-      }
-      final objects = <SceneEntry>[
-        for (final m in [imageMap, textMap])
-          for (final e in m.entries) SceneEntry(e.key, e.value),
-      ]..sort((a, b) => a.id.compareTo(b.id));
-      result.addAll(objects);
-    }
-    return result;
+    return elementPaintOrder(
+      elementOrder: elementOrder,
+      strokes: strokeMap,
+      shapes: shapeMap,
+      images: imageMap,
+      texts: textMap,
+      entry: SceneEntry.new,
+    );
   }
 }
