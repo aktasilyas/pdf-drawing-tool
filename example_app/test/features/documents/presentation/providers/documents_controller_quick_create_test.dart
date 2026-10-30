@@ -17,18 +17,19 @@ void main() {
 
   void stubCreate(Either<dynamic, dynamic> result) {
     when(() => h.repo.createDocument(
-          title: any(named: 'title'),
-          templateId: any(named: 'templateId'),
-          folderId: any(named: 'folderId'),
-          paperColor: any(named: 'paperColor'),
-          isPortrait: any(named: 'isPortrait'),
-          documentType: any(named: 'documentType'),
-          coverId: any(named: 'coverId'),
-          hasCover: any(named: 'hasCover'),
-          paperWidthMm: any(named: 'paperWidthMm'),
-          paperHeightMm: any(named: 'paperHeightMm'),
-        )).thenAnswer((_) async => result.map((_) => testDocument).leftMap(
-        (_) => failure));
+              title: any(named: 'title'),
+              templateId: any(named: 'templateId'),
+              folderId: any(named: 'folderId'),
+              paperColor: any(named: 'paperColor'),
+              isPortrait: any(named: 'isPortrait'),
+              documentType: any(named: 'documentType'),
+              coverId: any(named: 'coverId'),
+              hasCover: any(named: 'hasCover'),
+              paperWidthMm: any(named: 'paperWidthMm'),
+              paperHeightMm: any(named: 'paperHeightMm'),
+            ))
+        .thenAnswer((_) async =>
+            result.map((_) => testDocument).leftMap((_) => failure));
   }
 
   void verifyCreate({
@@ -74,7 +75,8 @@ void main() {
   group('createWhiteboard', () {
     test('creates a blank white whiteboard in the folder', () async {
       stubCreate(const Right(null));
-      final id = await h.controller.createWhiteboard(title: 'W', folderId: 'f2');
+      final id =
+          await h.controller.createWhiteboard(title: 'W', folderId: 'f2');
       expect(id, testDocument.id);
       verifyCreate(
         title: 'W',
