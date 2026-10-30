@@ -22,6 +22,10 @@ class InputMode {
   bool ignores(PointerDeviceKind kind) =>
       kind == PointerDeviceKind.touch && !fingerDraws;
 
+  /// The eraser end of a stylus.
+  static bool isEraserEnd(PointerDeviceKind kind) =>
+      kind == PointerDeviceKind.invertedStylus;
+
   static bool isStylus(PointerDeviceKind kind) =>
       kind == PointerDeviceKind.stylus ||
       kind == PointerDeviceKind.invertedStylus;

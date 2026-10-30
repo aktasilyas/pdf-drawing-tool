@@ -80,7 +80,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
     }
 
     // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
+    final isEraser = ref.read(isEraserToolProvider) || invertedEraserActive;
     if (isEraser) {
       handleEraserMove(event);
       return;
@@ -104,6 +104,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void handlePointerUp(PointerUpEvent event) {
+    final inverted = invertedEraserActive;
     if (gateOther(event.pointer, end: true)) return;
 
     _longPressTimer?.cancel();
@@ -139,7 +140,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
     }
 
     // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
+    final isEraser = ref.read(isEraserToolProvider) || inverted;
     if (isEraser) {
       handleEraserUp(event);
       return;
@@ -163,6 +164,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer cancel - cancels the current operation.
   void handlePointerCancel(PointerCancelEvent event) {
+    final inverted = invertedEraserActive;
     if (gateOther(event.pointer, end: true)) return;
 
     _longPressTimer?.cancel();
@@ -207,7 +209,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
     }
 
     // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
+    final isEraser = ref.read(isEraserToolProvider) || inverted;
     if (isEraser) {
       handleEraserCancel();
     } else {

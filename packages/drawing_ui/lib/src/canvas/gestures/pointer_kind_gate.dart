@@ -13,6 +13,14 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
   final Set<int> _countedPointers = <int>{};
   int _stylusPointer = -1;
 
+  /// Pointer id of an eraser-end stylus that is down (-1: none). While set,
+  /// the canvas erases with the user's eraser settings and the selected tool
+  /// stays untouched.
+  int _invertedPointer = -1;
+
+  /// True while an eraser-end stylus is down.
+  bool get invertedEraserActive => _invertedPointer >= 0;
+
   /// Set when the pen cut a finger navigation gesture short; cleared when the
   /// next scale gesture starts or the cut one ends.
   bool navPreempted = false;
@@ -33,6 +41,9 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
     if (InputMode.isStylus(event.kind)) {
       ref.read(inputModeProvider.notifier).stylusSeen();
       _stylusPointer = event.pointer;
+      if (InputMode.isEraserEnd(event.kind)) {
+        _invertedPointer = event.pointer;
+      }
       if (lastFocalPoint != null) {
         // The pen pre-empts a one-finger pan/swipe in progress: the rest of
         // that gesture neither flips the page nor jumps the canvas.
@@ -60,6 +71,7 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
   /// Returns true when move/up/cancel of [pointer] must be skipped.
   bool gateOther(int pointer, {bool end = false}) {
     if (end && pointer == _stylusPointer) _stylusPointer = -1;
+    if (end && pointer == _invertedPointer) _invertedPointer = -1;
     if (end) return !_countedPointers.remove(pointer);
     return !_countedPointers.contains(pointer);
   }
