@@ -87,12 +87,6 @@ class PDFExportStateModel {
   }
 }
 
-/// Provider for PDF import state.
-final pdfImportStateProvider =
-    StateNotifierProvider<PDFImportStateNotifier, PDFImportStateModel>((ref) {
-  return PDFImportStateNotifier();
-});
-
 /// Notifier for PDF import state.
 class PDFImportStateNotifier extends StateNotifier<PDFImportStateModel> {
   PDFImportStateNotifier()
@@ -123,12 +117,6 @@ class PDFImportStateNotifier extends StateNotifier<PDFImportStateModel> {
     );
   }
 }
-
-/// Provider for PDF export state.
-final pdfExportStateProvider =
-    StateNotifierProvider<PDFExportStateNotifier, PDFExportStateModel>((ref) {
-  return PDFExportStateNotifier();
-});
 
 /// Notifier for PDF export state.
 class PDFExportStateNotifier extends StateNotifier<PDFExportStateModel> {
@@ -172,16 +160,4 @@ final pdfImportServiceProvider = Provider<PDFImportService>((ref) {
   });
 
   return service;
-});
-
-/// Helper provider to check if import is in progress.
-final isImportingProvider = Provider<bool>((ref) {
-  final state = ref.watch(pdfImportStateProvider);
-  return state.isLoading;
-});
-
-/// Helper provider to check if export is in progress.
-final isExportingProvider = Provider<bool>((ref) {
-  final state = ref.watch(pdfExportStateProvider);
-  return state.isExporting;
 });

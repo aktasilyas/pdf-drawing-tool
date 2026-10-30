@@ -110,19 +110,3 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
     await _saveConfig();
   }
 }
-
-/// Provider for visible tools only (convenience)
-final visibleToolsProvider = Provider<List<ToolConfig>>((ref) {
-  return ref.watch(toolbarConfigProvider).visibleTools;
-});
-
-/// Provider for checking if a specific tool is visible
-final isToolVisibleProvider = Provider.family<bool, ToolType>((ref, toolType) {
-  final config = ref.watch(toolbarConfigProvider);
-  return config.tools
-      .firstWhere(
-        (t) => t.toolType == toolType,
-        orElse: () => ToolConfig(toolType: toolType),
-      )
-      .isVisible;
-});

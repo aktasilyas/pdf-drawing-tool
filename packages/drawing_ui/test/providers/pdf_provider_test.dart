@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/pdf_provider.dart';
-import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 
 void main() {
@@ -14,127 +13,6 @@ void main() {
 
     tearDown(() {
       container.dispose();
-    });
-
-    group('Import State', () {
-      test('should initialize with idle import state', () {
-        final state = container.read(pdfImportStateProvider);
-
-        expect(state.state, PDFImportState.idle);
-        expect(state.isLoading, false);
-        expect(state.hasError, false);
-      });
-
-      test('should track import progress', () {
-        final state = container.read(pdfImportStateProvider);
-
-        expect(state.progress, 0.0);
-        expect(state.progressPercentage, 0);
-      });
-
-      test('should update import state', () {
-        final notifier = container.read(pdfImportStateProvider.notifier);
-
-        notifier.updateState(PDFImportState.loadingPDF);
-
-        final state = container.read(pdfImportStateProvider);
-        expect(state.state, PDFImportState.loadingPDF);
-        expect(state.isLoading, true);
-      });
-
-      test('should update import progress', () {
-        final notifier = container.read(pdfImportStateProvider.notifier);
-
-        notifier.updateProgress(0.5);
-
-        final state = container.read(pdfImportStateProvider);
-        expect(state.progress, 0.5);
-        expect(state.progressPercentage, 50);
-      });
-
-      test('should set import error', () {
-        final notifier = container.read(pdfImportStateProvider.notifier);
-
-        notifier.setError(const PdfImportFailure(PdfImportError.openFailed));
-
-        final state = container.read(pdfImportStateProvider);
-        expect(state.hasError, true);
-        expect(
-          state.failure,
-          const PdfImportFailure(PdfImportError.openFailed),
-        );
-      });
-
-      test('should reset import state', () {
-        final notifier = container.read(pdfImportStateProvider.notifier);
-
-        notifier.updateState(PDFImportState.loadingPDF);
-        notifier.updateProgress(0.5);
-        notifier.reset();
-
-        final state = container.read(pdfImportStateProvider);
-        expect(state.state, PDFImportState.idle);
-        expect(state.progress, 0.0);
-      });
-    });
-
-    group('Export State', () {
-      test('should initialize with idle export state', () {
-        final state = container.read(pdfExportStateProvider);
-
-        expect(state.state, PDFExportState.idle);
-        expect(state.isExporting, false);
-        expect(state.hasError, false);
-      });
-
-      test('should track export progress', () {
-        final state = container.read(pdfExportStateProvider);
-
-        expect(state.progress, 0.0);
-        expect(state.progressPercentage, 0);
-      });
-
-      test('should update export state', () {
-        final notifier = container.read(pdfExportStateProvider.notifier);
-
-        notifier.updateState(PDFExportState.preparing);
-
-        final state = container.read(pdfExportStateProvider);
-        expect(state.state, PDFExportState.preparing);
-        expect(state.isExporting, true);
-      });
-
-      test('should update export progress', () {
-        final notifier = container.read(pdfExportStateProvider.notifier);
-
-        notifier.updateProgress(0.75);
-
-        final state = container.read(pdfExportStateProvider);
-        expect(state.progress, 0.75);
-        expect(state.progressPercentage, 75);
-      });
-
-      test('should set export error', () {
-        final notifier = container.read(pdfExportStateProvider.notifier);
-
-        notifier.setError(ExportFailure.failed);
-
-        final state = container.read(pdfExportStateProvider);
-        expect(state.hasError, true);
-        expect(state.failure, ExportFailure.failed);
-      });
-
-      test('should reset export state', () {
-        final notifier = container.read(pdfExportStateProvider.notifier);
-
-        notifier.updateState(PDFExportState.exporting);
-        notifier.updateProgress(0.8);
-        notifier.reset();
-
-        final state = container.read(pdfExportStateProvider);
-        expect(state.state, PDFExportState.idle);
-        expect(state.progress, 0.0);
-      });
     });
 
     group('Import Service Integration', () {
@@ -151,54 +29,6 @@ void main() {
         container.dispose();
 
         expect(service.isDisposed, true);
-      });
-    });
-
-    group('Helper Providers', () {
-      test('should check if import is loading', () {
-        final isLoading = container.read(isImportingProvider);
-
-        expect(isLoading, false);
-      });
-
-      test('should check if export is loading', () {
-        final isExporting = container.read(isExportingProvider);
-
-        expect(isExporting, false);
-      });
-    });
-
-    group('State Notifications', () {
-      test('should notify on import state change', () {
-        var notificationCount = 0;
-
-        container.listen(
-          pdfImportStateProvider,
-          (previous, next) {
-            notificationCount++;
-          },
-        );
-
-        final notifier = container.read(pdfImportStateProvider.notifier);
-        notifier.updateState(PDFImportState.loadingPDF);
-
-        expect(notificationCount, 1);
-      });
-
-      test('should notify on export state change', () {
-        var notificationCount = 0;
-
-        container.listen(
-          pdfExportStateProvider,
-          (previous, next) {
-            notificationCount++;
-          },
-        );
-
-        final notifier = container.read(pdfExportStateProvider.notifier);
-        notifier.updateState(PDFExportState.preparing);
-
-        expect(notificationCount, 1);
       });
     });
   });

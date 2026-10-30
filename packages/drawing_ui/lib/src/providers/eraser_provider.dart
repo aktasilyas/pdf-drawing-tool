@@ -13,11 +13,6 @@ final eraserModeProvider = StateProvider<dp.EraserMode>((ref) {
   return ref.watch(dp.activeEraserModeProvider);
 });
 
-/// Eraser size state (piksel cinsinden) (backward compatibility)
-final eraserSizeProvider = StateProvider<double>((ref) {
-  return ref.watch(dp.eraserSettingsProvider).size;
-});
-
 /// Aktif eraser tool instance.
 ///
 /// Mode veya size değiştiğinde otomatik yeniden oluşturulur.
@@ -64,10 +59,3 @@ final pixelEraserPreviewProvider =
 
 /// Stroke eraser preview - stroke IDs to visually hide during gesture
 final strokeEraserPreviewProvider = StateProvider<Set<String>>((ref) => {});
-
-/// Eraser aktif mi? (currentTool eraser tiplerinden biri mi?)
-final isEraserActiveProvider = Provider<bool>((ref) {
-  // Bu provider tool_style_provider'daki currentToolProvider'a bağlı
-  // Şimdilik false döndürüyor, DrawingCanvas entegrasyonunda güncellenecek
-  return false;
-});

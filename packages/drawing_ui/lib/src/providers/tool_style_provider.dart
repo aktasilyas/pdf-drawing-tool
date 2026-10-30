@@ -134,14 +134,6 @@ final isEraserToolProvider = Provider<bool>((ref) {
   ].contains(toolType);
 });
 
-/// Whether the current tool is a pen-type tool.
-final isPenToolProvider = Provider<bool>((ref) {
-  final toolType = ref.watch(currentToolProvider);
-
-  // Use the new isPenTool getter from ToolType
-  return toolType.isPenTool;
-});
-
 /// Whether the current tool is the selection tool.
 final isSelectionToolProvider = Provider<bool>((ref) {
   final toolType = ref.watch(currentToolProvider);

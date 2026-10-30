@@ -137,26 +137,26 @@ void main() {
     });
 
     test('initial document has one layer', () {
-      expect(container.read(layerCountProvider), 1);
+      expect(container.read(documentProvider).layerCount, 1);
     });
 
     test('addLayer increases layer count', () {
       container.read(layerActionsProvider).add('Katman 2');
 
-      expect(container.read(layerCountProvider), 2);
+      expect(container.read(documentProvider).layerCount, 2);
     });
 
     test('removeLayer decreases layer count', () {
       container.read(layerActionsProvider).add('Katman 2');
       container.read(layerActionsProvider).remove(1);
 
-      expect(container.read(layerCountProvider), 1);
+      expect(container.read(documentProvider).layerCount, 1);
     });
 
     test('removeLayer does nothing if only one layer', () {
       container.read(layerActionsProvider).remove(0);
 
-      expect(container.read(layerCountProvider), 1);
+      expect(container.read(documentProvider).layerCount, 1);
     });
 
     test('setActiveLayer changes active layer', () {
@@ -205,16 +205,16 @@ void main() {
       container.dispose();
     });
 
-    test('isDocumentEmptyProvider reflects state', () {
+    test('document isEmpty reflects state', () {
       final container = ProviderContainer();
 
-      expect(container.read(isDocumentEmptyProvider), true);
+      expect(container.read(documentProvider).isEmpty, true);
 
       container.read(documentProvider.notifier).addStroke(
             Stroke.create(style: StrokeStyle.pen()),
           );
 
-      expect(container.read(isDocumentEmptyProvider), false);
+      expect(container.read(documentProvider).isEmpty, false);
 
       container.dispose();
     });
@@ -237,13 +237,13 @@ void main() {
       container.dispose();
     });
 
-    test('layerCountProvider updates correctly', () {
+    test('layerCount updates correctly', () {
       final container = ProviderContainer();
 
-      expect(container.read(layerCountProvider), 1);
+      expect(container.read(documentProvider).layerCount, 1);
 
       container.read(layerActionsProvider).add('Test');
-      expect(container.read(layerCountProvider), 2);
+      expect(container.read(documentProvider).layerCount, 2);
 
       container.dispose();
     });

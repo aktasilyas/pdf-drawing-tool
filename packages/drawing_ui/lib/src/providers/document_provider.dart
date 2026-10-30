@@ -30,18 +30,6 @@ final strokeCountProvider = Provider<int>((ref) {
   return document.strokeCount;
 });
 
-/// Is document empty (no strokes).
-final isDocumentEmptyProvider = Provider<bool>((ref) {
-  final document = ref.watch(documentProvider);
-  return document.isEmpty;
-});
-
-/// Layer count in the document.
-final layerCountProvider = Provider<int>((ref) {
-  final document = ref.watch(documentProvider);
-  return document.layerCount;
-});
-
 /// Active layer index.
 final activeLayerIndexProvider = Provider<int>((ref) {
   final document = ref.watch(documentProvider);

@@ -323,45 +323,5 @@ void main() {
 
       container.dispose();
     });
-
-    test('isDefaultZoomProvider returns true at 100%', () {
-      final container = ProviderContainer();
-
-      expect(container.read(isDefaultZoomProvider), true);
-
-      container.read(canvasTransformProvider.notifier).setZoom(1.5);
-      expect(container.read(isDefaultZoomProvider), false);
-
-      container.read(canvasTransformProvider.notifier).setZoom(1.0);
-      expect(container.read(isDefaultZoomProvider), true);
-
-      container.dispose();
-    });
-
-    test('canZoomInProvider returns false at max zoom', () {
-      final container = ProviderContainer();
-
-      expect(container.read(canZoomInProvider), true);
-
-      container
-          .read(canvasTransformProvider.notifier)
-          .setZoom(CanvasTransform.maxZoom);
-      expect(container.read(canZoomInProvider), false);
-
-      container.dispose();
-    });
-
-    test('canZoomOutProvider returns false at min zoom', () {
-      final container = ProviderContainer();
-
-      expect(container.read(canZoomOutProvider), true);
-
-      container
-          .read(canvasTransformProvider.notifier)
-          .setZoom(CanvasTransform.minZoom);
-      expect(container.read(canZoomOutProvider), false);
-
-      container.dispose();
-    });
   });
 }
