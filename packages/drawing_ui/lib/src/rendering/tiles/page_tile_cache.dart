@@ -96,6 +96,13 @@ class PageTileCache extends ChangeNotifier {
 
   int get cachedBytes => _store.bytes;
 
+  /// Drops every cached tile outside the viewport (memory pressure); they
+  /// are rebuilt when they scroll back into view.
+  void trimToVisible() {
+    final grid = _grid;
+    _store.evict(grid == null ? const {} : grid.keysIn(_viewport).toSet(), 0);
+  }
+
   /// Paints [rect] of the current scene as vectors (cold/blend tiles).
   void paintVectorRegion(ui.Canvas canvas, ui.Rect rect) {
     final scene = _scene;
