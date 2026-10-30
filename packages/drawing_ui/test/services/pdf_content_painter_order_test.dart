@@ -68,8 +68,7 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
-  test('exports elements missing from elementOrder, in canvas order',
-      () async {
+  test('exports elements missing from elementOrder, in canvas order', () async {
     final layer = Layer(
       id: 'l',
       name: 'l',
