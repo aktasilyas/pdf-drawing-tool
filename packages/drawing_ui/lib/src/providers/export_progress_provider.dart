@@ -81,11 +81,19 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
 
   bool get isCancelRequested => _cancelRequested;
 
+  /// Asks the running export to stop. The overlay switches to the
+  /// cancelled state at once, so the tap is answered even while the
+  /// exporter finishes its current page (#490).
   void requestCancel() {
+    if (state.status != ExportProgressStatus.exporting) return;
     _cancelRequested = true;
+    setCancelled();
   }
 
+  /// Shows the cancelled state. A no-op once the export already left
+  /// [ExportProgressStatus.exporting] (e.g. [requestCancel] showed it).
   void setCancelled() {
+    if (state.status != ExportProgressStatus.exporting) return;
     state = state.copyWith(status: ExportProgressStatus.cancelled);
     _autoDismissTimer?.cancel();
     _autoDismissTimer = Timer(

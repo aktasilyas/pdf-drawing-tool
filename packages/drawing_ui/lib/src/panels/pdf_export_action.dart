@@ -133,7 +133,9 @@ Future<void> performPagesPDFExport(
       isCancelled: () => progress.isCancelRequested,
     );
 
-    if (result.wasCancelled) {
+    // Also honour a cancel that arrived after the exporter's last check:
+    // never open the share sheet or save dialog for a cancelled export.
+    if (result.wasCancelled || progress.isCancelRequested) {
       progress.setCancelled();
       return;
     }
