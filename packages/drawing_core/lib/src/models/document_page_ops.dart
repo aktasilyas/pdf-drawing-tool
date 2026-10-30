@@ -13,17 +13,29 @@ extension DocumentPageOps on DrawingDocument {
   /// both are equal.
   DrawingDocument movePage(int from, int to) {
     final length = pages.length;
-    if (from == to || from < 0 || to < 0 || from >= length || to >= length) {
+    // The cover is pinned to page 1: it cannot move, nothing goes before it.
+    final floor = _firstAllowedIndex;
+    if (floor == 1 && from == 0) return this;
+    final target = to < 0 ? to : to.clamp(floor, length);
+    if (from == target ||
+        from < 0 ||
+        target < 0 ||
+        from >= length ||
+        target >= length) {
       return this;
     }
     final list = List<Page>.from(pages);
-    list.insert(to, list.removeAt(from));
+    list.insert(target, list.removeAt(from));
     return _withPages(list, pages[currentPageIndex].id);
   }
 
-  /// Inserts [page] at [index], clamped to `[0, pages.length]`.
+  /// Lowest index a page may take: 1 when the first page is a cover.
+  int get _firstAllowedIndex => pages.isNotEmpty && pages.first.isCover ? 1 : 0;
+
+  /// Inserts [page] at [index], clamped to `[0, pages.length]` (`[1, ..]`
+  /// when the document starts with a cover).
   DrawingDocument insertPageAt(int index, Page page) {
-    final at = index.clamp(0, pages.length);
+    final at = index.clamp(_firstAllowedIndex, pages.length);
     final list = List<Page>.from(pages)..insert(at, page);
     final currentId = pages.isEmpty ? null : pages[currentPageIndex].id;
     return _withPages(list, currentId);

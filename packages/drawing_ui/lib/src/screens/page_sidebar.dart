@@ -221,7 +221,8 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
               onPageTap: widget.onPageTap,
             );
             // Indexes are contiguous only when every page is listed.
-            if (isBookmarkFilter) return item;
+            // The cover is pinned to page 1: not draggable, not a drop target.
+            if (isBookmarkFilter || allPages[pageIndex].isCover) return item;
             return ReorderablePageCell(
               index: pageIndex,
               onMove: (from, to) => movePageWithUndo(ref, context, from, to),
