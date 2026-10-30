@@ -24,10 +24,9 @@ const int maxLibraryPreviewWidth = 720;
 
 /// Pixel width a library preview needs on a screen with [devicePixelRatio]
 /// (clamped to 1..[libraryPreviewMaxDpr]).
-int libraryPreviewWidth(double devicePixelRatio) =>
-    (libraryPreviewTileWidth *
-            devicePixelRatio.clamp(1.0, libraryPreviewMaxDpr))
-        .ceil();
+int libraryPreviewWidth(double devicePixelRatio) => (libraryPreviewTileWidth *
+        devicePixelRatio.clamp(1.0, libraryPreviewMaxDpr))
+    .ceil();
 
 /// Library previews by `'<width>|<filePath>|<page>'`. Separate from
 /// [pdfThumbnailCacheProvider] so sidebar thumbnails stay small and cheap.
