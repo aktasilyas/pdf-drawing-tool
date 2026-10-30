@@ -95,6 +95,11 @@ mixin _GestureState<T extends ConsumerStatefulWidget>
   set scaleGestureIsZoom(bool value);
   bool _swipeDragActive = false;
 
+  /// True between an eraser down and its up/cancel. A second finger or a
+  /// scale gesture ends the session, and moves/ups without one are ignored,
+  /// so two-finger navigation never erases (#487).
+  bool _eraserSessionActive = false;
+
   // ── Long press paste menu ──
   Timer? _longPressTimer;
   Offset? _longPressScreenPos;

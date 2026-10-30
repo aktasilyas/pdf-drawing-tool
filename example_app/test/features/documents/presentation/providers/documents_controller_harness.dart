@@ -10,6 +10,8 @@ class MockDocumentRepository extends Mock implements DocumentRepository {}
 
 class MockPageTrashRepository extends Mock implements PageTrashRepository {}
 
+class HarnessFolderRepository extends Mock implements FolderRepository {}
+
 const failure = CacheFailure('boom');
 
 /// Localized-copy stand-in passed to the duplicate calls.
@@ -33,7 +35,7 @@ const allLists = {
   'totalCount',
   'notebookCount',
 };
-const trashMoveLists = {'documents', 'trash', 'folders'};
+const trashMoveLists = {'documents', 'favorites', 'recent', 'trash', 'folders'};
 const permanentDeleteLists = {'trash', 'totalCount', 'notebookCount'};
 const pageTrashLists = {'trashedPages', 'trashItems'};
 
@@ -49,6 +51,7 @@ void registerDocumentsFallbacks() {
 class DocumentsHarness {
   final repo = MockDocumentRepository();
   final pageTrash = MockPageTrashRepository();
+  final folderRepo = HarnessFolderRepository();
   final builds = <String, int>{};
   late final ProviderContainer container;
 
@@ -76,6 +79,7 @@ class DocumentsHarness {
     container = ProviderContainer(overrides: [
       documentRepositoryProvider.overrideWithValue(repo),
       pageTrashRepositoryProvider.overrideWithValue(pageTrash),
+      folderRepositoryProvider.overrideWithValue(folderRepo),
       foldersProvider.overrideWith((ref) async {
         _hit('folders');
         return [];

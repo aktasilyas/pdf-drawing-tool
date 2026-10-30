@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 
 /// Keeps unsaved ink from being lost when the user leaves the editor.
 ///
 /// - App paused, hidden, inactive or detached: flushes any pending autosave
-///   right away instead of waiting for the debounce timer.
+///   right away instead of waiting for the debounce timer. Once the app is
+///   hidden, the text being typed is committed first (#489).
 /// - System back: first closes the topmost open popover or phone drawer
 ///   ([DismissibleOverlays], #482); with none open it is routed through
 ///   [onLeave] (the same save-then-leave path as the in-app Home button)
@@ -46,6 +48,11 @@ class _EditorLeaveGuardState extends ConsumerState<EditorLeaveGuard> {
 
   void _onLifecycleChange(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
+    // Inactive alone (notification shade, system dialog) keeps the text box
+    // open; once the app is hidden the typed text is committed (#489).
+    if (state != AppLifecycleState.inactive) {
+      commitTextBeingEdited(ref.read);
+    }
     ref.read(autoSaveProvider.notifier).flush();
   }
 

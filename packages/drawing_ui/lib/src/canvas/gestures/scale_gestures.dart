@@ -7,7 +7,8 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
         _PointerKindGate<T>,
-        _TextGestures<T> {
+        _TextGestures<T>,
+        _EraserGestures<T> {
   // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
   // ─────────────────────────────────────────────────────────────────────────
@@ -26,6 +27,9 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
     if (isLaserDrawing) {
       laserController.cancelStroke();
       isLaserDrawing = false;
+    }
+    if (_eraserSessionActive) {
+      handleEraserCancel();
     }
     if (isSelecting) {
       ref.read(activeSelectionToolProvider).cancelSelection();
