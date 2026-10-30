@@ -13,6 +13,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleEraserDown(PointerDownEvent event) {
+    _eraserSessionActive = true;
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
@@ -66,6 +67,8 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   }
 
   void handleEraserMove(PointerMoveEvent event) {
+    // No session: the gesture turned multi-touch, or never started.
+    if (!_eraserSessionActive) return;
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
@@ -103,6 +106,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   /// preview, cursor and pending erasure without touching the document or
   /// the history.
   void handleEraserCancel() {
+    _eraserSessionActive = false;
     ref.read(eraserToolProvider).endErasing();
     pixelEraseHits.clear();
     pixelEraseOriginalStrokes.clear();
@@ -120,6 +124,9 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   }
 
   void handleEraserUp(PointerUpEvent event) {
+    // Ups after a cancelled (multi-touch) session commit nothing.
+    if (!_eraserSessionActive) return;
+    _eraserSessionActive = false;
     final settings = ref.read(eraserSettingsProvider);
     final document = ref.read(documentProvider);
     final layerIndex = document.activeLayerIndex;
