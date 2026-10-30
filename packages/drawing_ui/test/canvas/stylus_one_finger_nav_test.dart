@@ -115,6 +115,28 @@ void main() {
     expect(container.read(activeLayerStrokesProvider), hasLength(strokes + 1));
   });
 
+  testWidgets('pen down mid-swipe: lifting the finger does not flip the page',
+      (tester) async {
+    await pump(tester, mode: fixed);
+    await enterStylusMode(tester);
+
+    final finger = await tester.startGesture(const Offset(500, 300));
+    for (var i = 0; i < 3; i++) {
+      await finger.moveBy(const Offset(-30, 0));
+    }
+    final pen = await tester.startGesture(const Offset(100, 500),
+        kind: PointerDeviceKind.stylus);
+    for (var i = 0; i < 5; i++) {
+      await finger.moveBy(const Offset(-30, 0));
+      await pen.moveBy(const Offset(10, 0));
+    }
+    await pen.up();
+    await finger.up();
+    await tester.pumpAndSettle();
+
+    expect(swipes, isEmpty);
+  });
+
   testWidgets('without a stylus a one-finger drag draws, not pans',
       (tester) async {
     await pump(tester);

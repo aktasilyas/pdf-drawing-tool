@@ -49,6 +49,7 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
       finishTextEditing();
     }
 
+    navPreempted = false;
     lastFocalPoint = details.localFocalPoint;
     lastScale = 1.0;
     scaleStartFocalPoint = details.localFocalPoint;
@@ -192,6 +193,13 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
       ref
           .read(zoomBasedRenderProvider.notifier)
           .onZoomChanged(currentZoom, cacheKey);
+    }
+
+    if (navPreempted) {
+      navPreempted = false;
+      lastScale = null;
+      scaleStartFocalPoint = null;
+      return;
     }
 
     // End interactive swipe drag if active

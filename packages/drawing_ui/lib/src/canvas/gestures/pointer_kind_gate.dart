@@ -13,6 +13,10 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
   final Set<int> _countedPointers = <int>{};
   int _stylusPointer = -1;
 
+  /// Set when the pen cut a finger navigation gesture short; cleared when the
+  /// next scale gesture starts or the cut one ends.
+  bool navPreempted = false;
+
   /// True while a stylus is down (palm touches must not zoom/pan then).
   bool get isStylusActive => _stylusPointer >= 0;
 
@@ -29,10 +33,15 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
     if (InputMode.isStylus(event.kind)) {
       ref.read(inputModeProvider.notifier).stylusSeen();
       _stylusPointer = event.pointer;
-      if (_swipeDragActive) {
-        // The pen pre-empts a one-finger page swipe in progress.
-        onPageSwipeDragEnd?.call(0);
-        _swipeDragActive = false;
+      if (lastFocalPoint != null) {
+        // The pen pre-empts a one-finger pan/swipe in progress: the rest of
+        // that gesture neither flips the page nor jumps the canvas.
+        if (_swipeDragActive) {
+          onPageSwipeDragEnd?.call(0);
+          _swipeDragActive = false;
+        }
+        navPreempted = true;
+        lastFocalPoint = null;
       }
       if (_countedPointers.isNotEmpty) {
         // A palm or finger got there first: the pen takes over.
