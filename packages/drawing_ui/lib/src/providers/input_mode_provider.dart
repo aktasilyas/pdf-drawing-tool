@@ -26,8 +26,7 @@ class InputMode {
       kind == PointerDeviceKind.stylus ||
       kind == PointerDeviceKind.invertedStylus;
 
-  InputMode copyWith({bool? stylusDetected, bool? drawWithFinger}) =>
-      InputMode(
+  InputMode copyWith({bool? stylusDetected, bool? drawWithFinger}) => InputMode(
         stylusDetected: stylusDetected ?? this.stylusDetected,
         drawWithFinger: drawWithFinger ?? this.drawWithFinger,
       );
