@@ -6,7 +6,7 @@ import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/clipboard_file_refs_provider.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
-import 'export_panel.dart' show performPagesPDFExport;
+import 'export_panel.dart' show performPagesPDFExport, rejectIfExportRunning;
 import 'page_options_widgets.dart';
 import 'page_structure_undo.dart';
 
@@ -102,7 +102,9 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     final pageIndex = targetPageIndex;
     final notifier = ref.read(exportProgressProvider.notifier);
     final strings = context.drawingStrings.export;
+    final busy = rejectIfExportRunning(context, ref);
     onPanelClose();
+    if (busy) return;
     final title = doc.title.isEmpty ? strings.fallbackFileName : doc.title;
     performPagesPDFExport(
       notifier,

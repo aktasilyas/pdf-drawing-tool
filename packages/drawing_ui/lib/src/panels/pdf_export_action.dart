@@ -116,7 +116,9 @@ Future<void> performPagesPDFExport(
   PDFPageFormat? pageFormat,
   @visibleForTesting PDFExporter? exporter,
 }) async {
-  progress.start(pages.length);
+  // One export at a time (#491); callers show the message via
+  // [rejectIfExportRunning].
+  if (!progress.tryBegin(pages.length)) return;
 
   try {
     exporter ??= PDFExporter(pdfPaths: pdfPaths);
@@ -197,5 +199,7 @@ Future<void> performPagesPDFExport(
   } catch (e) {
     DrawingLog.e('PDF export failed', e);
     progress.setError(exportFailureFor(e));
+  } finally {
+    progress.end();
   }
 }

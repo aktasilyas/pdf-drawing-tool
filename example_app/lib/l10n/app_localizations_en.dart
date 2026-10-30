@@ -1529,6 +1529,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorExportCancelled => 'Cancelled';
 
   @override
+  String get editorExportInProgress => 'An export is already in progress';
+
+  @override
   String editorExportPagesWithoutPdfBackground(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

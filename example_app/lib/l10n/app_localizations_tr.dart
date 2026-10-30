@@ -1510,6 +1510,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorExportCancelled => 'İptal edildi';
 
   @override
+  String get editorExportInProgress => 'Bir dışa aktarma zaten sürüyor';
+
+  @override
   String editorExportPagesWithoutPdfBackground(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

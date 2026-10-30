@@ -2774,6 +2774,12 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get editorExportCancelled;
 
+  /// No description provided for @editorExportInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'An export is already in progress'**
+  String get editorExportInProgress;
+
   /// No description provided for @editorExportPagesWithoutPdfBackground.
   ///
   /// In en, this message translates to:

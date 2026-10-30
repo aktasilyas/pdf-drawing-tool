@@ -26,6 +26,9 @@ abstract class ExportStrings {
   String get saved;
   String savedWithSize(String size);
   String get cancelled;
+
+  /// Shown when an export is started while another one is still running.
+  String get inProgress;
   String pagesWithoutPdfBackground(int count);
   String pagesWithoutImages(int count);
 
@@ -52,6 +55,7 @@ abstract class ExportStrings {
         'saved': saved,
         'savedWithSize': savedWithSize('Notes'),
         'cancelled': cancelled,
+        'inProgress': inProgress,
         'pagesWithoutPdfBackground': pagesWithoutPdfBackground(2),
         'pagesWithoutImages': pagesWithoutImages(2),
       };
@@ -124,6 +128,9 @@ class ExportStringsTr extends ExportStrings {
 
   @override
   String get cancelled => 'İptal edildi';
+
+  @override
+  String get inProgress => 'Bir dışa aktarma zaten sürüyor';
 
   @override
   String pagesWithoutPdfBackground(int count) =>
