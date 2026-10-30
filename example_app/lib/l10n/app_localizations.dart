@@ -1622,6 +1622,24 @@ abstract class AppLocalizations {
   /// **'Style'**
   String get editorPanelTextStyle;
 
+  /// No description provided for @editorPanelTextBold.
+  ///
+  /// In en, this message translates to:
+  /// **'Bold'**
+  String get editorPanelTextBold;
+
+  /// No description provided for @editorPanelTextItalic.
+  ///
+  /// In en, this message translates to:
+  /// **'Italic'**
+  String get editorPanelTextItalic;
+
+  /// No description provided for @editorPanelTextUnderline.
+  ///
+  /// In en, this message translates to:
+  /// **'Underline'**
+  String get editorPanelTextUnderline;
+
   /// No description provided for @editorPanelAddNote.
   ///
   /// In en, this message translates to:

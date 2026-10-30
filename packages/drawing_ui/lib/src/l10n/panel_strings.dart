@@ -83,6 +83,15 @@ abstract class PanelStrings {
   /// Text style label.
   String get textStyle;
 
+  /// Bold toggle (screen-reader label).
+  String get bold;
+
+  /// Italic toggle (screen-reader label).
+  String get italic;
+
+  /// Underline toggle (screen-reader label).
+  String get underline;
+
   /// Sticky note add button.
   String get addNote;
 
@@ -138,6 +147,9 @@ abstract class PanelStrings {
         'textHint': textHint,
         'textColor': textColor,
         'textStyle': textStyle,
+        'bold': bold,
+        'italic': italic,
+        'underline': underline,
         'addNote': addNote,
         'colorHex': colorHex,
         'colorRed': colorRed,
@@ -232,6 +244,15 @@ class PanelStringsTr extends PanelStrings {
 
   @override
   String get textStyle => 'Stil';
+
+  @override
+  String get bold => 'Kalın';
+
+  @override
+  String get italic => 'İtalik';
+
+  @override
+  String get underline => 'Altı çizili';
 
   @override
   String get addNote => 'Not Ekle';

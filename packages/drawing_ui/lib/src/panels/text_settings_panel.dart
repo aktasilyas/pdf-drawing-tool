@@ -113,6 +113,7 @@ class _StyleButtonRow extends StatelessWidget {
         _StyleToggle(
           key: const ValueKey('text-style-bold'),
           label: 'B', // l10n-ignore
+          semanticLabel: context.drawingStrings.panels.bold,
           isSelected: isBold,
           fontWeight: FontWeight.bold,
           onTap: onBoldToggled,
@@ -121,6 +122,7 @@ class _StyleButtonRow extends StatelessWidget {
         _StyleToggle(
           key: const ValueKey('text-style-italic'),
           label: 'I', // l10n-ignore
+          semanticLabel: context.drawingStrings.panels.italic,
           isSelected: isItalic,
           fontStyle: FontStyle.italic,
           onTap: onItalicToggled,
@@ -129,6 +131,7 @@ class _StyleButtonRow extends StatelessWidget {
         _StyleToggle(
           key: const ValueKey('text-style-underline'),
           label: 'U', // l10n-ignore
+          semanticLabel: context.drawingStrings.panels.underline,
           isSelected: isUnderline,
           decoration: TextDecoration.underline,
           onTap: onUnderlineToggled,
@@ -142,6 +145,7 @@ class _StyleToggle extends StatelessWidget {
   const _StyleToggle({
     super.key,
     required this.label,
+    required this.semanticLabel,
     required this.isSelected,
     required this.onTap,
     this.fontWeight,
@@ -150,6 +154,7 @@ class _StyleToggle extends StatelessWidget {
   });
 
   final String label;
+  final String semanticLabel;
   final bool isSelected;
   final VoidCallback onTap;
   final FontWeight? fontWeight;
@@ -160,32 +165,40 @@ class _StyleToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      toggled: isSelected,
+      label: semanticLabel,
+      excludeSemantics: true,
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox.square(
-        dimension: ChromeSizes.minTouchTarget,
-        child: Center(
-          child: Container(
-            width: ChromeIconButton.visualSize,
-            height: ChromeIconButton.visualSize,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected ? palette.accentContainer : Colors.transparent,
-              borderRadius: BorderRadius.circular(ChromeRadius.md),
-              border: Border.all(
-                color: isSelected ? palette.accent : palette.border,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox.square(
+          dimension: ChromeSizes.minTouchTarget,
+          child: Center(
+            child: Container(
+              width: ChromeIconButton.visualSize,
+              height: ChromeIconButton.visualSize,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color:
+                    isSelected ? palette.accentContainer : Colors.transparent,
+                borderRadius: BorderRadius.circular(ChromeRadius.md),
+                border: Border.all(
+                  color: isSelected ? palette.accent : palette.border,
+                ),
               ),
-            ),
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 18,
-                    fontWeight: fontWeight ?? FontWeight.normal,
-                    fontStyle: fontStyle,
-                    decoration: decoration,
-                    color: isSelected ? palette.accent : palette.textMuted,
-                  ),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: 18,
+                      fontWeight: fontWeight ?? FontWeight.normal,
+                      fontStyle: fontStyle,
+                      decoration: decoration,
+                      color: isSelected ? palette.accent : palette.textMuted,
+                    ),
+              ),
             ),
           ),
         ),
