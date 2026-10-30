@@ -6,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 
+import 'package:example_app/features/documents/presentation/providers/imported_document_content.dart';
+
 import 'documents_controller_harness.dart';
 
 void main() {
@@ -103,6 +105,44 @@ void main() {
       expect(content['id'], 'doc-1');
       expect(content['pages'], pages);
       expect(content['documentType'], DocumentType.pdf.name);
+    });
+
+    test('landscape pages create a landscape row with matching paper mm',
+        () async {
+      stubCreate(() async => Right(testDocument));
+      stubSave(() async => const Right(null));
+      await h.controller.createDocumentWithPages(
+        title: 'Slides',
+        documentType: DocumentType.pdf,
+        pages: [
+          {
+            'id': 'p1',
+            'index': 0,
+            'size': {'width': 960.0, 'height': 540.0},
+          },
+        ],
+        pageCount: 1,
+      );
+      final call = verify(() => h.repo.createDocument(
+            title: any(named: 'title'),
+            templateId: any(named: 'templateId'),
+            folderId: any(named: 'folderId'),
+            paperColor: any(named: 'paperColor'),
+            isPortrait: captureAny(named: 'isPortrait'),
+            documentType: any(named: 'documentType'),
+            coverId: any(named: 'coverId'),
+            hasCover: any(named: 'hasCover'),
+            paperWidthMm: captureAny(named: 'paperWidthMm'),
+            paperHeightMm: captureAny(named: 'paperHeightMm'),
+          ));
+      expect(call.captured[0], false);
+      expect(call.captured[1], closeTo(540 * 25.4 / 72, 0.01));
+      expect(call.captured[2], closeTo(960 * 25.4 / 72, 0.01));
+    });
+
+    test('pages without size keep A4 portrait', () {
+      final paper = importedPaperFromPages(pages);
+      expect(paper, (isPortrait: true, widthMm: 210.0, heightMm: 297.0));
     });
 
     test('returns null when creating fails', () async {

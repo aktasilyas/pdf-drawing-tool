@@ -75,6 +75,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     state = const AsyncValue.loading();
 
     String? createdId;
+    final paper = importedPaperFromPages(pages);
     try {
       // 1. Create the document with a blank template.
       final result = await repository.createDocument(
@@ -82,8 +83,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
         templateId: 'blank', // PDF needs no template
         folderId: folderId,
         paperColor: PaperColor.white.storageKey, // PDF default
-        isPortrait: true,
+        isPortrait: paper.isPortrait,
         documentType: documentType,
+        paperWidthMm: paper.widthMm,
+        paperHeightMm: paper.heightMm,
       );
 
       return await result.fold(
