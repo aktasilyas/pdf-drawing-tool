@@ -21,6 +21,7 @@ class UnifiedColorPicker extends StatelessWidget {
     this.chipSize = 22.0,
     this.spacing = 6.0,
     this.isHighlighter = false,
+    this.compactMoreButton = false,
   });
 
   final Color selectedColor;
@@ -32,6 +33,10 @@ class UnifiedColorPicker extends StatelessWidget {
   final double chipSize;
   final double spacing;
   final bool isHighlighter;
+
+  /// Shows "more" as a swatch-sized palette dot (label kept for screen
+  /// readers) instead of the labelled chip, so narrow popovers fit one row.
+  final bool compactMoreButton;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +62,7 @@ class UnifiedColorPicker extends StatelessWidget {
         if (showMoreButton)
           _MoreButton(
             onTap: () => _showColorPalette(context),
+            compactSize: compactMoreButton ? chipSize : null,
           ),
       ],
     );
@@ -181,9 +187,12 @@ class _ColorChip extends StatelessWidget {
 
 /// "Daha fazla" butonu
 class _MoreButton extends StatelessWidget {
-  const _MoreButton({required this.onTap});
+  const _MoreButton({required this.onTap, this.compactSize});
 
   final VoidCallback onTap;
+
+  /// When set, renders a palette dot of this diameter instead of the chip.
+  final double? compactSize;
 
   @override
   Widget build(BuildContext context) {
@@ -202,9 +211,30 @@ class _MoreButton extends StatelessWidget {
           ),
           child: Center(
             widthFactor: 1,
-            child: _moreChip(context),
+            child: compactSize == null
+                ? _moreChip(context)
+                : _morePaletteDot(context, compactSize!),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _morePaletteDot(BuildContext context, double size) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colorScheme.chipSurface,
+        shape: BoxShape.circle,
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+      ),
+      child: PhosphorIcon(
+        ElyanotesIcons.palette,
+        size: size * 0.6,
+        color: colorScheme.primary,
       ),
     );
   }
