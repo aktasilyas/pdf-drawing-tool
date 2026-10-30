@@ -12,7 +12,6 @@ import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
-export 'package:drawing_ui/src/panels/export_guard.dart';
 export 'package:drawing_ui/src/panels/pdf_export_action.dart';
 
 /// Export panel with PDF and PNG export options.

@@ -31,6 +31,7 @@ void exportCurrentPageAsPNG(
   final page = document.currentPage;
   final progress = ref.read(exportProgressProvider.notifier);
   // Never overwrite the state of an export that is still running (#491).
+  // Silent here: UI callers show the message via rejectIfExportRunning.
   if (progress.isBusy) return;
   if (page == null) {
     progress.setError(ExportFailure.noPages);
