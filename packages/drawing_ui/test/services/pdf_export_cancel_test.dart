@@ -67,8 +67,8 @@ void main() {
   });
 
   for (final share in [true, false]) {
-    test('cancel during a one-page export opens no '
-        '${share ? 'share sheet' : 'save dialog'}', () async {
+    final flow = share ? 'share sheet' : 'save dialog';
+    test('cancel during a one-page export opens no $flow', () async {
       final progress = ExportProgressNotifier();
       addTearDown(progress.dispose);
       final shareService = _FakeShare();
