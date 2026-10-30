@@ -1371,6 +1371,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPageGo => 'Git';
 
   @override
+  String editorPageGoToPageOutOfRange(int count) {
+    return '1 ile $count arasında bir sayfa girin';
+  }
+
+  @override
   String editorPageListPageOf(int page, int count) {
     return 'Sayfa $page / $count';
   }

@@ -104,6 +104,10 @@ class AppPageStrings extends PageStrings {
   String get go => _l10n.editorPageGo;
 
   @override
+  String goToPageOutOfRange(int count) =>
+      _l10n.editorPageGoToPageOutOfRange(count);
+
+  @override
   String pdfRangeTitle(int count) => _l10n.editorPdfRangeTitle(count);
 
   @override

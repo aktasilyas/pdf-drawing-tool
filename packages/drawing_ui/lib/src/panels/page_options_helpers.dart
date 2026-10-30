@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
-import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/go_to_page_dialog.dart';
 
 // ═══════════════════════════════════════════
 // Extracted helpers (shared with page_options_panel.dart)
@@ -40,41 +40,14 @@ Widget pageOptionsThickDivider(ColorScheme cs, {bool compact = false}) =>
       color: cs.outlineVariant.withValues(alpha: 0.3),
     );
 
-/// "Go to page" dialog extracted from PageOptionsPanel.
+/// "Go to page" from the page options menu: validated [GoToPageDialog],
+/// then navigates [pageManager] to the chosen page.
 void showGoToPageDialog({
   required BuildContext context,
   required int pageCount,
   required PageManagerNotifier pageManager,
 }) {
-  final controller = TextEditingController();
-  final strings = context.drawingStrings;
-  void goTo(String value, BuildContext ctx) {
-    final page = int.tryParse(value);
-    if (page != null && page >= 1 && page <= pageCount) {
-      Navigator.pop(ctx);
-      pageManager.goToPage(page - 1);
-    }
-  }
-
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(strings.pages.goToPage),
-      content: TextField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        autofocus: true,
-        decoration: InputDecoration(hintText: '1 - $pageCount'),
-        onSubmitted: (v) => goTo(v, ctx),
-      ),
-      actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(strings.panels.cancel)),
-        FilledButton(
-            onPressed: () => goTo(controller.text, ctx),
-            child: Text(strings.pages.go)),
-      ],
-    ),
-  );
+  pickGoToPageIndex(context, pageCount: pageCount).then((index) {
+    if (index != null) pageManager.goToPage(index);
+  });
 }
