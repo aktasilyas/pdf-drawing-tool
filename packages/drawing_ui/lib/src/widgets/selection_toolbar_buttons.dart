@@ -3,6 +3,7 @@ import 'package:drawing_ui/src/l10n/enum_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 
 /// Icon button for the selection toolbar quick-action bar.
 ///
@@ -37,14 +38,22 @@ class SelectionToolbarButton extends StatelessWidget {
           )
         : PhosphorIcon(action.icon, size: 20, color: color);
 
-    return Tooltip(
-      message: action.kind.label(context.drawingStrings),
-      child: GestureDetector(
-        onTap: enabled ? onTap : null,
-        behavior: HitTestBehavior.opaque,
-        child: Opacity(
-          opacity: enabled ? 1.0 : 0.38,
-          child: SizedBox(width: 40, height: 40, child: Center(child: child)),
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: enabled,
+      child: Tooltip(
+        message: action.kind.label(context.drawingStrings),
+        child: GestureDetector(
+          onTap: enabled ? onTap : null,
+          behavior: HitTestBehavior.opaque,
+          child: Opacity(
+            opacity: enabled ? 1.0 : 0.38,
+            child: SizedBox.square(
+              dimension: ChromeSizes.minTouchTarget,
+              child: Center(child: child),
+            ),
+          ),
         ),
       ),
     );
@@ -69,18 +78,23 @@ class SelectionToolbarIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Center(
-            child: PhosphorIcon(icon,
-                size: 20,
-                color: isActive ? colorScheme.primary : colorScheme.onSurface),
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: true,
+      child: Tooltip(
+        message: tooltip,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox.square(
+            dimension: ChromeSizes.minTouchTarget,
+            child: Center(
+              child: PhosphorIcon(icon,
+                  size: 20,
+                  color:
+                      isActive ? colorScheme.primary : colorScheme.onSurface),
+            ),
           ),
         ),
       ),

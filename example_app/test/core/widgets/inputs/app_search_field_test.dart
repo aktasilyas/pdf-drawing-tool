@@ -50,4 +50,46 @@ void main() {
     expect(_shown(tester), '');
     await tester.pump(const Duration(milliseconds: 300));
   });
+
+  testWidgets('clear button exposes the given localized label', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: AppSearchField(
+            text: 'ab',
+            clearTooltip: 'Aramayı temizle',
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: AppSearchField(
+            text: 'abc',
+            clearTooltip: 'Aramayı temizle',
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    expect(find.byTooltip('Aramayı temizle'), findsOneWidget);
+    // TalkBack reads the tooltip of the button node.
+    expect(
+      tester.getSemantics(find.byType(IconButton)),
+      containsSemantics(tooltip: 'Aramayı temizle', isButton: true),
+    );
+  });
+
+  testWidgets('clear button falls back to the Material clear tooltip',
+      (tester) async {
+    await tester.pumpWidget(_app('x'));
+    await tester.pumpWidget(_app('xy'));
+    final material =
+        MaterialLocalizations.of(tester.element(find.byType(AppSearchField)));
+    expect(find.byTooltip(material.clearButtonTooltip), findsOneWidget);
+  });
 }

@@ -21,6 +21,7 @@ class LibrarySearchField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return AppSearchField(
       hint: context.l10n.librarySearchHint,
+      clearTooltip: context.l10n.libraryClearSearch,
       text: ref.watch(searchQueryProvider),
       onChanged: (value) =>
           ref.read(searchQueryProvider.notifier).state = value,
