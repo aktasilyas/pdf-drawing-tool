@@ -46,40 +46,53 @@ class CompactToggle extends StatelessWidget {
     final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: ChromeSizes.minTouchTarget),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(!value),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  color: palette.textPrimary,
+    void toggle() => onChanged(!value);
+
+    // One node for the whole row ("<label>, switch, on"): the Text and the
+    // Switch below are excluded, so TalkBack does not stop on each.
+    return Semantics(
+      container: true,
+      label: label,
+      toggled: value,
+      enabled: true,
+      excludeSemantics: true,
+      onTap: toggle,
+      child: ConstrainedBox(
+        constraints:
+            const BoxConstraints(minHeight: ChromeSizes.minTouchTarget),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: toggle,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: palette.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            Transform.scale(
-              scale: scale,
-              alignment: Alignment.centerRight,
-              child: Switch(
-                value: value,
-                onChanged: onChanged,
-                activeTrackColor: activeColor ?? palette.accent,
-                activeThumbColor: palette.onAccent,
-                inactiveThumbColor: palette.textMuted,
-                inactiveTrackColor: palette.surfaceElevated,
-                trackOutlineColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected)
-                      ? Colors.transparent
-                      : palette.textMuted,
+              Transform.scale(
+                scale: scale,
+                alignment: Alignment.centerRight,
+                child: Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeTrackColor: activeColor ?? palette.accent,
+                  activeThumbColor: palette.onAccent,
+                  inactiveThumbColor: palette.textMuted,
+                  inactiveTrackColor: palette.surfaceElevated,
+                  trackOutlineColor: WidgetStateProperty.resolveWith(
+                    (states) => states.contains(WidgetState.selected)
+                        ? Colors.transparent
+                        : palette.textMuted,
+                  ),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
