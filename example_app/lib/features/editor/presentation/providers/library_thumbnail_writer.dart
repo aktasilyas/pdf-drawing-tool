@@ -75,6 +75,10 @@ class LibraryThumbnailWriter {
   Future<void>? _worker;
   Timer? _timer;
 
+  /// Counts queued requests, so [ensureStored] can tell that a save queued
+  /// a newer first page while it was reading the row.
+  int _requests = 0;
+
   /// Completes when no render or write is in flight.
   Future<void> get idle => _worker ?? Future<void>.value();
 
@@ -93,6 +97,7 @@ class LibraryThumbnailWriter {
   void request(DrawingDocument document) {
     try {
       if (!_wants(document)) return;
+      _requests++;
       _pending[document.id] = document;
       _timer?.cancel();
       if (idleDelay == Duration.zero) {
@@ -102,6 +107,36 @@ class LibraryThumbnailWriter {
       }
     } catch (e) {
       logger.w('Thumbnail request failed', error: e);
+    }
+  }
+
+  /// Requests a first preview for [document] when its library row has none
+  /// yet (a notebook from before #520, or opened but never edited since).
+  ///
+  /// Notebooks with a cover keep showing the cover and are skipped. The
+  /// already-loaded first page is used, so nothing is decoded again, and the
+  /// render waits for [idleDelay] like [request], off the open path. Call
+  /// after [baseline].
+  Future<void> ensureStored(DrawingDocument document) async {
+    try {
+      if (!enabled) return;
+      final pages = document.pages;
+      if (pages.isEmpty || pages.first.isCover) return;
+      final requestsBefore = _requests;
+      final row = await repository().getDocument(document.id);
+      // A save requested a newer first page while the row was read.
+      if (_requests != requestsBefore) return;
+      final missing = row.fold(
+        (_) => false,
+        (info) => info.thumbnailPath == null && !info.hasCover,
+      );
+      if (!missing) return;
+      final recorded = _recorded[document.id];
+      if (recorded != null && !identical(recorded, pages.first)) return;
+      _recorded.remove(document.id);
+      request(document);
+    } catch (e) {
+      logger.w('Thumbnail check on open failed', error: e);
     }
   }
 
@@ -168,8 +203,11 @@ class LibraryThumbnailWriter {
 
 /// The editor's library-preview writer. Disabled when the app documents root
 /// is unknown (tests), so the repository is never touched there.
+///
+/// The resolver is read, not watched: it is a startup override that never
+/// changes, and a rebuild would drop the writer's recorded and pending pages.
 final libraryThumbnailWriterProvider = Provider<LibraryThumbnailWriter>((ref) {
-  final paths = ref.watch(pdfPathResolverProvider);
+  final paths = ref.read(pdfPathResolverProvider);
   return LibraryThumbnailWriter(
     enabled: paths.documentsRoot?.isNotEmpty == true,
     repository: () => ref.read(documentRepositoryProvider),
