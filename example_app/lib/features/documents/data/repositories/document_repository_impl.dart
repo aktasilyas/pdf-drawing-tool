@@ -9,26 +9,33 @@ import 'package:example_app/features/documents/data/datasources/document_local_d
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 import 'package:example_app/features/documents/data/repositories/document_queries.dart';
+import 'package:example_app/features/documents/data/repositories/document_thumbnails.dart';
 import 'package:example_app/features/documents/data/repositories/document_trash_purge.dart';
 
 @Injectable(as: DocumentRepository)
 class DocumentRepositoryImpl
-    with DocumentQueries, DocumentTrashPurge
+    with DocumentQueries, DocumentTrashPurge, DocumentThumbnails
     implements DocumentRepository {
   final DocumentLocalDatasource _localDatasource;
   final FolderLocalDatasource _folderDatasource;
   final LocalTransactionRunner _runner;
   final Uuid _uuid;
+  final PdfPathResolver _pdfPaths;
 
   DocumentRepositoryImpl(
     this._localDatasource,
     this._folderDatasource,
     this._runner, [
     Uuid? uuid,
-  ]) : _uuid = uuid ?? const Uuid();
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  ])  : _uuid = uuid ?? const Uuid(),
+        _pdfPaths = pdfPaths;
 
   @override
   DocumentLocalDatasource get localDatasource => _localDatasource;
+
+  @override
+  PdfPathResolver get thumbnailPaths => _pdfPaths;
 
   @override
   Future<Either<Failure, DocumentInfo>> createDocument({

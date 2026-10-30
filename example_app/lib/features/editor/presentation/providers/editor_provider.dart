@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/domain/usecases/load_document_usecase.dart';
 import 'package:example_app/features/editor/domain/usecases/save_document_usecase.dart';
+import 'package:example_app/features/editor/presentation/providers/library_thumbnail_writer.dart';
 
 // Provider for LoadDocumentUseCase
 final loadDocumentUseCaseProvider = Provider<LoadDocumentUseCase>((ref) {
@@ -102,6 +103,7 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   Future<void> _write(DrawingDocument document) async {
     state = true; // Saving...
     final useCase = _ref.read(saveDocumentUseCaseProvider);
+    final thumbnails = _ref.read(libraryThumbnailWriterProvider);
     final result = await useCase(document);
 
     final failure = result.fold((f) => f, (_) => null);
@@ -109,6 +111,7 @@ class AutoSaveNotifier extends StateNotifier<bool> {
       logger.e('Save failed', error: failure.message);
     } else {
       logger.i('Document saved successfully: ${document.id}');
+      thumbnails.request(document);
     }
 
     // A lifecycle flush can outlive the editor (provider invalidated on leave).

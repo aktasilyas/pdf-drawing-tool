@@ -24,23 +24,41 @@ class ManagedFileCleanup {
 
   /// Managed files the stored pages of document [id] point to.
   Future<Set<String>> pathsOfDocument(String id) async {
+    final thumbnail = await _thumbnailOf(id);
+    final paths = <String>{
+      // Only managed files may be deleted, never a user's own file.
+      if (thumbnail != null && isManagedImagePath(thumbnail)) thumbnail,
+    };
     final row = await (_db.select(_db.documentContents)
           ..where((t) => t.documentId.equals(id)))
         .getSingleOrNull();
-    if (row == null) return {};
+    if (row == null) return paths;
     final Object? pages;
     try {
       pages = (await _codec.decode(row.data))['pages'];
     } catch (e) {
       // Undecodable content must not block deletion; only file cleanup is lost.
       logger.w('Skipping file cleanup, content of $id is corrupt: $e');
-      return {};
+      return paths;
     }
-    if (pages is! List) return {};
-    return {
-      for (final page in pages)
-        if (page is Map<String, dynamic>) ...managedFilePathsOfPage(page),
-    };
+    if (pages is! List) return paths;
+    for (final page in pages) {
+      if (page is Map<String, dynamic>) {
+        paths.addAll(managedFilePathsOfPage(page));
+      }
+    }
+    return paths;
+  }
+
+  /// The library thumbnail path stored on the row of document [id], if any.
+  Future<String?> _thumbnailOf(String id) async {
+    final documents = _db.documents;
+    final rows = await (_db.selectOnly(documents)
+          ..addColumns([documents.thumbnailPath])
+          ..where(documents.id.equals(id)))
+        .map((row) => row.read(documents.thumbnailPath))
+        .get();
+    return rows.isEmpty ? null : rows.first;
   }
 
   /// The members of [paths] that nothing references any more.
@@ -51,10 +69,25 @@ class ManagedFileCleanup {
     ];
   }
 
-  /// Whether a clipboard, any remaining document content or a trashed page
-  /// mentions [path].
+  /// Whether a clipboard, a document thumbnail, any remaining document content
+  /// or a trashed page mentions [path].
   Future<bool> _isReferenced(String path) async =>
-      _clipboard.contains(path) || await _anyRowContains(json.encode(path));
+      _clipboard.contains(path) ||
+      await _isThumbnail(path) ||
+      await _anyRowContains(json.encode(path));
+
+  /// Whether a document row uses [path] as its library thumbnail. Thumbnails
+  /// are stored as `'<dir>/<name>'`, so the normalized form is matched too.
+  Future<bool> _isThumbnail(String path) async {
+    final candidates = {path, ...managedFileRefsIn(path)};
+    final documents = _db.documents;
+    final rows = await (_db.selectOnly(documents)
+          ..addColumns([documents.id])
+          ..where(documents.thumbnailPath.isIn(candidates))
+          ..limit(1))
+        .get();
+    return rows.isNotEmpty;
+  }
 
   /// Whether any document content or trashed page mentions the file [name]
   /// anywhere (SQL `LIKE`; wildcards in [name] only widen the match).

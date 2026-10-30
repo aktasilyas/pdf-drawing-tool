@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/library_thumbnail_writer.dart';
 
 /// Reads a provider; both `WidgetRef.read` and `ProviderContainer.read`
 /// tear off to this type.
@@ -20,6 +23,7 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(canvasTransformProvider.notifier).resetForNewDocument();
   read(documentProvider.notifier).updateDocument(document);
   read(currentDocumentProvider.notifier).state = document;
+  read(libraryThumbnailWriterProvider).baseline(document);
   final pageManager = read(pageManagerProvider.notifier);
   pageManager.initializeFromDocument(
     document.pages,
@@ -117,10 +121,14 @@ void endEditorSession(ProviderReader read) {
 /// too: the next notebook must open editable in single-page view, and the
 /// closed notebook's page renders (up to 50 MB) are freed. The thumbnail
 /// cache is kept: library previews use it (#481).
+///
+/// A pending first-page preview is rendered now, in the background; the
+/// writer reloads the library lists again once it is stored (#520).
 void closeEditorSession(
   ProviderReader read,
   void Function(ProviderOrFamily provider) invalidate,
 ) {
+  unawaited(read(libraryThumbnailWriterProvider).flush());
   invalidate(documentsProvider);
   invalidate(favoriteDocumentsProvider);
   invalidate(recentDocumentsProvider);

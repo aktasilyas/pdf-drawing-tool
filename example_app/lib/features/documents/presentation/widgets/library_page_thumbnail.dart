@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
-import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
+import 'package:drawing_ui/drawing_ui.dart'
+    show CoverGeometry, pdfPathResolverProvider;
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
@@ -58,7 +61,12 @@ class LibraryPageThumbnail extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: _content(),
+                child: document.thumbnailPath == null
+                    ? _content()
+                    : _InkThumbnail(
+                        stored: document.thumbnailPath!,
+                        fallback: _content,
+                      ),
               ),
             ),
           ],
@@ -112,5 +120,47 @@ class LibraryPageThumbnail extends StatelessWidget {
           size: Size.infinite,
         );
     }
+  }
+}
+
+/// Builds the image provider of a stored library thumbnail path. Overridable
+/// in tests.
+final libraryThumbnailImageProvider =
+    Provider<ImageProvider Function(String stored)>((ref) {
+  final paths = ref.watch(pdfPathResolverProvider);
+  return (stored) => FileImage(File(paths.resolve(stored)));
+});
+
+/// Stored ink thumbnail of a document. [fallback] is only built when the
+/// image fails to load, so the content readers behind it stay idle.
+class _InkThumbnail extends ConsumerWidget {
+  const _InkThumbnail({required this.stored, required this.fallback});
+
+  final String stored;
+  final Widget Function() fallback;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final imageFor = ref.watch(libraryThumbnailImageProvider);
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final cacheWidth =
+            width.isFinite && width > 0 ? (width * pixelRatio).ceil() : null;
+        final base = imageFor(stored);
+        return Image(
+          image:
+              cacheWidth == null ? base : ResizeImage(base, width: cacheWidth),
+          // The page rect already has the page aspect; cover avoids
+          // hairline gaps from rounding.
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          gaplessPlayback: true,
+          errorBuilder: (_, __, ___) => fallback(),
+        );
+      },
+    );
   }
 }
