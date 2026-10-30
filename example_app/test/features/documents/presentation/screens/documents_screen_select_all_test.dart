@@ -3,10 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/features/documents/documents.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
-import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
-import 'package:example_app/features/documents/presentation/screens/documents_screen_helpers.dart';
-import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 
 void main() {
   final now = DateTime(2026, 1, 1);
