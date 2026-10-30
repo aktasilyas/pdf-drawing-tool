@@ -70,8 +70,14 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
     super.initState();
     _createCache();
     widget.cacheManager.addListener(_onImagesChanged);
-    _memoryPressure =
-        EditorMemoryPressureObserver(() => _cache.trimToVisible());
+    _memoryPressure = EditorMemoryPressureObserver(_onMemoryPressure);
+  }
+
+  /// Low memory: drop off-screen tiles. The image cache may be trimmed too,
+  /// so re-raster the tiles under each image once it loads again.
+  void _onMemoryPressure() {
+    _cache.trimToVisible();
+    _unloaded = {for (final image in widget.scene.images) image.filePath};
   }
 
   void _createCache() {

@@ -141,4 +141,44 @@ void main() {
     manager.debugPut('/unrelated.png', _tinyImage());
     expect(cache.debugRasterCount, count);
   });
+
+  testWidgets('after memory pressure a reloaded image re-rasters its tile', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final manager = ImageCacheManager(protectWindow: Duration.zero);
+    const image = ImageElement(
+      id: 'img',
+      filePath: '/does/not/exist/trimmed.png',
+      x: 20,
+      y: 20,
+      width: 60,
+      height: 60,
+    );
+    manager.debugPut(image.filePath, _tinyImage());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ActiveLayerContent(
+          scene: _scene([_s('far', 600, 400)], images: const [image]),
+          transform: CanvasTransform(zoom: 1),
+          viewportSize: const Size(800, 600),
+          isZooming: false,
+          renderer: FlutterStrokeRenderer(),
+          cacheManager: manager,
+        ),
+      ),
+    );
+    final cache = tester
+        .state<ActiveLayerContentState>(find.byType(ActiveLayerContent))
+        .cache;
+
+    manager.trim();
+    tester.binding.handleMemoryPressure();
+    manager.debugPut(image.filePath, _tinyImage());
+    await tester.pump();
+
+    expect(cache.debugRasterizedKeys, [const TileKey(0, 0)]);
+  });
 }
