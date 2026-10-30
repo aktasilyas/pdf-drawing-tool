@@ -11,7 +11,6 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/editor/editor.dart';
-import 'package:example_app/features/editor/presentation/providers/library_thumbnail_writer.dart';
 
 class _MockSave extends Mock implements SaveDocumentUseCase {}
 
