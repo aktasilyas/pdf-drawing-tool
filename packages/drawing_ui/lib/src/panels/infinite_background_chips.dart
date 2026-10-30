@@ -1,6 +1,28 @@
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/theme/drawing_colors.dart';
 import 'infinite_background_logic.dart';
+
+/// Announces a chip as one selectable button named by its visible label.
+/// Child semantics are excluded, so the tap action is exposed here.
+Widget _chipSemantics({
+  required String label,
+  required bool isSelected,
+  required VoidCallback onTap,
+  required Widget child,
+}) =>
+    Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: child,
+      ),
+    );
 
 /// Pattern chip: mini pattern icon over a label.
 class InfiniteBackgroundPatternChip extends StatelessWidget {
@@ -21,7 +43,9 @@ class InfiniteBackgroundPatternChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final fg = isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant;
     return Expanded(
-      child: GestureDetector(
+      child: _chipSemantics(
+        label: label,
+        isSelected: isSelected,
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 64),
@@ -127,10 +151,12 @@ class InfiniteBackgroundColorChip extends StatelessWidget {
     final onDark = InfiniteBackgroundColors.isDark(color);
     // Contrast-safe colours based on the chip background, not the theme.
     final textColor =
-        onDark ? const Color(0xFFF2F3F6) : const Color(0xFF1B1F23);
-    final checkColor = onDark ? const Color(0xFFF2F3F6) : cs.primary;
+        onDark ? DrawingColors.onDarkPaper : DrawingColors.onLightPaper;
+    final checkColor = onDark ? DrawingColors.onDarkPaper : cs.primary;
     return Expanded(
-      child: GestureDetector(
+      child: _chipSemantics(
+        label: label,
+        isSelected: isSelected,
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minHeight: 48),
