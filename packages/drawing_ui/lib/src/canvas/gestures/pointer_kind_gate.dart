@@ -16,11 +16,24 @@ mixin _PointerKindGate<T extends ConsumerStatefulWidget>
   /// True while a stylus is down (palm touches must not zoom/pan then).
   bool get isStylusActive => _stylusPointer >= 0;
 
+  /// Whether a scale gesture with [fingers] touches navigates the canvas:
+  /// two fingers always, one finger only in stylus mode (the pen draws, the
+  /// finger scrolls and swipes pages). Never while the pen is down.
+  bool navigatesWith(int fingers) {
+    if (isStylusActive) return false;
+    return fingers >= 2 || !ref.read(inputModeProvider).fingerDraws;
+  }
+
   /// Returns true when the down event must not reach the tools.
   bool gateDown(PointerDownEvent event) {
     if (InputMode.isStylus(event.kind)) {
       ref.read(inputModeProvider.notifier).stylusSeen();
       _stylusPointer = event.pointer;
+      if (_swipeDragActive) {
+        // The pen pre-empts a one-finger page swipe in progress.
+        onPageSwipeDragEnd?.call(0);
+        _swipeDragActive = false;
+      }
       if (_countedPointers.isNotEmpty) {
         // A palm or finger got there first: the pen takes over.
         if (drawingController.isDrawing) drawingController.cancelStroke();

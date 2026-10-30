@@ -14,11 +14,11 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleScaleStart(ScaleStartDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2 || isStylusActive) return;
+    // Two fingers, or one finger in stylus mode
+    if (!navigatesWith(details.pointerCount)) return;
 
     // Show zoom indicator
-    ref.read(isZoomingProvider.notifier).state = true;
+    ref.read(isZoomingProvider.notifier).state = details.pointerCount >= 2;
 
     // Cancel any ongoing operations when zoom/pan starts
     if (drawingController.isDrawing) {
@@ -57,8 +57,7 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
   }
 
   void handleScaleUpdate(ScaleUpdateDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2 || isStylusActive) return;
+    if (!navigatesWith(details.pointerCount)) return;
     if (!mounted) return;
 
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
