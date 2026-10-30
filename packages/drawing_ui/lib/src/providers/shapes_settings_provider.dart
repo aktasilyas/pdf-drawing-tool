@@ -1,49 +1,59 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 
-/// Shapes settings provider.
-final shapesSettingsProvider =
-    StateNotifierProvider<ShapesSettingsNotifier, ShapesSettingsState>(
-  (ref) => ShapesSettingsNotifier(const ShapesSettingsState(
-    selectedShape: ShapeType.rectangle,
-    strokeThickness: 2.0,
-    strokeColor: Color(0xFF000000),
-    fillEnabled: false,
-    fillColor: Color(0x40000000),
-  )),
+/// SharedPreferences key for shapes settings.
+const _shapesSettingsKey = 'elyanotes_shapes';
+
+/// Default shapes settings.
+const _defaultShapesSettings = ShapesSettingsState(
+  selectedShape: ShapeType.rectangle,
+  strokeThickness: 2.0,
+  strokeColor: Color(0xFF000000),
+  fillEnabled: false,
+  fillColor: Color(0x40000000),
 );
 
-/// Shape type enum - En cok kullanilan 10 sekil.
-/// Core ShapeType ile birebir eslesir.
+/// Shapes settings provider with SharedPreferences persistence.
+final shapesSettingsProvider =
+    StateNotifierProvider<ShapesSettingsNotifier, ShapesSettingsState>(
+  (ref) => ShapesSettingsNotifier(ref.watch(sharedPreferencesProvider)),
+);
+
+/// Shape type enum - the ten most used shapes.
+/// Maps one-to-one to the core ShapeType.
 enum ShapeType {
-  /// Duz cizgi
+  /// Straight line
   line,
 
-  /// Ok isareti
+  /// Arrow
   arrow,
 
-  /// Dikdortgen
+  /// Rectangle
   rectangle,
 
-  /// Elips/Daire
+  /// Ellipse / circle
   ellipse,
 
-  /// Ucgen
+  /// Triangle
   triangle,
 
-  /// Eskenar dortgen
+  /// Diamond (rhombus)
   diamond,
 
-  /// Yildiz
+  /// Star
   star,
 
-  /// Besgen
+  /// Pentagon
   pentagon,
 
-  /// Altigen
+  /// Hexagon
   hexagon,
 
-  /// Arti isareti
+  /// Plus sign
   plus,
 }
 
@@ -78,29 +88,88 @@ class ShapesSettingsState {
       fillColor: fillColor ?? this.fillColor,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'selectedShape': selectedShape.name,
+      'strokeThickness': strokeThickness,
+      'strokeColor': strokeColor.toARGB32(),
+      'fillEnabled': fillEnabled,
+      'fillColor': fillColor.toARGB32(),
+    };
+  }
+
+  /// Reads stored settings; every missing, unknown or wrongly typed field
+  /// falls back to its own default.
+  factory ShapesSettingsState.fromJson(Map<String, dynamic> json) {
+    const d = _defaultShapesSettings;
+    final shape = ShapeType.values.asNameMap()[json['selectedShape']];
+    final thickness = _positiveDouble(json['strokeThickness']);
+    final strokeColor = json['strokeColor'];
+    final fillEnabled = json['fillEnabled'];
+    final fillColor = json['fillColor'];
+    return ShapesSettingsState(
+      selectedShape: shape ?? d.selectedShape,
+      strokeThickness: thickness ?? d.strokeThickness,
+      strokeColor: strokeColor is int ? Color(strokeColor) : d.strokeColor,
+      fillEnabled: fillEnabled is bool ? fillEnabled : d.fillEnabled,
+      fillColor: fillColor is int ? Color(fillColor) : d.fillColor,
+    );
+  }
 }
 
-/// Notifier for shapes settings.
+double? _positiveDouble(Object? value) {
+  if (value is num && value.isFinite && value > 0) return value.toDouble();
+  return null;
+}
+
+/// Notifier for shapes settings with persistence. Null prefs (tests) keep
+/// the settings in memory only.
 class ShapesSettingsNotifier extends StateNotifier<ShapesSettingsState> {
-  ShapesSettingsNotifier(super.state);
+  ShapesSettingsNotifier(this._prefs) : super(_load(_prefs));
+
+  final SharedPreferences? _prefs;
+
+  static ShapesSettingsState _load(SharedPreferences? prefs) {
+    final source = prefs?.getString(_shapesSettingsKey);
+    if (source == null) return _defaultShapesSettings;
+    try {
+      final json = jsonDecode(source);
+      if (json is Map<String, dynamic>) {
+        return ShapesSettingsState.fromJson(json);
+      }
+    } on FormatException {
+      // Corrupt value: fall back to defaults.
+    }
+    return _defaultShapesSettings;
+  }
+
+  Future<void> _save() async {
+    await _prefs?.setString(_shapesSettingsKey, jsonEncode(state.toJson()));
+  }
 
   void setSelectedShape(ShapeType shape) {
     state = state.copyWith(selectedShape: shape);
+    _save();
   }
 
   void setStrokeThickness(double thickness) {
     state = state.copyWith(strokeThickness: thickness);
+    _save();
   }
 
   void setStrokeColor(Color color) {
     state = state.copyWith(strokeColor: color);
+    _save();
   }
 
   void setFillEnabled(bool enabled) {
     state = state.copyWith(fillEnabled: enabled);
+    _save();
   }
 
   void setFillColor(Color color) {
     state = state.copyWith(fillColor: color);
+    _save();
   }
 }
