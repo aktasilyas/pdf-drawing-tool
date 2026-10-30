@@ -48,6 +48,7 @@ class DocumentsContentView extends ConsumerWidget {
       case SidebarSection.documents:
         return _DocumentsWithFolders(
           parentFolderId: null,
+          searchAllFolders: true,
           onCreateNew: onCreateNew,
           onFolderTap: onFolderTap,
           onDocumentTap: onDocumentTap,
@@ -87,11 +88,15 @@ class _DocumentsWithFolders extends ConsumerWidget {
     required this.onDocumentTap,
     required this.onFolderMore,
     required this.onDocumentMore,
+    this.searchAllFolders = false,
     this.onCreateNew,
   });
 
   final VoidCallback? onCreateNew;
   final String? parentFolderId;
+
+  /// While a query is typed, search every folder instead of [parentFolderId].
+  final bool searchAllFolders;
   final ValueChanged<Folder> onFolderTap;
   final ValueChanged<DocumentInfo> onDocumentTap;
   final ValueChanged<Folder> onFolderMore;
@@ -100,7 +105,11 @@ class _DocumentsWithFolders extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foldersAsync = ref.watch(foldersProvider);
-    final documentsAsync = ref.watch(documentsProvider(parentFolderId));
+    final searchQuery = ref.watch(searchQueryProvider);
+    final searchAll = searchAllFolders && searchQuery.isNotEmpty;
+    final documentsAsync = searchAll
+        ? ref.watch(searchResultsProvider)
+        : ref.watch(documentsProvider(parentFolderId));
     return foldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, st) => libraryLoadErrorView(
@@ -118,19 +127,21 @@ class _DocumentsWithFolders extends ConsumerWidget {
             error,
             st,
             message: context.l10n.libraryLoadFailed,
-            onRetry: () => ref.invalidate(documentsProvider(parentFolderId)),
+            onRetry: () => searchAll
+                ? ref.invalidate(searchResultsProvider)
+                : ref.invalidate(documentsProvider(parentFolderId)),
           ),
           data: (documents) {
-            final searchQuery = ref.watch(searchQueryProvider);
-            // Filter documents
-            final filteredDocs = searchQuery.isEmpty
+            // Filter documents (library-wide results are already matched)
+            final filteredDocs = searchQuery.isEmpty || searchAll
                 ? documents
                 : documents
                     .where((doc) => matchesSearch(doc.title, searchQuery))
                     .toList();
             // Filter folders by parent
-            var filteredFolders =
-                folders.where((f) => f.parentId == parentFolderId).toList();
+            var filteredFolders = searchAll
+                ? folders
+                : folders.where((f) => f.parentId == parentFolderId).toList();
             if (searchQuery.isNotEmpty) {
               filteredFolders = filteredFolders
                   .where((f) => matchesSearch(f.name, searchQuery))
@@ -217,9 +228,19 @@ class _FavoritesView extends ConsumerWidget {
             if (folders.isEmpty && documents.isEmpty) {
               return const FavoritesEmptyState();
             }
-            final sorted = _sortDocuments(ref, documents);
+            final query = ref.watch(searchQueryProvider);
+            final shownFolders = query.isEmpty
+                ? folders
+                : folders.where((f) => matchesSearch(f.name, query)).toList();
+            final shownDocs = query.isEmpty
+                ? documents
+                : documents.where((d) => matchesSearch(d.title, query)).toList();
+            if (shownFolders.isEmpty && shownDocs.isEmpty) {
+              return DocumentsEmptySearchResult(query: query);
+            }
+            final sorted = _sortDocuments(ref, shownDocs);
             return _ViewModeSwitcher(
-              folders: folders,
+              folders: shownFolders,
               documents: sorted,
               onFolderTap: onFolderTap,
               onDocumentTap: onDocumentTap,

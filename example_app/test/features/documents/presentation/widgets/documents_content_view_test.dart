@@ -125,4 +125,84 @@ void main() {
       expect(calls, equals(2));
     });
   });
+
+  group('DocumentsContentView search', () {
+    final now = DateTime(2026, 1, 1);
+    DocumentInfo doc(String id, String title) => DocumentInfo(
+          id: id,
+          title: title,
+          templateId: 'blank',
+          createdAt: now,
+          updatedAt: now,
+        );
+
+    Widget build(SidebarSection section, List<Override> overrides) {
+      return ProviderScope(
+        overrides: overrides,
+        child: localizedApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: DocumentsContentView(
+              section: section,
+              folderId: null,
+              onFolderTap: (_) {},
+              onDocumentTap: (_) {},
+              onFolderMore: (_) {},
+              onDocumentMore: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('should_find_notebook_in_subfolder_when_searching_documents',
+        (tester) async {
+      await tester.pumpWidget(
+        build(SidebarSection.documents, [
+          searchQueryProvider.overrideWith((ref) => 'fiz'),
+          foldersProvider.overrideWith((ref) async => <Folder>[]),
+          documentsProvider.overrideWith((ref, id) async => <DocumentInfo>[]),
+          searchResultsProvider
+              .overrideWith((ref) async => [doc('1', 'Fizik')]),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Fizik'), findsOneWidget);
+      expect(find.byType(DocumentsEmptySearchResult), findsNothing);
+    });
+
+    testWidgets('should_filter_favorites_by_query', (tester) async {
+      await tester.pumpWidget(
+        build(SidebarSection.favorites, [
+          searchQueryProvider.overrideWith((ref) => 'fiz'),
+          favoriteFoldersProvider.overrideWith((ref) async => <Folder>[]),
+          favoriteDocumentsProvider.overrideWith(
+              (ref) async => [doc('1', 'Fizik'), doc('2', 'Kimya')]),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Fizik'), findsOneWidget);
+      expect(find.text('Kimya'), findsNothing);
+    });
+
+    testWidgets('should_show_no_results_in_favorites_for_unmatched_query',
+        (tester) async {
+      await tester.pumpWidget(
+        build(SidebarSection.favorites, [
+          searchQueryProvider.overrideWith((ref) => 'xyz'),
+          favoriteFoldersProvider.overrideWith((ref) async => <Folder>[]),
+          favoriteDocumentsProvider
+              .overrideWith((ref) async => [doc('1', 'Fizik')]),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(DocumentsEmptySearchResult), findsOneWidget);
+    });
+  });
 }
