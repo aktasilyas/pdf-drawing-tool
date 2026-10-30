@@ -23,7 +23,8 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(canvasTransformProvider.notifier).resetForNewDocument();
   read(documentProvider.notifier).updateDocument(document);
   read(currentDocumentProvider.notifier).state = document;
-  read(libraryThumbnailWriterProvider).baseline(document);
+  final thumbnails = read(libraryThumbnailWriterProvider)..baseline(document);
+  unawaited(thumbnails.ensureStored(document));
   final pageManager = read(pageManagerProvider.notifier);
   pageManager.initializeFromDocument(
     document.pages,

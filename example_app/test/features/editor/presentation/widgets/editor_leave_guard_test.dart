@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -8,9 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/editor/editor.dart';
 
 class _MockSave extends Mock implements SaveDocumentUseCase {}
+
+class _MockRepo extends Mock implements DocumentRepository {}
 
 void main() {
   late _MockSave save;
@@ -19,6 +23,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(DrawingDocument.emptyMultiPage('fallback'));
+    registerFallbackValue(Uint8List(0));
   });
 
   tearDown(DismissibleOverlays.instance.reset);
@@ -33,10 +38,14 @@ void main() {
   Future<ProviderContainer> pumpGuard(
     WidgetTester tester, {
     Future<void> Function()? onLeave,
+    List<Override> overrides = const [],
   }) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [saveDocumentUseCaseProvider.overrideWithValue(save)],
+        overrides: [
+          saveDocumentUseCaseProvider.overrideWithValue(save),
+          ...overrides,
+        ],
         child: MaterialApp(
           home: EditorLeaveGuard(
             onLeave: onLeave ?? () async => leaveCalls++,
@@ -189,6 +198,92 @@ void main() {
         AppLifecycleState.inactive,
         AppLifecycleState.resumed,
       ]);
+    });
+  });
+
+  group('library preview on backgrounding (#528)', () {
+    late _MockRepo repo;
+    late int renders;
+    late LibraryThumbnailWriter writer;
+
+    setUp(() {
+      repo = _MockRepo();
+      renders = 0;
+      when(() => repo.saveThumbnail(any(), any()))
+          .thenAnswer((_) async => const Right('thumb.png'));
+      writer = LibraryThumbnailWriter(
+        enabled: true,
+        repository: () => repo,
+        render: (page, width, height) async {
+          renders++;
+          return Uint8List(1);
+        },
+        idleDelay: const Duration(seconds: 20),
+      );
+    });
+
+    void resume(WidgetTester tester) => setLifecycle(tester, const [
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
+          AppLifecycleState.resumed,
+        ]);
+
+    testWidgets('pausing writes the pending preview without the idle delay',
+        (tester) async {
+      final container = await pumpGuard(
+        tester,
+        overrides: [libraryThumbnailWriterProvider.overrideWithValue(writer)],
+      );
+      container.read(autoSaveProvider.notifier).documentChanged(doc);
+
+      setLifecycle(tester, const [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ]);
+      await tester.pump();
+      await tester.pump();
+
+      verify(() => save(doc)).called(1);
+      expect(renders, 1);
+      verify(() => repo.saveThumbnail('doc_a', any())).called(1);
+
+      await tester.pump(const Duration(seconds: 30));
+      expect(renders, 1);
+      resume(tester);
+    });
+
+    testWidgets('the observer is removed when the editor closes',
+        (tester) async {
+      await pumpGuard(
+        tester,
+        overrides: [libraryThumbnailWriterProvider.overrideWithValue(writer)],
+      );
+      // The editor closes; the app-wide provider scope stays.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            saveDocumentUseCaseProvider.overrideWithValue(save),
+            libraryThumbnailWriterProvider.overrideWithValue(writer),
+          ],
+          child: const MaterialApp(home: SizedBox()),
+        ),
+      );
+      writer.request(doc);
+
+      setLifecycle(tester, const [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ]);
+      await tester.pump();
+      expect(renders, 0);
+
+      // Only the idle delay writes it now.
+      await tester.pump(const Duration(seconds: 20));
+      await tester.pump();
+      expect(renders, 1);
+      resume(tester);
     });
   });
 }

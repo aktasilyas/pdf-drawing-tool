@@ -1,15 +1,20 @@
+import 'dart:async';
+
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
+import 'package:example_app/features/editor/presentation/providers/library_thumbnail_writer.dart';
 
 /// Keeps unsaved ink from being lost when the user leaves the editor.
 ///
 /// - App paused, hidden, inactive or detached: flushes any pending autosave
 ///   right away instead of waiting for the debounce timer. Once the app is
-///   hidden, the text being typed is committed first (#489).
+///   hidden, the text being typed is committed first (#489). Once hidden or
+///   paused, the library preview is written after that save instead of
+///   waiting for its idle delay, so a swipe-away keeps it (#528).
 /// - System back: first closes the topmost open popover or phone drawer
 ///   ([DismissibleOverlays], #482); with none open it is routed through
 ///   [onLeave] (the same save-then-leave path as the in-app Home button)
@@ -53,7 +58,12 @@ class _EditorLeaveGuardState extends ConsumerState<EditorLeaveGuard> {
     if (state != AppLifecycleState.inactive) {
       commitTextBeingEdited(ref.read);
     }
-    ref.read(autoSaveProvider.notifier).flush();
+    final saved = ref.read(autoSaveProvider.notifier).flush();
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused) {
+      final thumbnails = ref.read(libraryThumbnailWriterProvider);
+      unawaited(saved.whenComplete(thumbnails.flush));
+    }
   }
 
   Future<void> _leave() async {
