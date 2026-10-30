@@ -125,7 +125,7 @@ void main() {
       // at 9/16 of the height cannot hold all seven actions.
       await open(
         tester,
-        (c, r) => showDocumentMenu(c, r, testDocument),
+        (c, r) => showDocumentMenu(c, r, testDocument, isTrash: false),
         size: const Size(1280, 800),
         padding: const FakeViewPadding(top: 24, bottom: 48),
       );
