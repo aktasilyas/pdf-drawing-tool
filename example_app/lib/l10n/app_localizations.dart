@@ -338,6 +338,18 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to log out of your account?'**
   String get settingsLogoutConfirm;
 
+  /// No description provided for @settingsDrawWithFinger.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw with finger'**
+  String get settingsDrawWithFinger;
+
+  /// No description provided for @settingsDrawWithFingerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, only the stylus draws and fingers scroll and zoom'**
+  String get settingsDrawWithFingerSubtitle;
+
   /// No description provided for @settingsCrashReports.
   ///
   /// In en, this message translates to:

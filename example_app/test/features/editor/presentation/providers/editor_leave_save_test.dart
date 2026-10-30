@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart' show documentProvider;
+import 'package:drawing_ui/drawing_ui.dart'
+    show documentProvider, textToolProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -136,5 +137,37 @@ void main() {
 
     expect(await leaving, isFalse);
     expect(container.read(saveFailureProvider), failure);
+  });
+
+  group('text being typed (#489)', () {
+    void type(String value) {
+      final notifier = container.read(textToolProvider.notifier);
+      notifier.startNewText(10, 20, pageId: doc.pages.first.id, layerIndex: 0);
+      final active = container.read(textToolProvider).activeText!;
+      notifier.updateText(active.copyWith(text: value));
+    }
+
+    testWidgets('is committed and saved on leave', (tester) async {
+      type('Hello');
+
+      expect(await saveBeforeLeavingEditor(container.read), isTrue);
+
+      final saved =
+          verify(() => save(captureAny())).captured.single as DrawingDocument;
+      expect(
+        saved.pages.first.layers.first.texts.map((t) => t.text),
+        ['Hello'],
+      );
+      expect(container.read(textToolProvider).isEditing, isFalse);
+    });
+
+    testWidgets('an empty text box saves nothing', (tester) async {
+      type('  ');
+
+      expect(await saveBeforeLeavingEditor(container.read), isTrue);
+
+      verifyNever(() => save(any()));
+      expect(container.read(textToolProvider).isEditing, isFalse);
+    });
   });
 }

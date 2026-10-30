@@ -21,6 +21,7 @@ import 'package:example_app/features/settings/presentation/providers/settings_pr
 import 'package:example_app/features/settings/presentation/widgets/about_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/canvas_theme_setting.dart';
 import 'package:example_app/features/settings/presentation/widgets/crash_reporting_setting.dart';
+import 'package:example_app/features/settings/presentation/widgets/draw_with_finger_setting.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_dialogs.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_header.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
@@ -128,6 +129,7 @@ class _AppearanceSection extends ConsumerWidget {
           onTap: () => SettingsDialogs.showThemeDialog(context, ref, settings),
         ),
         const CanvasThemeSetting(),
+        const DrawWithFingerSetting(),
         SettingsTile(
           icon: Icons.star_outline,
           title: l10n.settingsPinFavorites,
