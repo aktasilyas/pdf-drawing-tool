@@ -53,8 +53,8 @@ Future<void> _settle(
     WidgetTester tester, ThumbnailCache cache, Page page) async {
   final key = ThumbnailGenerator.getCacheKey(page);
   for (var i = 0; i < 100 && cache.get(key) == null; i++) {
-    await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester
+        .runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pump();
   }
   await tester.pump();
