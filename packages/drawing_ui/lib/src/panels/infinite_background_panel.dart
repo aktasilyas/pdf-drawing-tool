@@ -4,6 +4,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'infinite_background_sections.dart';
 import 'page_options_widgets.dart';
 
@@ -65,7 +66,11 @@ class _Header extends StatelessWidget {
           icon: PhosphorIcon(PhosphorIconsLight.x,
               size: 20, color: cs.onSurfaceVariant),
           onPressed: onClose,
-          visualDensity: VisualDensity.compact,
+          tooltip: context.drawingStrings.panels.close,
+          constraints: const BoxConstraints.tightFor(
+            width: ChromeSizes.minTouchTarget,
+            height: ChromeSizes.minTouchTarget,
+          ),
         ),
       ]),
     );

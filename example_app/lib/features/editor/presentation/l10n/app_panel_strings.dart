@@ -86,6 +86,15 @@ class AppPanelStrings extends PanelStrings {
   String get textStyle => _l10n.editorPanelTextStyle;
 
   @override
+  String get bold => _l10n.editorPanelTextBold;
+
+  @override
+  String get italic => _l10n.editorPanelTextItalic;
+
+  @override
+  String get underline => _l10n.editorPanelTextUnderline;
+
+  @override
   String get addNote => _l10n.editorPanelAddNote;
 
   @override

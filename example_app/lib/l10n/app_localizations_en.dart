@@ -908,6 +908,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPanelTextStyle => 'Style';
 
   @override
+  String get editorPanelTextBold => 'Bold';
+
+  @override
+  String get editorPanelTextItalic => 'Italic';
+
+  @override
+  String get editorPanelTextUnderline => 'Underline';
+
+  @override
   String get editorPanelAddNote => 'Add note';
 
   @override

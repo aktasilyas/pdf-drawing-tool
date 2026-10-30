@@ -3,6 +3,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'unified_color_picker.dart';
 
@@ -107,9 +108,14 @@ class _TextStylePopupState extends State<TextStylePopup> {
                         ),
                       ),
                       const Spacer(),
-                      GestureDetector(
-                        onTap: widget.onClose,
-                        child: PhosphorIcon(ElyanotesIcons.close,
+                      IconButton(
+                        onPressed: widget.onClose,
+                        tooltip: s.panels.close,
+                        constraints: const BoxConstraints.tightFor(
+                          width: ChromeSizes.minTouchTarget,
+                          height: ChromeSizes.minTouchTarget,
+                        ),
+                        icon: PhosphorIcon(ElyanotesIcons.close,
                             size: 18, color: cs.onSurfaceVariant),
                       ),
                     ],
@@ -205,6 +211,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                             _StyleButton(
                               icon: Icons.format_bold,
                               label: 'B', // l10n-ignore
+                              semanticLabel: s.panels.bold,
                               isSelected: _isBold,
                               onTap: () {
                                 setState(() => _isBold = !_isBold);
@@ -215,6 +222,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                             _StyleButton(
                               icon: Icons.format_italic,
                               label: 'I', // l10n-ignore
+                              semanticLabel: s.panels.italic,
                               isSelected: _isItalic,
                               fontStyle: FontStyle.italic,
                               onTap: () {
@@ -226,6 +234,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                             _StyleButton(
                               icon: Icons.format_underlined,
                               label: 'U', // l10n-ignore
+                              semanticLabel: s.panels.underline,
                               isSelected: _isUnderline,
                               decoration: TextDecoration.underline,
                               onTap: () {
@@ -251,6 +260,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
 class _StyleButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String semanticLabel;
   final bool isSelected;
   final FontStyle? fontStyle;
   final TextDecoration? decoration;
@@ -259,6 +269,7 @@ class _StyleButton extends StatelessWidget {
   const _StyleButton({
     required this.icon,
     required this.label,
+    required this.semanticLabel,
     required this.isSelected,
     this.fontStyle,
     this.decoration,
@@ -269,27 +280,41 @@ class _StyleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      toggled: isSelected,
+      label: semanticLabel,
+      excludeSemantics: true,
       onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outlineVariant,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: textTheme.titleMedium?.copyWith(
-              fontSize: 18,
-              fontWeight: label == 'B' ? FontWeight.bold : FontWeight.normal,
-              fontStyle: fontStyle,
-              decoration: decoration,
-              color: isSelected ? cs.onPrimary : cs.onSurface,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox.square(
+          dimension: ChromeSizes.minTouchTarget,
+          child: Center(
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected ? cs.primary : cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isSelected ? cs.primary : cs.outlineVariant,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontSize: 18,
+                    fontWeight:
+                        label == 'B' ? FontWeight.bold : FontWeight.normal,
+                    fontStyle: fontStyle,
+                    decoration: decoration,
+                    color: isSelected ? cs.onPrimary : cs.onSurface,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

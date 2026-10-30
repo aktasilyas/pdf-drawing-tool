@@ -891,6 +891,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPanelTextStyle => 'Stil';
 
   @override
+  String get editorPanelTextBold => 'Kalın';
+
+  @override
+  String get editorPanelTextItalic => 'İtalik';
+
+  @override
+  String get editorPanelTextUnderline => 'Altı çizili';
+
+  @override
   String get editorPanelAddNote => 'Not Ekle';
 
   @override
