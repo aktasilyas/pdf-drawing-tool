@@ -6,6 +6,7 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
         ConsumerState<T>,
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
+        _PointerKindGate<T>,
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
         _TextGestures<T>,
@@ -24,6 +25,8 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer down - starts a new stroke, eraser, selection, shape, or text.
   void handlePointerDown(PointerDownEvent event) {
+    if (gateDown(event)) return;
+
     // ══════════════════════════════════════════════════════════════
     // Sayfa sınırı kontrolü (LIMITED mod için)
     // ══════════════════════════════════════════════════════════════
