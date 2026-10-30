@@ -65,8 +65,7 @@ void main() {
         ],
       );
 
-  test('a notebook without a stored preview gets exactly one write',
-      () async {
+  test('a notebook without a stored preview gets exactly one write', () async {
     rowIs();
     final d = doc();
     final w = writer()..baseline(d);
