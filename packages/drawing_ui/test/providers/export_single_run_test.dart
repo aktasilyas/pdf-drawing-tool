@@ -140,7 +140,8 @@ void main() {
     expect(progress.isBusy, isFalse);
   });
 
-  test('Cancel stops only the running export and blocks a restart until it '
+  test(
+      'Cancel stops only the running export and blocks a restart until it '
       'has stopped', () async {
     final progress = ExportProgressNotifier();
     addTearDown(progress.dispose);

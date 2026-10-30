@@ -69,8 +69,8 @@ void main() {
     ));
 
     // A long export is running.
-    expect(container.read(exportProgressProvider.notifier).tryBegin(200),
-        isTrue);
+    expect(
+        container.read(exportProgressProvider.notifier).tryBegin(200), isTrue);
     container.read(exportProgressProvider.notifier).updateProgress(40, 200);
   }
 
@@ -154,8 +154,7 @@ void main() {
     expectRefused(tester);
   });
 
-  testWidgets('no export running: the panel starts the export',
-      (tester) async {
+  testWidgets('no export running: the panel starts the export', (tester) async {
     await pump(tester, ExportPanel(onClose: () {}, embedded: true));
     container.read(exportProgressProvider.notifier).end();
     await tapItem(tester, _export.exportPdf);
