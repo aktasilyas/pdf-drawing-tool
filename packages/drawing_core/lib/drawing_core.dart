@@ -64,6 +64,7 @@ export 'src/models/template.dart';
 export 'src/models/template_category.dart';
 export 'src/models/template_pattern.dart';
 export 'src/models/text_element.dart';
+export 'src/models/unreadable_element.dart';
 export 'src/models/image_element.dart';
 export 'src/models/sticky_note.dart';
 
