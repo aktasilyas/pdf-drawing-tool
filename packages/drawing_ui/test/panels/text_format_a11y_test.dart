@@ -180,7 +180,9 @@ void main() {
       ),
     );
     await tester.tap(find.bySemanticsLabel(label));
-    await tester.pump();
+    // Swatches also accept a double tap (full palette), so a single tap
+    // resolves only after the double-tap timeout.
+    await tester.pump(kDoubleTapTimeout);
     expect(changed?.color, 0xFFE53935);
     expect(
       tester.getSemantics(find.bySemanticsLabel(label)),
