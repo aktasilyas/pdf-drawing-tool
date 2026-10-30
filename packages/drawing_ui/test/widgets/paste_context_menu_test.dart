@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/widgets/paste_context_menu.dart';
 
@@ -21,7 +22,7 @@ const _kDevicePixelRatio = 2.0;
 // Helpers
 // ============================================================
 
-/// Sets the physical window size so the 120x40 pill has enough room to render.
+/// Sets the physical window size so the 120x48 pill has enough room to render.
 void _setWindowSize(WidgetTester tester) {
   tester.view.physicalSize = _kPhysicalSize;
   tester.view.devicePixelRatio = _kDevicePixelRatio;
@@ -310,7 +311,7 @@ void main() {
       _setWindowSize(tester);
       _ignoreOverflow();
 
-      // screenPos.dy=300 → top = 300-40-12 = 248, not clamped (248 > 8).
+      // screenPos.dy=300 → top = 300-48-12 = 240, not clamped (240 > 8).
       await tester.pumpWidget(
         _buildTestApp(
           pasteMenuState: const PasteMenuState(
@@ -327,7 +328,7 @@ void main() {
         ),
       );
 
-      expect(positioned.top, equals(248.0));
+      expect(positioned.top, equals(240.0));
     });
 
     testWidgets('should_position_below_press_point_when_too_close_to_top',
@@ -335,7 +336,7 @@ void main() {
       _setWindowSize(tester);
       _ignoreOverflow();
 
-      // screenPos.dy=20 → top = 20-40-12 = -32 < 8 → fallback to 20+12 = 32.
+      // screenPos.dy=20 → top = 20-48-12 = -40 < 8 → fallback to 20+12 = 32.
       await tester.pumpWidget(
         _buildTestApp(
           pasteMenuState: const PasteMenuState(
@@ -438,7 +439,7 @@ void main() {
       _setWindowSize(tester);
       _ignoreOverflow();
 
-      // screenPos=(500,400) → left=440, top=348 (both unclamped).
+      // screenPos=(500,400) → left=440, top=340 (both unclamped).
       await tester.pumpWidget(
         _buildTestApp(
           pasteMenuState: const PasteMenuState(
@@ -456,7 +457,7 @@ void main() {
       );
 
       expect(positioned.left, equals(440.0));
-      expect(positioned.top, equals(348.0));
+      expect(positioned.top, equals(340.0));
     });
   });
 
@@ -654,6 +655,75 @@ void main() {
 
       // state.canvasPos is forwarded to pasteFromClipboardAt on tap.
       expect(widget.state.canvasPos, equals(canvasPos));
+    });
+  });
+
+  // ===========================================================================
+  // Accessibility
+  // ===========================================================================
+
+  group('PasteContextMenu accessibility', () {
+    String pasteLabel(WidgetTester tester) {
+      final context = tester.element(find.byType(PasteContextMenu));
+      return context.drawingStrings.selection.paste;
+    }
+
+    testWidgets('is one labelled button at least 48dp tall', (tester) async {
+      _setWindowSize(tester);
+      _ignoreOverflow();
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          pasteMenuState: const PasteMenuState(
+            screenPos: _kDefaultScreenPos,
+            canvasPos: _kDefaultCanvasPos,
+          ),
+        ),
+      );
+
+      final label = pasteLabel(tester);
+      expect(find.bySemanticsLabel(label), findsOneWidget);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel(label)),
+        isSemantics(label: label, isButton: true, hasTapAction: true),
+      );
+      expect(
+        tester.getSize(find.bySemanticsLabel(label)).height,
+        greaterThanOrEqualTo(48),
+      );
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('semantic tap pastes and closes the menu', (tester) async {
+      _setWindowSize(tester);
+      _ignoreOverflow();
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          pasteMenuState: const PasteMenuState(
+            screenPos: _kDefaultScreenPos,
+            canvasPos: _kDefaultCanvasPos,
+          ),
+        ),
+      );
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PasteContextMenu)),
+      );
+      container.read(pasteMenuProvider.notifier).state = const PasteMenuState(
+        screenPos: _kDefaultScreenPos,
+        canvasPos: _kDefaultCanvasPos,
+      );
+
+      tester.semantics.tap(find.semantics.byLabel(pasteLabel(tester)));
+      await tester.pump();
+
+      expect(container.read(pasteMenuProvider), isNull);
+      handle.dispose();
     });
   });
 }
