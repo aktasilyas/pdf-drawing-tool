@@ -18,8 +18,10 @@ is_flutter() { grep -qE 'sdk:[[:space:]]*flutter' "$1/pubspec.yaml"; }
 annotate() { # $1=title $2=logfile
   if [ -n "${GITHUB_ACTIONS:-}" ]; then
     local msg
-    # Failed test names first (they are usually far above the tail), then the tail.
-    msg=$( { grep -E '❌|\[E\]|Some tests failed|EXCEPTION CAUGHT' "$2" | head -n 20; echo '...'; tail -n 40 "$2"; } \
+    # Analyzer errors/warnings and compile errors first, then failed test names
+    # (all usually far above the tail), then the tail.
+    msg=$( { grep -E '^ *(error|warning) - |: Error: ' "$2" | head -n 15
+             grep -E '❌|\[E\]|Some tests failed|EXCEPTION CAUGHT' "$2" | head -n 20; echo '...'; tail -n 40 "$2"; } \
       | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
     echo "::error title=$1::$msg"
   fi

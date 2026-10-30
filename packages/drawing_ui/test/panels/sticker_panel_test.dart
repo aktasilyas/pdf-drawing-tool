@@ -122,7 +122,8 @@ void main() {
 
     final node = tester.getSemantics(find.bySemanticsLabel('😃'));
     final insert = CustomSemanticsAction(label: 'Çıkartma Ekle');
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+    final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
+    owner.performAction(
       node.id,
       SemanticsAction.customAction,
       CustomSemanticsAction.getIdentifier(insert),
