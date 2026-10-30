@@ -95,15 +95,6 @@ abstract class SelectionStrings {
   /// Screenshot failure message.
   String get screenshotSaveFailed;
 
-  /// Text context menu.
-  String get contextEdit;
-
-  /// Text context menu.
-  String get contextStyle;
-
-  /// Text context menu.
-  String get contextMove;
-
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
         'lassoFreeform': lassoFreeform,
@@ -136,9 +127,6 @@ abstract class SelectionStrings {
         'screenshotSaved': screenshotSaved,
         'screenshotCopied': screenshotCopied,
         'screenshotSaveFailed': screenshotSaveFailed,
-        'contextEdit': contextEdit,
-        'contextStyle': contextStyle,
-        'contextMove': contextMove,
       };
 }
 
@@ -236,13 +224,4 @@ class SelectionStringsTr extends SelectionStrings {
 
   @override
   String get screenshotSaveFailed => 'Ekran resmi kaydedilemedi';
-
-  @override
-  String get contextEdit => 'Düzenle';
-
-  @override
-  String get contextStyle => 'Stil';
-
-  @override
-  String get contextMove => 'Taşı';
 }

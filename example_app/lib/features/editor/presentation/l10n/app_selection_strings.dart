@@ -98,13 +98,4 @@ class AppSelectionStrings extends SelectionStrings {
 
   @override
   String get screenshotSaveFailed => _l10n.editorSelectionScreenshotSaveFailed;
-
-  @override
-  String get contextEdit => _l10n.editorSelectionContextEdit;
-
-  @override
-  String get contextStyle => _l10n.editorSelectionContextStyle;
-
-  @override
-  String get contextMove => _l10n.editorSelectionContextMove;
 }

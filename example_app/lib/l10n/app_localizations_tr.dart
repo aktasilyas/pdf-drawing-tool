@@ -1095,15 +1095,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorSelectionScreenshotSaveFailed => 'Ekran resmi kaydedilemedi';
 
   @override
-  String get editorSelectionContextEdit => 'Düzenle';
-
-  @override
-  String get editorSelectionContextStyle => 'Stil';
-
-  @override
-  String get editorSelectionContextMove => 'Taşı';
-
-  @override
   String get editorDocumentNameLabel => 'Belge Adı';
 
   @override

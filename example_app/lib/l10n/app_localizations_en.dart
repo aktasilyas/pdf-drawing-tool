@@ -1114,15 +1114,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save the screenshot';
 
   @override
-  String get editorSelectionContextEdit => 'Edit';
-
-  @override
-  String get editorSelectionContextStyle => 'Style';
-
-  @override
-  String get editorSelectionContextMove => 'Move';
-
-  @override
   String get editorDocumentNameLabel => 'Document name';
 
   @override
