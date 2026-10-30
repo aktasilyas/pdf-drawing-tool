@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:drawing_core/drawing_core.dart';
@@ -39,7 +40,11 @@ typedef ThumbnailRenderer = Future<Uint8List?> Function(
 /// After a successful save the editor calls [request]; the first page is
 /// rendered and stored only when it is not the page instance recorded by
 /// [baseline] or by the last write, so edits to other pages cost nothing.
-/// Requests that arrive while a render runs are coalesced (newest wins).
+/// The render waits for [idleDelay] without new requests, or for [flush]
+/// when the editor closes, so drawing on the first page does not re-render
+/// it after every autosave. Pending requests are coalesced (newest wins).
+/// Legacy single-layer documents build new page views on every access and
+/// so always count as changed; the idle delay bounds that cost.
 /// Nothing here throws.
 class LibraryThumbnailWriter {
   LibraryThumbnailWriter({
@@ -47,6 +52,7 @@ class LibraryThumbnailWriter {
     required this.repository,
     required this.render,
     this.onWritten,
+    this.idleDelay = const Duration(seconds: 20),
   });
 
   final bool enabled;
@@ -54,10 +60,20 @@ class LibraryThumbnailWriter {
   final ThumbnailRenderer render;
   final void Function()? onWritten;
 
+  /// Quiet time after the last request before the render starts.
+  /// [Duration.zero] starts it at once.
+  final Duration idleDelay;
+
+  /// Documents whose first page is remembered; older ones are forgotten so
+  /// the pages (and their strokes) of every opened notebook are not kept.
+  static const int maxRecorded = 8;
+
   /// First page last seen (opened or written) per document id.
+  /// Insertion-ordered (map literal), so the first key is the oldest.
   final Map<String, Page> _recorded = {};
   final Map<String, DrawingDocument> _pending = {};
   Future<void>? _worker;
+  Timer? _timer;
 
   /// Completes when no render or write is in flight.
   Future<void> get idle => _worker ?? Future<void>.value();
@@ -67,7 +83,7 @@ class LibraryThumbnailWriter {
     try {
       final pages = document.pages;
       if (pages.isEmpty) return;
-      _recorded[document.id] = pages.first;
+      _record(document.id, pages.first);
     } catch (e) {
       logger.w('Thumbnail baseline failed', error: e);
     }
@@ -78,9 +94,36 @@ class LibraryThumbnailWriter {
     try {
       if (!_wants(document)) return;
       _pending[document.id] = document;
-      _worker ??= _drain();
+      _timer?.cancel();
+      if (idleDelay == Duration.zero) {
+        _start();
+      } else {
+        _timer = Timer(idleDelay, _start);
+      }
     } catch (e) {
       logger.w('Thumbnail request failed', error: e);
+    }
+  }
+
+  /// Starts pending renders now (the editor is closing) and completes when
+  /// they are stored.
+  Future<void> flush() {
+    _timer?.cancel();
+    _timer = null;
+    _start();
+    return idle;
+  }
+
+  void _start() {
+    if (_pending.isEmpty) return;
+    _worker ??= _drain();
+  }
+
+  void _record(String id, Page page) {
+    _recorded.remove(id);
+    _recorded[id] = page;
+    while (_recorded.length > maxRecorded) {
+      _recorded.remove(_recorded.keys.first);
     }
   }
 
@@ -115,7 +158,7 @@ class LibraryThumbnailWriter {
       final result = await repository().saveThumbnail(document.id, bytes);
       final saved = result.fold((_) => false, (_) => true);
       if (!saved) return;
-      _recorded[document.id] = page;
+      _record(document.id, page);
       onWritten?.call();
     } catch (e, st) {
       logger.w('Library thumbnail write failed', error: e, stackTrace: st);

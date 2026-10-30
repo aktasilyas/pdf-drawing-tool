@@ -25,6 +25,7 @@ void main() {
     save = _MockSave();
     thumbnails = _MockThumbnails();
     when(() => save(any())).thenAnswer((_) async => const Right(null));
+    when(() => thumbnails.flush()).thenAnswer((_) async {});
     container = ProviderContainer(
       overrides: [
         saveDocumentUseCaseProvider.overrideWithValue(save),

@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
+import 'package:example_app/features/documents/data/datasources/managed_file_paths.dart';
 
 /// Library thumbnail storage of [DocumentRepositoryImpl].
 mixin DocumentThumbnails {
@@ -51,7 +52,11 @@ mixin DocumentThumbnails {
       return Left(failure);
     }
     final previous = result.getOrElse(() => null);
-    if (previous != null && previous != stored) {
+    // A legacy value may point at the user's own file: only managed
+    // thumbnails are ever deleted.
+    if (previous != null &&
+        previous != stored &&
+        isManagedImagePath(previous)) {
       try {
         // A duplicate may still use the previous file; only unreferenced
         // files are deleted.

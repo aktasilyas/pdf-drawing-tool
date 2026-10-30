@@ -39,9 +39,13 @@ void main() {
         .thenAnswer((_) async => const Right('thumb.png'));
   });
 
-  LibraryThumbnailWriter writer({bool enabled = true}) =>
+  LibraryThumbnailWriter writer({
+    bool enabled = true,
+    Duration idleDelay = Duration.zero,
+  }) =>
       LibraryThumbnailWriter(
         enabled: enabled,
+        idleDelay: idleDelay,
         repository: () => repo,
         render: (page, width, height) {
           final done = Completer<Uint8List?>();
@@ -140,6 +144,45 @@ void main() {
     expect(written, 2);
   });
 
+  test('renders only after the idle delay, or at once on flush', () async {
+    final w = writer(idleDelay: const Duration(hours: 1));
+    final d1 = docWith([page(0)]);
+    final d2 = docWith([page(0)]);
+
+    w.request(d1);
+    w.request(d2);
+    await pumpEventQueue();
+    expect(renders, isEmpty);
+
+    final flushed = w.flush();
+    expect(renders, hasLength(1));
+    expect(renders.single.page, same(d2.pages.first));
+    renders.single.done.complete(png);
+    await flushed;
+
+    verify(() => repo.saveThumbnail('doc_a', png)).called(1);
+    expect(written, 1);
+  });
+
+  test('a flush with nothing pending does nothing', () async {
+    final w = writer(idleDelay: const Duration(hours: 1));
+    await w.flush();
+    expect(renders, isEmpty);
+  });
+
+  test('forgets the oldest documents beyond the limit', () async {
+    final w = writer();
+    final first = docWith([page(0)]);
+    w.baseline(first);
+    for (var i = 0; i < LibraryThumbnailWriter.maxRecorded; i++) {
+      w.baseline(DrawingDocument.emptyMultiPage('B').copyWith(id: 'doc_$i'));
+    }
+
+    // doc_a was forgotten, so its unchanged first page is rendered again.
+    w.request(first);
+    expect(renders, hasLength(1));
+  });
+
   test('a disabled writer does nothing', () async {
     final w = writer(enabled: false);
     w.baseline(docWith([page(0)]));
@@ -154,6 +197,7 @@ void main() {
       enabled: true,
       repository: () => repo,
       render: (page, width, height) async => throw StateError('boom'),
+      idleDelay: Duration.zero,
     );
     w.request(docWith([page(0)]));
     await w.idle;

@@ -41,6 +41,10 @@ session: every step is verified in CI. No codegen (DI is registered by hand in
    (`baseline`, `request`, coalescing, never throws), `libraryThumbnailWriterProvider`
    (disabled with the passthrough resolver; invalidates library lists on write).
 4. **Hooks**: `startEditorSession` → `baseline(document)`; `_write` → `request(document)` after a successful save.
+   The render waits for 20 s without new requests, or runs when the editor
+   closes (`closeEditorSession` → `flush()`, not awaited), so drawing on
+   page 0 does not re-render after every autosave (review finding). The
+   writer remembers the first page of at most 8 documents.
 5. **Tile**: `LibraryPageThumbnail` shows `_InkThumbnail` (ResizeImage at tile
    width × DPR, falls back to today's preview on error) when `thumbnailPath` is set.
    `libraryThumbnailImageProvider` resolves stored paths; tests override it.

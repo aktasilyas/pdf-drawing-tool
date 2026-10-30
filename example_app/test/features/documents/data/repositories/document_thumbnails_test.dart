@@ -71,6 +71,18 @@ void main() {
     expect(fileOf(second).existsSync(), isTrue);
   });
 
+  test('a previous path outside the managed files is never deleted',
+      () async {
+    final doc = await create('A');
+    final own = File('${dir.path}/own.png')..writeAsBytesSync(png);
+    final row = await fx.documentDs.getDocument(doc.id);
+    await fx.documentDs.updateDocument(row.copyWith(thumbnailPath: own.path));
+
+    await save(doc.id);
+
+    expect(own.existsSync(), isTrue);
+  });
+
   test('a file still used by a duplicate is kept', () async {
     final doc = await create('A');
     final first = await save(doc.id);
