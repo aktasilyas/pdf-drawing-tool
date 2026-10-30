@@ -16,7 +16,7 @@ Future<void> _pump(WidgetTester tester, Widget chip) {
 }
 
 AppLocalizations _l10n(WidgetTester tester) =>
-    AppLocalizations.of(tester.element(find.byType(AppChip)))!;
+    AppLocalizations.of(tester.element(find.byType(AppChip)));
 
 void main() {
   for (final selected in [false, true]) {
