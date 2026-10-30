@@ -50,8 +50,7 @@ Offset stickyNoteMenuOrigin({
   double margin = ChromeSpacing.sm,
 }) {
   final maxLeft = math.max(margin, bounds.width - menuSize.width - margin);
-  final left =
-      (noteRect.center.dx - menuSize.width / 2).clamp(margin, maxLeft);
+  final left = (noteRect.center.dx - menuSize.width / 2).clamp(margin, maxLeft);
   var top = noteRect.top - gap - menuSize.height;
   if (top < margin) top = noteRect.bottom + gap;
   final maxTop = math.max(margin, bounds.height - menuSize.height - margin);
@@ -109,8 +108,7 @@ class _StickyNoteMenuLayout extends SingleChildLayoutDelegate {
       constraints.loosen();
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) =>
-      stickyNoteMenuOrigin(
+  Offset getPositionForChild(Size size, Size childSize) => stickyNoteMenuOrigin(
         noteRect: noteRect,
         menuSize: childSize,
         bounds: size,
