@@ -26,6 +26,15 @@
       }
     }
   },
+  "commonRemoveItem": "Remove {label}",
+  "@commonRemoveItem": {
+    "description": "Tooltip and screen-reader label of a chip's delete button.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Settings screen title."

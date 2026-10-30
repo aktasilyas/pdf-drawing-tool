@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Error: {error}'**
   String commonErrorDetail(String error);
 
+  /// Tooltip and screen-reader label of a chip's delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {label}'**
+  String commonRemoveItem(String label);
+
   /// Settings screen title.
   ///
   /// In en, this message translates to:
