@@ -1,3 +1,4 @@
+import 'package:drawing_ui/drawing_ui.dart' show FloatingExportProgress;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_he
 import 'package:example_app/features/documents/presentation/widgets/documents_menus.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_menus.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_memory_pressure_scope.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/premium/premium.dart';
@@ -48,7 +50,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
 
-    return _buildScaffold(isPhone);
+    return LibraryMemoryPressureScope(child: _buildScaffold(isPhone));
   }
 
   Widget _buildScaffold(bool isPhone) {
@@ -63,8 +65,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               ),
             )
           : null,
-      body: SafeArea(
-        child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          SafeArea(
+            child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
+          ),
+          // Progress / result card of "Export as PDF" from the document menu.
+          const FloatingExportProgress(),
+        ],
       ),
     );
   }

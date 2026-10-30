@@ -180,6 +180,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryErrorMoveDocument => 'Belge taşınamadı';
 
   @override
+  String get libraryErrorExportDocument => 'Belge PDF olarak dışa aktarılamadı';
+
+  @override
+  String get libraryExportAsPdf => 'PDF olarak dışa aktar';
+
+  @override
   String get libraryErrorToggleFavorite => 'Favori durumu değiştirilemedi';
 
   @override

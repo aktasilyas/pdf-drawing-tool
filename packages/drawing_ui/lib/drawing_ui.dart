@@ -31,6 +31,8 @@ export 'src/screens/drawing_screen_layout.dart';
 
 // Canvas
 export 'src/canvas/drawing_canvas.dart';
+export 'src/canvas/editor_memory_pressure_observer.dart'
+    show EditorMemoryPressureObserver;
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
 export 'src/canvas/canvas_color_scheme.dart';
@@ -88,7 +90,8 @@ export 'src/panels/highlighter_settings_panel.dart';
 export 'src/panels/eraser_settings_panel.dart';
 export 'src/panels/shapes_settings_panel.dart';
 export 'src/panels/sticker_panel.dart';
-export 'src/panels/export_panel.dart' show ExportPanel;
+export 'src/panels/export_panel.dart'
+    show ExportPanel, PDFExportRunner, pdfExportRunnerProvider;
 export 'src/panels/page_options_panel.dart' show PageOptionsPanel;
 export 'src/panels/sticky_note_panel.dart';
 export 'src/panels/text_settings_panel.dart';

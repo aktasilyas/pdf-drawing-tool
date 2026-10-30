@@ -63,46 +63,81 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
   /// first dependency pass.
   int? _width;
 
+  /// Preview key being rendered; at most one render is in flight per tile.
+  String? _inFlight;
+
+  /// Preview key this tile pins in the cache (see [LibraryPreviewPins]).
+  String? _pinned;
+  late final LibraryPreviewPins _pins = ref.read(libraryPreviewPinsProvider);
+
+  String get _key => libraryPreviewKey(widget.cacheKey, _width!);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Re-render when the DPR changes (window moved to another display).
     final width = libraryPreviewWidth(MediaQuery.devicePixelRatioOf(context));
-    if (width != _width) _scheduleRender(width);
+    if (width != _width) {
+      _width = width;
+      _renderFailed = false;
+    }
   }
 
   @override
   void didUpdateWidget(_PdfThumbnail oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cacheKey != widget.cacheKey) _scheduleRender(_width!);
+    if (oldWidget.cacheKey != widget.cacheKey) _renderFailed = false;
   }
 
-  void _scheduleRender(int width) {
-    _width = width;
-    _renderFailed = false;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _triggerRender());
+  @override
+  void dispose() {
+    final pinned = _pinned;
+    if (pinned != null) _pins.unpin(pinned);
+    super.dispose();
   }
 
-  Future<void> _triggerRender() async {
-    if (!mounted) return;
-    final container = ProviderScope.containerOf(context);
+  void _pin(String key) {
+    if (_pinned == key) return;
+    final old = _pinned;
+    if (old != null) _pins.unpin(old);
+    _pins.pin(key);
+    _pinned = key;
+  }
+
+  /// Renders [key] after this frame unless that render is already running.
+  /// Called whenever the preview is missing from the cache: first build, a
+  /// new page or DPR, or the cache was cleared (memory pressure).
+  void _requestRender(String key) {
+    if (_inFlight == key) return;
+    _inFlight = key;
     final cacheKey = widget.cacheKey;
     final width = _width!;
-    final result = await renderLibraryPreview(
-      container,
-      cacheKey,
-      width: width,
-    );
-    if (!mounted || cacheKey != widget.cacheKey || width != _width) return;
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _render(key, cacheKey, width));
+  }
+
+  Future<void> _render(String key, String cacheKey, int width) async {
+    if (!mounted) return;
+    final container = ProviderScope.containerOf(context, listen: false);
+    // A throwing rasteriser counts as a failed render (PDF icon).
+    final result = await renderLibraryPreview(container, cacheKey, width: width)
+        .catchError((Object _) => null);
+    if (_inFlight == key) _inFlight = null;
+    if (!mounted) return;
+    if (key != _key) return;
     if (result == null) {
       setState(() => _renderFailed = true);
+    } else if (!ref.read(pdfLibraryPreviewCacheProvider).containsKey(key)) {
+      // Cleared while this render was finishing: build again to re-request.
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cache = ref.watch(pdfLibraryPreviewCacheProvider);
-    final cached = cache[libraryPreviewKey(widget.cacheKey, _width!)];
+    final key = _key;
+    _pin(key);
+    final cached = ref.watch(pdfLibraryPreviewCacheProvider)[key];
 
     if (cached != null) {
       return Image.memory(
@@ -115,6 +150,7 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
     }
 
     if (_renderFailed) return _buildPdfIcon(context);
+    _requestRender(key);
     return const _LoadingIndicator();
   }
 

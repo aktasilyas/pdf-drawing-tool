@@ -15,14 +15,20 @@ void showMenuSheet(
       borderRadius:
           BorderRadius.vertical(top: Radius.circular(AppRadius.bottomSheet)),
     ),
+    // Hug the content instead of the default 9/16-height cap, which cannot
+    // hold every action on a landscape tablet; scroll if it still does not fit.
+    isScrollControlled: true,
+    useSafeArea: true,
     builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: AppSpacing.md),
-          ...children(ctx),
-          const SizedBox(height: AppSpacing.sm),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AppSpacing.md),
+            ...children(ctx),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
       ),
     ),
   );
