@@ -7,7 +7,8 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
-import 'package:drawing_ui/src/services/image_import_storage.dart';
+import 'package:drawing_ui/src/l10n/error_strings.dart';
+import 'package:drawing_ui/src/services/image_insert.dart';
 
 /// Longest edge (px) of an inserted photo; the picker downscales to this
 /// before the file is stored, keeping aspect ratio and EXIF orientation.
@@ -70,32 +71,49 @@ class ImagePanel extends ConsumerWidget {
     WidgetRef ref,
     ImageSource source,
   ) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: source,
-      imageQuality: 85,
-      maxWidth: maxStoredImageEdge,
-      maxHeight: maxStoredImageEdge,
+    final strings = context.drawingStrings;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final paths = ref.read(pdfPathResolverProvider);
+    final placement = ref.read(imagePlacementProvider.notifier);
+    final panel = ref.read(activePanelProvider.notifier);
+
+    final result = await insertPickedImage(
+      () async => (await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: maxStoredImageEdge,
+        maxHeight: maxStoredImageEdge,
+      ))
+          ?.path,
+      documentsRoot: () async =>
+          (await getApplicationDocumentsDirectory()).path,
+      paths: paths,
     );
-    if (picked == null) return;
+    if (result == null) return;
 
-    // Copy into the app container; persist the container-relative path.
-    final appDir = await getApplicationDocumentsDirectory();
-    final stored = await storeImportedImage(
-      picked.path,
-      documentsRoot: appDir.path,
-      paths: ref.read(pdfPathResolverProvider),
-    );
-
-    // Enter placement mode
-    ref.read(imagePlacementProvider.notifier).selectImagePath(stored);
-
-    // Close the panel
-    if (context.mounted) {
-      ref.read(activePanelProvider.notifier).state = null;
+    final error = result.error;
+    if (error != null) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(imageInsertMessage(strings.errors, error))),
+      );
+      return;
     }
+
+    // Enter placement mode and close the panel.
+    placement.selectImagePath(result.storedPath!);
+    if (context.mounted) panel.state = null;
   }
 }
+
+/// The message for a failed image insertion.
+String imageInsertMessage(ErrorStrings strings, ImageInsertError e) =>
+    switch (e) {
+      ImageInsertError.storageFull => strings.exportStorageFull,
+      ImageInsertError.cannotWrite => strings.exportCannotWrite,
+      ImageInsertError.pickerFailed ||
+      ImageInsertError.unreadable =>
+        strings.imageReadFailed,
+    };
 
 /// A list-tile style button for image source selection.
 class _ImageSourceTile extends StatelessWidget {
