@@ -59,6 +59,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String commonRemoveItem(String label) {
+    return 'Remove $label';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

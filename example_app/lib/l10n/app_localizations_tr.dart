@@ -59,6 +59,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String commonRemoveItem(String label) {
+    return 'Kaldır: $label';
+  }
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override
