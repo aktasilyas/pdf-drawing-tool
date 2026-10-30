@@ -16,6 +16,7 @@ import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/core/clipboard/clipboard_file_refs.dart';
 import 'package:example_app/core/database/app_database.dart';
 import 'package:example_app/core/database/local_transaction_runner.dart';
 import 'package:example_app/core/utils/logger.dart';
@@ -46,6 +47,9 @@ Future<void> configureDependencies() async {
   // Imported PDFs are stored relative to the app documents directory.
   final docsDir = await getApplicationDocumentsDirectory();
   getIt.registerSingleton<PdfPathResolver>(PdfPathResolver(docsDir.path));
+
+  // Paths the editor clipboards still need; bound at the app root.
+  getIt.registerLazySingleton<ClipboardFileRefs>(ClipboardFileRefs.new);
 
   // Manual registrations
   _registerRepositories();
@@ -91,6 +95,7 @@ void _registerRepositories() {
     () => DocumentLocalDatasourceImpl(
       getIt(),
       pdfPaths: getIt<PdfPathResolver>(),
+      clipboard: getIt<ClipboardFileRefs>(),
     ),
   );
 

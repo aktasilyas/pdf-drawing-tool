@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/bootstrap/app_bootstrap.dart';
 import 'package:example_app/core/bootstrap/app_overrides.dart';
+import 'package:example_app/core/bootstrap/clipboard_file_refs_binding.dart';
 import 'package:example_app/core/bootstrap/orphan_file_sweep_startup.dart';
 import 'package:example_app/core/bootstrap/startup_gate.dart';
 import 'package:example_app/core/core.dart';
@@ -40,7 +41,10 @@ Future<void> main() async {
           crashReporter: result.crashReporter,
           pdfPaths: getIt<PdfPathResolver>(),
         ),
-        child: const ElyaNotesApp(),
+        child: ClipboardFileRefsBinding(
+          refs: getIt<ClipboardFileRefs>(),
+          child: const ElyaNotesApp(),
+        ),
       ),
     ),
   );

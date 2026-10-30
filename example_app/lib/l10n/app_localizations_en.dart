@@ -1347,6 +1347,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPagePagePasted => 'Page pasted';
 
   @override
+  String get editorPagePasteFilesMissing =>
+      'Can\'t paste: the copied files no longer exist';
+
+  @override
   String get editorPagePageDuplicated => 'Page duplicated';
 
   @override

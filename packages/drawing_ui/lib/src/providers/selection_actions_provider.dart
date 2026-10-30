@@ -197,7 +197,8 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: ElyanotesIcons.paste,
       kind: SelectionActionKind.paste,
       isEnabled: hasClipboard,
-      onExecute: hasClipboard ? () => pasteFromClipboard(ref) : null,
+      onExecute:
+          hasClipboard ? () => pasteFromClipboard(ref, context: context) : null,
     ),
     SelectionAction(
       id: 'overflow_ai',

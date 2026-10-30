@@ -17,9 +17,14 @@ class LibraryFixture {
   LibraryFixture([
     QueryExecutor? executor,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+    ClipboardFileRefs? clipboard,
   ]) : db = AppDatabase(executor ?? NativeDatabase.memory()) {
     final runner = DriftTransactionRunner(db);
-    documentDs = DocumentLocalDatasourceImpl(db, pdfPaths: pdfPaths);
+    documentDs = DocumentLocalDatasourceImpl(
+      db,
+      pdfPaths: pdfPaths,
+      clipboard: clipboard,
+    );
     folderDs = FolderLocalDatasourceImpl(db);
     trashDs = TrashedPageLocalDatasourceImpl(db);
     documents = DocumentRepositoryImpl(documentDs, folderDs, runner);
