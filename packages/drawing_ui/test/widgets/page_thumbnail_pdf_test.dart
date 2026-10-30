@@ -46,6 +46,20 @@ Future<int> _darkPixels(Uint8List png) async {
   return dark;
 }
 
+/// Lets the thumbnail render finish. Each real async step (file check,
+/// picture.toImage, PNG encode) completes in real time but resumes only when
+/// the fake-async zone flushes its microtasks, so alternate the two.
+Future<void> _settle(
+    WidgetTester tester, ThumbnailCache cache, Page page) async {
+  final key = ThumbnailGenerator.getCacheKey(page);
+  for (var i = 0; i < 100 && cache.get(key) == null; i++) {
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+  await tester.pump();
+}
+
 void main() {
   testWidgets(
       'a PDF page thumbnail is the rasterizer render with its ink, '
@@ -75,9 +89,7 @@ void main() {
     expect(find.byType(PdfThumbnailPlaceholder), findsOneWidget);
     expect(find.byType(Image), findsNothing);
 
-    await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 500)));
-    await tester.pump();
+    await _settle(tester, cache, page);
 
     final generated = cache.get(ThumbnailGenerator.getCacheKey(page));
     expect(generated, isNotNull, reason: 'ThumbnailGenerator rendered it');
@@ -106,9 +118,7 @@ void main() {
         ));
 
     await pumpPage();
-    await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 500)));
-    await tester.pump();
+    await _settle(tester, cache, page);
     expect(cache.get(ThumbnailGenerator.getCacheKey(page)), isNotNull);
 
     page = page.copyWith(
@@ -117,9 +127,7 @@ void main() {
     await tester.pump();
     expect(find.byType(PdfThumbnailPlaceholder), findsOneWidget);
 
-    await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 500)));
-    await tester.pump();
+    await _settle(tester, cache, page);
     expect(cache.get(ThumbnailGenerator.getCacheKey(page)), isNotNull);
     expect(find.byType(Image), findsOneWidget);
   });
