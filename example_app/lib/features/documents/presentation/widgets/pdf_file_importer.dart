@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:drawing_ui/drawing_ui.dart';
-import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_import_commit.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_import_feedback.dart';
+import 'package:example_app/features/documents/presentation/widgets/pdf_import_loading_dialog.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 /// Title for a document created from a PDF file name: only a trailing `.pdf`
@@ -19,11 +19,17 @@ String pdfTitleFromFileName(String fileName) =>
 
 /// Imports the PDF at [path] as a new document in the current folder and opens
 /// it in the editor. Shows its own progress dialog and error messages.
+///
+/// A PDF over the page limit asks [chooseRange] which pages to import (the
+/// range sheet by default); cancelling creates nothing and shows no error.
+/// [createService] makes a fresh import service per attempt.
 Future<void> importPdfFile(
   BuildContext context, {
   required String path,
   required String name,
   required int size,
+  PDFImportService Function()? createService,
+  ChoosePdfPageRange? chooseRange,
 }) async {
   final l10n = context.l10n;
   // Dosya boyutu kontrolü (max 200MB)
@@ -40,56 +46,43 @@ Future<void> importPdfFile(
     return;
   }
 
-  // 2. Loading göster
   if (!context.mounted) return;
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => AlertDialog(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          Text(
-            l10n.libraryPdfOpening,
-            style: TextStyle(color: Theme.of(ctx).colorScheme.onSurface),
-          ),
-        ],
-      ),
-    ),
-  );
+  final loading = PdfImportLoadingDialog(context, l10n.libraryPdfOpening)
+    ..show();
 
   // Save references before async gap
   final messenger = ScaffoldMessenger.of(context);
   final router = GoRouter.of(context);
   final strings = context.drawingStrings;
+  final pdfPaths =
+      ProviderScope.containerOf(context).read(pdfPathResolverProvider);
 
-  // Track dialog state to prevent double-pop crash
-  bool isDialogOpen = true;
-  void closeLoadingDialog() {
-    if (isDialogOpen && context.mounted) {
-      isDialogOpen = false;
-      Navigator.of(context, rootNavigator: true).pop();
-    }
-  }
-
-  PDFImportService? importService;
   try {
-    // PDF Import Service kullan (dosya yolu ile - RAM tasarrufu)
-    final pdfPaths =
-        ProviderScope.containerOf(context).read(pdfPathResolverProvider);
-    importService = PDFImportService(pdfPaths: pdfPaths);
-    final importResult = await importService.importFromFile(
-      filePath: path,
-      config: PDFImportConfig.all(),
+    final importResult = await importPdfWithPageLimit(
+      importWith: (config) async {
+        final service =
+            createService?.call() ?? PDFImportService(pdfPaths: pdfPaths);
+        try {
+          return await service.importFromFile(filePath: path, config: config);
+        } finally {
+          service.dispose();
+        }
+      },
+      chooseRange: (count, max) async {
+        // The sheet and the progress dialog never overlap.
+        loading.close();
+        if (!context.mounted) return null;
+        final range = await (chooseRange ??
+                (n, m) =>
+                    showPdfPageRangeSheet(context, pageCount: n, maxPages: m))(
+            count, max);
+        if (range != null) loading.show();
+        return range;
+      },
     );
     // Loading dialog kapat
-    closeLoadingDialog();
+    loading.close();
+    if (importResult == null) return; // Cancelled: nothing was created.
 
     if (!importResult.isSuccess) {
       messenger.showSnackBar(
@@ -162,8 +155,7 @@ Future<void> importPdfFile(
       router.push(RouteNames.editorPath(documentId));
     }
   } catch (e) {
-    // Loading dialog'u kapat (sadece henüz kapatılmadıysa)
-    closeLoadingDialog();
+    loading.close();
 
     // Hata mesajı göster
     messenger.showSnackBar(
@@ -173,7 +165,5 @@ Future<void> importPdfFile(
         behavior: SnackBarBehavior.floating,
       ),
     );
-  } finally {
-    importService?.dispose();
   }
 }

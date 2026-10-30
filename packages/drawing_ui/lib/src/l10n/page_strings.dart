@@ -1,3 +1,5 @@
+import '../services/pdf_page_range.dart' show PdfPageRangeError;
+
 /// User-facing copy of the page options menu, page actions and the go-to dialog.
 ///
 /// Every getter and method must also be listed in [toMap]; the drift tests
@@ -42,6 +44,19 @@ abstract class PageStrings {
   String get goToPage;
   String get go;
 
+  /// Title of the page range sheet for a PDF with [count] pages.
+  String pdfRangeTitle(int count);
+  String pdfRangeLimitHint(int max);
+  String pdfRangeImportFirst(int max);
+  String get pdfRangeChoose;
+  String get pdfRangeStart;
+  String get pdfRangeEnd;
+  String get pdfRangeImport;
+  String get pdfRangeCancel;
+
+  /// Error shown under the range fields for [error].
+  String pdfRangeError(PdfPageRangeError error, int total, int max);
+
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
         'rename': rename,
@@ -76,6 +91,16 @@ abstract class PageStrings {
         'backgroundReplaced': backgroundReplaced,
         'goToPage': goToPage,
         'go': go,
+        'pdfRangeTitle': pdfRangeTitle(640),
+        'pdfRangeLimitHint': pdfRangeLimitHint(500),
+        'pdfRangeImportFirst': pdfRangeImportFirst(500),
+        'pdfRangeChoose': pdfRangeChoose,
+        'pdfRangeStart': pdfRangeStart,
+        'pdfRangeEnd': pdfRangeEnd,
+        'pdfRangeImport': pdfRangeImport,
+        'pdfRangeCancel': pdfRangeCancel,
+        for (final e in PdfPageRangeError.values)
+          'pdfRangeError.${e.name}': pdfRangeError(e, 640, 500),
       };
 }
 
@@ -180,4 +205,38 @@ class PageStringsTr extends PageStrings {
 
   @override
   String get go => 'Git';
+
+  @override
+  String pdfRangeTitle(int count) => 'Bu PDF $count sayfa';
+
+  @override
+  String pdfRangeLimitHint(int max) =>
+      'Bir seferde en fazla $max sayfa içe aktarılabilir.';
+
+  @override
+  String pdfRangeImportFirst(int max) => 'İlk $max sayfayı içe aktar';
+
+  @override
+  String get pdfRangeChoose => 'Aralık seç';
+
+  @override
+  String get pdfRangeStart => 'Başlangıç';
+
+  @override
+  String get pdfRangeEnd => 'Bitiş';
+
+  @override
+  String get pdfRangeImport => 'İçe aktar';
+
+  @override
+  String get pdfRangeCancel => 'Vazgeç';
+
+  @override
+  String pdfRangeError(PdfPageRangeError error, int total, int max) =>
+      switch (error) {
+        PdfPageRangeError.startBelowOne => 'Başlangıç en az 1 olmalı',
+        PdfPageRangeError.startAfterEnd => 'Başlangıç, bitişten büyük olamaz',
+        PdfPageRangeError.endAfterTotal => 'Bitiş $total sayfadan büyük olamaz',
+        PdfPageRangeError.tooLong => 'En fazla $max sayfa seçilebilir',
+      };
 }

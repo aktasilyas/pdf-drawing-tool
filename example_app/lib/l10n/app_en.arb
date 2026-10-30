@@ -908,6 +908,53 @@
     }
   },
   "editorPdfRelinkFailed": "Couldn't re-link the PDF",
+  "editorPdfRangeTitle": "This PDF has {count} pages",
+  "@editorPdfRangeTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeLimitHint": "You can import up to {max} pages at a time.",
+  "@editorPdfRangeLimitHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeImportFirst": "Import first {max} pages",
+  "@editorPdfRangeImportFirst": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeChoose": "Choose range",
+  "editorPdfRangeStart": "Start",
+  "editorPdfRangeEnd": "End",
+  "editorPdfRangeImport": "Import",
+  "editorPdfRangeCancel": "Cancel",
+  "editorPdfRangeErrorStartBelowOne": "Start must be at least 1",
+  "editorPdfRangeErrorStartAfterEnd": "Start can't be after end",
+  "editorPdfRangeErrorEndAfterTotal": "End can't be past page {total}",
+  "@editorPdfRangeErrorEndAfterTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeErrorTooLong": "You can select up to {max} pages",
+  "@editorPdfRangeErrorTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "editorErrorPdfLoadFailed": "Couldn't load PDF",
   "editorErrorPdfPagesSkipped": "{count, plural, =1{1 page could not be read and was skipped} other{{count} pages could not be read and were skipped}}",
   "@editorErrorPdfPagesSkipped": {

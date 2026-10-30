@@ -1760,6 +1760,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPdfRelinkFailed => 'Couldn\'t re-link the PDF';
 
   @override
+  String editorPdfRangeTitle(int count) {
+    return 'This PDF has $count pages';
+  }
+
+  @override
+  String editorPdfRangeLimitHint(int max) {
+    return 'You can import up to $max pages at a time.';
+  }
+
+  @override
+  String editorPdfRangeImportFirst(int max) {
+    return 'Import first $max pages';
+  }
+
+  @override
+  String get editorPdfRangeChoose => 'Choose range';
+
+  @override
+  String get editorPdfRangeStart => 'Start';
+
+  @override
+  String get editorPdfRangeEnd => 'End';
+
+  @override
+  String get editorPdfRangeImport => 'Import';
+
+  @override
+  String get editorPdfRangeCancel => 'Cancel';
+
+  @override
+  String get editorPdfRangeErrorStartBelowOne => 'Start must be at least 1';
+
+  @override
+  String get editorPdfRangeErrorStartAfterEnd => 'Start can\'t be after end';
+
+  @override
+  String editorPdfRangeErrorEndAfterTotal(int total) {
+    return 'End can\'t be past page $total';
+  }
+
+  @override
+  String editorPdfRangeErrorTooLong(int max) {
+    return 'You can select up to $max pages';
+  }
+
+  @override
   String get editorErrorPdfLoadFailed => 'Couldn\'t load PDF';
 
   @override

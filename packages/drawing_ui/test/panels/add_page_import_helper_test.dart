@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/l10n/error_strings.dart';
 import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
+import 'package:drawing_ui/src/services/pdf_page_range.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
@@ -51,7 +52,105 @@ Page _pdfPage(int pdfPage) => Page.create(
       ),
     );
 
+/// 640-page PDF: `all()` is too long, `pageRange(501, 640)` has 140 pages.
+class _BigPdfService extends Fake implements PDFImportService {
+  _BigPdfService(this.configs);
+
+  final List<PDFImportConfig> configs;
+
+  @override
+  Future<PDFImportServiceResult> importFromFile({
+    required String filePath,
+    required PDFImportConfig config,
+  }) async {
+    configs.add(config);
+    if (config.pageSelection == PDFPageSelection.all) {
+      return PDFImportServiceResult.error(
+        const PdfImportFailure(
+          PdfImportError.tooManyPages,
+          pageCount: 640,
+          maxPages: 500,
+        ),
+      );
+    }
+    return PDFImportServiceResult.success(
+      [for (var p = config.startPage!; p <= config.endPage!; p++) _pdfPage(p)],
+    );
+  }
+
+  @override
+  void dispose() {}
+}
+
 void main() {
+  group('page range for PDFs over the limit', () {
+    test('inserts the chosen range at the insertion index (AC4)', () async {
+      final configs = <PDFImportConfig>[];
+      final pages = await importPdfAsPages(
+        'big.pdf',
+        3,
+        createService: () => _BigPdfService(configs),
+        chooseRange: (count, max) async {
+          expect([count, max], [640, 500]);
+          return const PdfPageRange(501, 640);
+        },
+      );
+      expect(pages, hasLength(140));
+      expect(pages.first.index, 3);
+      expect(pages.last.index, 142);
+      expect(configs, hasLength(2));
+      expect([configs.last.startPage, configs.last.endPage], [501, 640]);
+    });
+
+    test('cancelling the choice imports nothing and shows no error', () async {
+      PdfImportFailure? failure;
+      final pages = await importPdfAsPages(
+        'big.pdf',
+        0,
+        onError: (f) => failure = f,
+        createService: () => _BigPdfService([]),
+        chooseRange: (_, __) async => null,
+      );
+      expect(pages, isEmpty);
+      expect(failure, isNull);
+    });
+
+    test('without chooseRange the failure is reported as today', () async {
+      PdfImportFailure? failure;
+      final pages = await importPdfAsPages(
+        'big.pdf',
+        0,
+        onError: (f) => failure = f,
+        createService: () => _BigPdfService([]),
+      );
+      expect(pages, isEmpty);
+      expect(failure!.error, PdfImportError.tooManyPages);
+    });
+
+    test('a small PDF imports in one call and never asks (AC5)', () async {
+      var asked = false;
+      var calls = 0;
+      final service = _FakeImportService(
+        PDFImportServiceResult.success([_pdfPage(1), _pdfPage(2)]),
+      );
+      final pages = await importPdfAsPages(
+        'small.pdf',
+        0,
+        createService: () {
+          calls++;
+          return service;
+        },
+        chooseRange: (_, __) async {
+          asked = true;
+          return null;
+        },
+      );
+      expect(pages, hasLength(2));
+      expect(calls, 1);
+      expect(asked, isFalse);
+    });
+  });
+
   test('reports the skipped page count and re-indexes the pages', () async {
     final service = _FakeImportService(
       PDFImportServiceResult.success(

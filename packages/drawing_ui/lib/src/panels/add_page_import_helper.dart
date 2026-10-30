@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:drawing_ui/src/l10n/error_strings.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
+import 'package:drawing_ui/src/services/pdf_import_with_limit.dart';
+import 'package:drawing_ui/src/services/pdf_page_range.dart';
 import 'package:drawing_ui/src/services/picked_file_cleanup.dart';
 
 /// Signature of [pickAndImportFile], so tests can supply a fake importer.
@@ -17,6 +19,7 @@ typedef PageFileImporter = Future<List<Page>> Function({
   void Function(int count)? onPagesSkipped,
   void Function(ImagePageImportError error)? onImageError,
   PdfPathResolver pdfPaths,
+  ChoosePdfPageRange? chooseRange,
 });
 
 /// Importer used by the "Add page" panel; [pickAndImportFile] by default.
@@ -35,6 +38,7 @@ Future<List<Page>> pickAndImportFile({
   void Function(int count)? onPagesSkipped,
   void Function(ImagePageImportError error)? onImageError,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  ChoosePdfPageRange? chooseRange,
 }) async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -51,6 +55,7 @@ Future<List<Page>> pickAndImportFile({
     onPagesSkipped: onPagesSkipped,
     onImageError: onImageError,
     pdfPaths: pdfPaths,
+    chooseRange: chooseRange,
   );
 }
 
@@ -65,6 +70,7 @@ Future<List<Page>> importPickedFile(
   void Function(ImagePageImportError error)? onImageError,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   PDFImportService Function()? createService,
+  ChoosePdfPageRange? chooseRange,
   String? documentsRoot,
   PickedFileCleanup cleanup = deletePickedFileCopy,
 }) =>
@@ -78,6 +84,7 @@ Future<List<Page>> importPickedFile(
             insertIndex,
             onError: onError,
             onPagesSkipped: onPagesSkipped,
+            chooseRange: chooseRange,
             createService:
                 createService ?? () => PDFImportService(pdfPaths: pdfPaths),
           );
@@ -96,21 +103,30 @@ Future<List<Page>> importPickedFile(
 /// Imports the PDF at [path] as pages numbered from [insertIndex].
 ///
 /// Failures go to [onError] and give an empty list. Pages that could not be
-/// read are left out and their count goes to [onPagesSkipped].
+/// read are left out and their count goes to [onPagesSkipped]. A PDF over the
+/// page limit asks [chooseRange] for a range; cancelling gives an empty list
+/// without an error. Without [chooseRange] it fails as `tooManyPages`.
 Future<List<Page>> importPdfAsPages(
   String path,
   int insertIndex, {
   void Function(PdfImportFailure failure)? onError,
   void Function(int count)? onPagesSkipped,
   PDFImportService Function()? createService,
+  ChoosePdfPageRange? chooseRange,
 }) async {
-  PDFImportService? svc;
   try {
-    svc = createService?.call() ?? PDFImportService();
-    final r = await svc.importFromFile(
-      filePath: path,
-      config: PDFImportConfig.all(),
+    final r = await importPdfWithPageLimit(
+      importWith: (config) async {
+        final svc = createService?.call() ?? PDFImportService();
+        try {
+          return await svc.importFromFile(filePath: path, config: config);
+        } finally {
+          svc.dispose();
+        }
+      },
+      chooseRange: chooseRange,
     );
+    if (r == null) return [];
     if (!r.isSuccess || r.pages.isEmpty) {
       onError?.call(
         r.failure ?? const PdfImportFailure(PdfImportError.openFailed),
@@ -125,8 +141,6 @@ Future<List<Page>> importPdfAsPages(
   } catch (e) {
     onError?.call(pdfImportFailureFor(e));
     return [];
-  } finally {
-    svc?.dispose();
   }
 }
 
