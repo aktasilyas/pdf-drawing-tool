@@ -66,8 +66,8 @@ class PdfDocumentPool {
     }
 
     // Move (or add) the document to the most recently used end.
-    final document = _documents.remove(filePath) ??
-        _PooledDocument(_opener(filePath));
+    final document =
+        _documents.remove(filePath) ?? _PooledDocument(_opener(filePath));
     _documents[filePath] = document;
     _evictOverflow();
 
