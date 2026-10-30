@@ -159,8 +159,7 @@ void main() {
       await _expectGuidelines(t);
       expect(
         t.getSemantics(find.bySemanticsLabel(_label(_red))),
-        containsSemantics(
-            isButton: true, isSelected: true, hasTapAction: true),
+        containsSemantics(isButton: true, isSelected: true, hasTapAction: true),
       );
       expect(
         t.getSemantics(find.bySemanticsLabel(_label(_blue))),
