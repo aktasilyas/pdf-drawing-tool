@@ -83,7 +83,7 @@ mixin _CanvasOverlays
       // ───────────────────────────────────────────────────────────────────
       // Eraser Cursor Overlay (using screen coordinates)
       // ───────────────────────────────────────────────────────────────────
-      if (isEraserTool)
+      if (isEraserTool || eraserCursorPosition != null)
         EraserCursorWidget(
           cursorPosition: eraserCursorPosition ?? Offset.zero,
           isVisible: eraserCursorPosition != null,

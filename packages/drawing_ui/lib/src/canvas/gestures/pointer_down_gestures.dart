@@ -68,6 +68,12 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
       return;
     }
 
+    // Eraser end of a stylus erases whatever tool is selected.
+    if (InputMode.isEraserEnd(event.kind)) {
+      handleEraserDown(event);
+      return;
+    }
+
     // Get current tool type
     final toolType = ref.read(currentToolProvider);
 
