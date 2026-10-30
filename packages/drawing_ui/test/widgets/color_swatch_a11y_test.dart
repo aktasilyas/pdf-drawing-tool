@@ -37,8 +37,7 @@ Future<void> _expectGuidelines(WidgetTester t) async {
 
 void main() {
   group('ColorSwatchTarget', () {
-    testWidgets('48dp target, button + selected + colour label',
-        (t) async {
+    testWidgets('48dp target, button + selected + colour label', (t) async {
       final handle = t.ensureSemantics();
       var taps = 0;
       await _pump(

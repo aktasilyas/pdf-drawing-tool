@@ -211,32 +211,32 @@ class _MoreButton extends StatelessWidget {
   Widget _moreChip(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: colorScheme.chipSurface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.chipSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PhosphorIcon(
+            ElyanotesIcons.palette,
+            size: 12,
+            color: colorScheme.primary,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(
-              ElyanotesIcons.palette,
-              size: 12,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: 3),
-            Text(
-              context.drawingStrings.selection.more,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: colorScheme.primary,
-                  ),
-            ),
-          ],
-        ),
+          const SizedBox(width: 3),
+          Text(
+            context.drawingStrings.selection.more,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  color: colorScheme.primary,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }
