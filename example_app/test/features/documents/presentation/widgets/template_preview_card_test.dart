@@ -90,8 +90,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('selected border and caption use the palette accent',
-      (tester) async {
+  testWidgets('selected caption uses the palette accent', (tester) async {
     await tester.pumpWidget(_host(coverSelected: true));
 
     final caption = tester.widget<Text>(find.text('Front'));

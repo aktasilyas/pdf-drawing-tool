@@ -127,6 +127,7 @@ class _CategoryChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
     );
 
     // The pill keeps its 40dp look; the tap target fills the 48dp row.
