@@ -20,6 +20,8 @@ export 'pdf_loader.dart';
 export 'pdf_page_renderer.dart';
 export 'pdf_share_service.dart';
 export 'pdf_to_page_converter.dart';
+export 'picked_file_cleanup.dart'
+    show PickedFileCleanup, deletePickedFileCopy, withPickedFile;
 export 'selection_capture_service.dart';
 export 'selection_image_sink.dart';
 export 'thumbnail_cache.dart';

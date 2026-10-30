@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:drawing_ui/src/l10n/error_strings.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
+import 'package:drawing_ui/src/services/picked_file_cleanup.dart';
 
 /// Signature of [pickAndImportFile], so tests can supply a fake importer.
 typedef PageFileImporter = Future<List<Page>> Function({
@@ -43,24 +44,54 @@ Future<List<Page>> pickAndImportFile({
   if (result == null || result.files.isEmpty) return [];
   final filePath = result.files.first.path;
   if (filePath == null) return [];
-
-  final ext = filePath.split('.').last.toLowerCase();
-  if (ext == 'pdf') {
-    return importPdfAsPages(
-      filePath,
-      insertIndex,
-      onError: onError,
-      onPagesSkipped: onPagesSkipped,
-      createService: () => PDFImportService(pdfPaths: pdfPaths),
-    );
-  }
-  return importImageAsPage(
+  return importPickedFile(
     filePath,
     insertIndex,
-    pdfPaths: pdfPaths,
+    onError: onError,
+    onPagesSkipped: onPagesSkipped,
     onImageError: onImageError,
+    pdfPaths: pdfPaths,
   );
 }
+
+/// Imports the picked PDF or image at [path] as pages numbered from
+/// [insertIndex], then removes the picker's temporary copy with [cleanup]
+/// whatever the outcome (#469).
+Future<List<Page>> importPickedFile(
+  String path,
+  int insertIndex, {
+  void Function(PdfImportFailure failure)? onError,
+  void Function(int count)? onPagesSkipped,
+  void Function(ImagePageImportError error)? onImageError,
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  PDFImportService Function()? createService,
+  String? documentsRoot,
+  PickedFileCleanup cleanup = deletePickedFileCopy,
+}) =>
+    withPickedFile(
+      path,
+      () {
+        final ext = path.split('.').last.toLowerCase();
+        if (ext == 'pdf') {
+          return importPdfAsPages(
+            path,
+            insertIndex,
+            onError: onError,
+            onPagesSkipped: onPagesSkipped,
+            createService:
+                createService ?? () => PDFImportService(pdfPaths: pdfPaths),
+          );
+        }
+        return importImageAsPage(
+          path,
+          insertIndex,
+          pdfPaths: pdfPaths,
+          onImageError: onImageError,
+          documentsRoot: documentsRoot,
+        );
+      },
+      cleanup: cleanup,
+    );
 
 /// Imports the PDF at [path] as pages numbered from [insertIndex].
 ///
