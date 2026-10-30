@@ -29,6 +29,9 @@ export 'tool_style_provider.dart';
 export 'pdf_library_preview.dart'
     show
         pdfLibraryPreviewCacheProvider,
+        clearLibraryPreviewsProvider,
+        LibraryPreviewPins,
+        libraryPreviewPinsProvider,
         pdfWidthRasterizerProvider,
         PdfWidthRasterizer,
         renderLibraryPreview,

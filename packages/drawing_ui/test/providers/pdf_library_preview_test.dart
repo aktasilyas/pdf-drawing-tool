@@ -43,6 +43,54 @@ void main() {
         hasLength(maxLibraryPreviews));
   });
 
+  test('a full cache never evicts a preview a mounted tile pins', () async {
+    final pins = container.read(libraryPreviewPinsProvider);
+    await renderLibraryPreview(container, 'a.pdf|1', width: 480);
+    final pinned = libraryPreviewKey('a.pdf|1', 480);
+    pins.pin(pinned);
+    for (var i = 2; i <= maxLibraryPreviews + 5; i++) {
+      await renderLibraryPreview(container, 'a.pdf|$i', width: 480);
+    }
+    final cache = container.read(pdfLibraryPreviewCacheProvider);
+    expect(cache, contains(pinned));
+    expect(cache, hasLength(maxLibraryPreviews));
+
+    pins.unpin(pinned);
+    await renderLibraryPreview(container, 'b.pdf|1', width: 480);
+    expect(container.read(pdfLibraryPreviewCacheProvider),
+        isNot(contains(pinned)));
+  });
+
+  test('the cache grows past the cap only while every entry is pinned',
+      () async {
+    final pins = container.read(libraryPreviewPinsProvider);
+    for (var i = 1; i <= maxLibraryPreviews + 1; i++) {
+      pins.pin(libraryPreviewKey('a.pdf|$i', 480));
+      await renderLibraryPreview(container, 'a.pdf|$i', width: 480);
+    }
+    expect(container.read(pdfLibraryPreviewCacheProvider),
+        hasLength(maxLibraryPreviews + 1));
+  });
+
+  test('a key pinned twice stays pinned until both unpin', () {
+    final pins = LibraryPreviewPins()
+      ..pin('k')
+      ..pin('k')
+      ..unpin('k');
+    expect(pins.contains('k'), isTrue);
+    pins.unpin('k');
+    expect(pins.contains('k'), isFalse);
+    pins.unpin('k'); // extra unpin is harmless
+    expect(pins.contains('k'), isFalse);
+  });
+
+  test('clearLibraryPreviewsProvider empties the library preview cache',
+      () async {
+    await renderLibraryPreview(container, 'a.pdf|1', width: 480);
+    container.read(clearLibraryPreviewsProvider)();
+    expect(container.read(pdfLibraryPreviewCacheProvider), isEmpty);
+  });
+
   test('the widest preview is the widest tile at the highest DPR', () {
     expect(
       maxLibraryPreviewWidth,

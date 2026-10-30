@@ -31,6 +31,8 @@ export 'src/screens/drawing_screen_layout.dart';
 
 // Canvas
 export 'src/canvas/drawing_canvas.dart';
+export 'src/canvas/editor_memory_pressure_observer.dart'
+    show EditorMemoryPressureObserver;
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
 export 'src/canvas/canvas_color_scheme.dart';

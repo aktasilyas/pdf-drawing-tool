@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart' show pdfWidthRasterizerProvider;
+import 'package:drawing_ui/drawing_ui.dart'
+    show clearLibraryPreviewsProvider, pdfWidthRasterizerProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -160,5 +162,63 @@ void main() {
 
     expect(widths, [240, 720]);
     expect(find.byType(Image), findsOneWidget);
+  });
+
+  Widget lazyPdfApp(
+    Future<Uint8List?> Function() rasterize,
+    List<int> calls,
+  ) =>
+      ProviderScope(
+        overrides: [
+          documentRepositoryProvider.overrideWithValue(repository),
+          pdfWidthRasterizerProvider
+              .overrideWithValue((path, page, width) async {
+            calls.add(width);
+            return rasterize();
+          }),
+        ],
+        child: MaterialApp(
+          home: SizedBox(
+            width: 240,
+            height: 320,
+            child: DocumentPreview(document: _doc(DateTime(2026, 10, 2))),
+          ),
+        ),
+      );
+
+  testWidgets('a PDF tile renders again when its preview is cleared',
+      (tester) async {
+    answer(Right(PageBackground.pdfLazy(pageIndex: 1, pdfFilePath: 'a.pdf')));
+    final calls = <int>[];
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(lazyPdfApp(() async => _png, calls));
+    await tester.pumpAndSettle();
+    expect(calls, hasLength(1));
+    expect(find.byType(Image), findsOneWidget);
+
+    ProviderScope.containerOf(tester.element(find.byType(DocumentPreview)))
+        .read(clearLibraryPreviewsProvider)();
+    await tester.pumpAndSettle();
+
+    expect(calls, hasLength(2));
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('a failed PDF render shows the PDF icon and does not retry',
+      (tester) async {
+    answer(Right(PageBackground.pdfLazy(pageIndex: 1, pdfFilePath: 'a.pdf')));
+    final calls = <int>[];
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(lazyPdfApp(() async => null, calls));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(calls, hasLength(1));
+    expect(find.byIcon(Icons.picture_as_pdf), findsOneWidget);
   });
 }

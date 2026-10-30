@@ -33,6 +33,41 @@ int libraryPreviewWidth(double devicePixelRatio) => (libraryPreviewTileWidth *
 final pdfLibraryPreviewCacheProvider =
     StateProvider<Map<String, Uint8List>>((ref) => {});
 
+/// Library preview keys shown by a mounted tile, with a count per key (two
+/// tiles may show the same page). [renderLibraryPreview] never evicts a pinned
+/// key, so a visible tile keeps its preview however many tiles are mounted
+/// and evicted tiles cannot push each other out in a render loop.
+class LibraryPreviewPins {
+  final Map<String, int> _counts = {};
+
+  /// Marks [key] as shown by one more tile.
+  void pin(String key) => _counts.update(key, (c) => c + 1, ifAbsent: () => 1);
+
+  /// Marks [key] as shown by one tile less; unknown keys are ignored.
+  void unpin(String key) {
+    final count = _counts[key];
+    if (count == null) return;
+    if (count <= 1) {
+      _counts.remove(key);
+    } else {
+      _counts[key] = count - 1;
+    }
+  }
+
+  /// Whether a mounted tile shows [key].
+  bool contains(String key) => _counts.containsKey(key);
+}
+
+/// The [LibraryPreviewPins] of the library tiles (not reactive).
+final libraryPreviewPinsProvider =
+    Provider<LibraryPreviewPins>((ref) => LibraryPreviewPins());
+
+/// Drops every library preview (memory pressure). Mounted tiles render
+/// theirs again.
+final clearLibraryPreviewsProvider = Provider<void Function()>((ref) {
+  return () => ref.read(pdfLibraryPreviewCacheProvider.notifier).state = {};
+});
+
 /// Renders page [pageNumber] (1-based) of the PDF at [filePath] [width] px wide.
 /// Returns PNG bytes, or `null` on failure.
 typedef PdfWidthRasterizer = Future<Uint8List?> Function(
@@ -70,15 +105,28 @@ Future<Uint8List?> renderLibraryPreview(
   final bytes =
       await container.read(pdfWidthRasterizerProvider)(path, pageNumber, px);
   if (bytes == null) return null;
+  final pins = container.read(libraryPreviewPinsProvider);
   container.read(pdfLibraryPreviewCacheProvider.notifier).update((state) {
     final next = Map<String, Uint8List>.from(state);
     while (next.length >= maxLibraryPreviews) {
-      next.remove(next.keys.first);
+      final victim = _oldestUnpinned(next, pins);
+      if (victim == null) break;
+      next.remove(victim);
     }
     next[key] = bytes;
     return next;
   });
   return bytes;
+}
+
+String? _oldestUnpinned(
+  Map<String, Uint8List> cache,
+  LibraryPreviewPins pins,
+) {
+  for (final key in cache.keys) {
+    if (!pins.contains(key)) return key;
+  }
+  return null;
 }
 
 /// Default [PdfWidthRasterizer] backed by pdfx.
