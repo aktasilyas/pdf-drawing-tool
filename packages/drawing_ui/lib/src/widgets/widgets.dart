@@ -41,4 +41,5 @@ export 'unified_color_picker.dart';
 export 'template_preview_widget.dart';
 export 'ruler_overlay.dart';
 export 'paste_context_menu.dart';
+export 'sticky_note_context_menu.dart';
 export 'zoom_control_bar.dart';

@@ -3362,6 +3362,42 @@ abstract class AppLocalizations {
   /// **'Hello'**
   String get editorCanvasTextPreviewSample;
 
+  /// No description provided for @editorCanvasStickyNoteColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get editorCanvasStickyNoteColorYellow;
+
+  /// No description provided for @editorCanvasStickyNoteColorPink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink'**
+  String get editorCanvasStickyNoteColorPink;
+
+  /// No description provided for @editorCanvasStickyNoteColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get editorCanvasStickyNoteColorBlue;
+
+  /// No description provided for @editorCanvasStickyNoteColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get editorCanvasStickyNoteColorGreen;
+
+  /// No description provided for @editorCanvasStickyNoteColorOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get editorCanvasStickyNoteColorOrange;
+
+  /// No description provided for @editorCanvasStickyNoteColorPurple.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get editorCanvasStickyNoteColorPurple;
+
   /// No description provided for @libraryManageFolders.
   ///
   /// In en, this message translates to:

@@ -91,4 +91,22 @@ class AppCanvasStrings extends CanvasStrings {
 
   @override
   String get textPreviewSample => _l10n.editorCanvasTextPreviewSample;
+
+  @override
+  String get stickyNoteColorYellow => _l10n.editorCanvasStickyNoteColorYellow;
+
+  @override
+  String get stickyNoteColorPink => _l10n.editorCanvasStickyNoteColorPink;
+
+  @override
+  String get stickyNoteColorBlue => _l10n.editorCanvasStickyNoteColorBlue;
+
+  @override
+  String get stickyNoteColorGreen => _l10n.editorCanvasStickyNoteColorGreen;
+
+  @override
+  String get stickyNoteColorOrange => _l10n.editorCanvasStickyNoteColorOrange;
+
+  @override
+  String get stickyNoteColorPurple => _l10n.editorCanvasStickyNoteColorPurple;
 }

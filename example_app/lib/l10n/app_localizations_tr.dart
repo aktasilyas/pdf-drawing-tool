@@ -1842,6 +1842,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorCanvasTextPreviewSample => 'Merhaba';
 
   @override
+  String get editorCanvasStickyNoteColorYellow => 'Sarı';
+
+  @override
+  String get editorCanvasStickyNoteColorPink => 'Pembe';
+
+  @override
+  String get editorCanvasStickyNoteColorBlue => 'Mavi';
+
+  @override
+  String get editorCanvasStickyNoteColorGreen => 'Yeşil';
+
+  @override
+  String get editorCanvasStickyNoteColorOrange => 'Turuncu';
+
+  @override
+  String get editorCanvasStickyNoteColorPurple => 'Mor';
+
+  @override
   String get libraryManageFolders => 'Klasörleri Yönet';
 
   @override
