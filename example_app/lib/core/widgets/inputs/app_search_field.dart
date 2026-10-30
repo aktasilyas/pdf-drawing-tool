@@ -44,12 +44,17 @@ class AppSearchField extends StatefulWidget {
   /// When this changes externally, the text field updates accordingly.
   final String? text;
 
+  /// Tooltip and screen-reader label of the clear button. Defaults to the
+  /// Material "clear" tooltip of the current locale.
+  final String? clearTooltip;
+
   const AppSearchField({
     this.hint = 'Ara...',
     this.onChanged,
     this.onClear,
     this.debounceDuration = const Duration(milliseconds: 300),
     this.text,
+    this.clearTooltip,
     super.key,
   });
 
@@ -149,6 +154,8 @@ class _AppSearchFieldState extends State<AppSearchField> {
           suffixIcon: _hasText
               ? IconButton(
                   onPressed: _onClear,
+                  tooltip: widget.clearTooltip ??
+                      MaterialLocalizations.of(context).clearButtonTooltip,
                   icon: Icon(
                     ElyanotesIcons.libraryClose,
                     size: AppIconSize.md,

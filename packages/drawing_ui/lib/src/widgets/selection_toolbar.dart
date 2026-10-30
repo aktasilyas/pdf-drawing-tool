@@ -7,6 +7,7 @@ import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/selection_overflow_menu.dart';
@@ -85,8 +86,8 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     final hasOverflow =
         config.topRowActions.isNotEmpty || config.overflowActions.isNotEmpty;
     final buttonCount = config.toolbarActions.length + (hasOverflow ? 1 : 0);
-    const buttonWidth = 40.0;
-    final toolbarWidth = buttonCount * buttonWidth + 16;
+    // Each button is a 48dp hit target; the pill has no extra padding.
+    final toolbarWidth = buttonCount * ChromeSizes.minTouchTarget;
     final screenWidth = MediaQuery.of(context).size.width;
 
     final rawLeft = centerX - toolbarWidth / 2;
@@ -116,7 +117,6 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
