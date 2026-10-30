@@ -130,6 +130,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
             ColorPickerInfoBar(color: _currentColor),
             ColorPickerDottedDivider(color: cs.outlineVariant),
             ColorPickerRecentRow(
+              selectedColor: _currentColor,
               onColorSelected: _selectColor,
               outlineColor: cs.outlineVariant,
               iconColor: cs.onSurfaceVariant,
