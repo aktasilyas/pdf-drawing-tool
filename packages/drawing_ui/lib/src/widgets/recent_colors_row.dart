@@ -1,6 +1,9 @@
 /// Recently used colours row for the colour picker.
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/theme/chrome_palette.dart';
+import 'package:drawing_ui/src/widgets/color_swatch_target.dart';
+
 /// Recent Colors Row
 class RecentColorsRow extends StatelessWidget {
   const RecentColorsRow({
@@ -16,31 +19,25 @@ class RecentColorsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = ChromePalette.of(context).accent;
     return Wrap(
       spacing: 0,
       runSpacing: 0,
       children: colors.take(12).map((color) {
         final isSelected = _colorsMatch(color, selectedColor);
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        return ColorSwatchTarget(
+          color: color,
+          isSelected: isSelected,
           onTap: () => onColorSelected(color),
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child: Center(
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF4FC3F7)
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected ? accent : Colors.transparent,
+                width: 2,
               ),
             ),
           ),

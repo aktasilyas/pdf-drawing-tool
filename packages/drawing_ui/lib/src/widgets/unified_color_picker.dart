@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/color_swatch_target.dart';
 
 /// Ortak renk seçici widget - hızlı renkler + daha fazla butonu
 class UnifiedColorPicker extends StatelessWidget {
@@ -35,9 +37,14 @@ class UnifiedColorPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = (quickColors ?? ColorPresets.quickAccess).take(5).toList();
 
+    // Each swatch sits in a 48dp hit area, which already leaves
+    // (48 - chipSize) between the visuals; only add what is missing.
+    final gap =
+        (spacing - (ChromeSizes.minTouchTarget - chipSize)).clamp(0.0, spacing);
+
     return Wrap(
-      spacing: spacing,
-      runSpacing: 4,
+      spacing: gap,
+      runSpacing: 0,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ...colors.map((color) => _ColorChip(
@@ -129,7 +136,9 @@ class _ColorChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return ColorSwatchTarget(
+      color: color,
+      isSelected: isSelected,
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       child: Container(
@@ -178,37 +187,56 @@ class _MoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: context.drawingStrings.selection.more,
+      excludeSemantics: true,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: colorScheme.chipSurface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: ChromeSizes.minTouchTarget,
+            minHeight: ChromeSizes.minTouchTarget,
+          ),
+          child: Center(
+            widthFactor: 1,
+            child: _moreChip(context),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(
-              ElyanotesIcons.palette,
-              size: 12,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: 3),
-            Text(
-              context.drawingStrings.selection.more,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: colorScheme.primary,
-                  ),
-            ),
-          ],
+      ),
+    );
+  }
+
+  Widget _moreChip(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.chipSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.3),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PhosphorIcon(
+            ElyanotesIcons.palette,
+            size: 12,
+            color: colorScheme.primary,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            context.drawingStrings.selection.more,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  color: colorScheme.primary,
+                ),
+          ),
+        ],
       ),
     );
   }
