@@ -59,17 +59,41 @@ class _PdfThumbnail extends ConsumerStatefulWidget {
 class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
   bool _renderFailed = false;
 
+  /// Pixel width of the current preview (tile width x DPR); null before the
+  /// first dependency pass.
+  int? _width;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-render when the DPR changes (window moved to another display).
+    final width = libraryPreviewWidth(MediaQuery.devicePixelRatioOf(context));
+    if (width != _width) _scheduleRender(width);
+  }
+
+  @override
+  void didUpdateWidget(_PdfThumbnail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cacheKey != widget.cacheKey) _scheduleRender(_width!);
+  }
+
+  void _scheduleRender(int width) {
+    _width = width;
+    _renderFailed = false;
     WidgetsBinding.instance.addPostFrameCallback((_) => _triggerRender());
   }
 
   Future<void> _triggerRender() async {
     if (!mounted) return;
     final container = ProviderScope.containerOf(context);
-    final result = await renderThumbnail(container, widget.cacheKey);
-    if (!mounted) return;
+    final cacheKey = widget.cacheKey;
+    final width = _width!;
+    final result = await renderLibraryPreview(
+      container,
+      cacheKey,
+      width: width,
+    );
+    if (!mounted || cacheKey != widget.cacheKey || width != _width) return;
     if (result == null) {
       setState(() => _renderFailed = true);
     }
@@ -77,8 +101,8 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final cache = ref.watch(pdfThumbnailCacheProvider);
-    final cached = cache[widget.cacheKey];
+    final cache = ref.watch(pdfLibraryPreviewCacheProvider);
+    final cached = cache[libraryPreviewKey(widget.cacheKey, _width!)];
 
     if (cached != null) {
       return Image.memory(

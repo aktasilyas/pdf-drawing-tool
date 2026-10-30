@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 
 import 'package:drawing_ui/src/utils/drawing_log.dart';
+import 'package:drawing_ui/src/providers/pdf_library_preview.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/services/pdf_page_renderer.dart';
 import 'package:drawing_ui/src/services/pdf_render_slots.dart';
@@ -167,6 +168,7 @@ final clearPdfCacheProvider = Provider<void Function()>((ref) {
   return () {
     ref.read(pdfPageCacheProvider.notifier).state = {};
     ref.read(pdfThumbnailCacheProvider.notifier).state = {};
+    ref.read(pdfLibraryPreviewCacheProvider.notifier).state = {};
   };
 });
 
