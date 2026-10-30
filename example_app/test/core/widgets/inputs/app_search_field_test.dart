@@ -77,7 +77,11 @@ void main() {
       ),
     );
     expect(find.byTooltip('Aramayı temizle'), findsOneWidget);
-    expect(find.bySemanticsLabel('Aramayı temizle'), findsOneWidget);
+    // TalkBack reads the tooltip of the button node.
+    expect(
+      tester.getSemantics(find.byType(IconButton)),
+      containsSemantics(tooltip: 'Aramayı temizle', isButton: true),
+    );
   });
 
   testWidgets('clear button falls back to the Material clear tooltip',
