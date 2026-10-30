@@ -47,6 +47,7 @@ void main() {
       void Function(int count)? onPagesSkipped,
       void Function(ImagePageImportError error)? onImageError,
       core.PdfPathResolver pdfPaths = core.PdfPathResolver.passthrough,
+      ChoosePdfPageRange? chooseRange,
     }) =>
         pending.future;
 

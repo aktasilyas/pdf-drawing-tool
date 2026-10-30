@@ -102,6 +102,7 @@ void main() {
       void Function(int count)? onPagesSkipped,
       void Function(ImagePageImportError error)? onImageError,
       core.PdfPathResolver pdfPaths = core.PdfPathResolver.passthrough,
+      ChoosePdfPageRange? chooseRange,
     }) async {
       received = defaultPageSize;
       return [];
@@ -115,5 +116,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(received, _landscape);
+  });
+
+  testWidgets(
+      'import hands the importer a chooser that opens the range sheet '
+      'after the panel closed (AC4)', (tester) async {
+    ChoosePdfPageRange? chooser;
+    Future<List<core.Page>> fakeImporter({
+      required int insertIndex,
+      required core.PageSize defaultPageSize,
+      void Function(PdfImportFailure failure)? onError,
+      void Function(int count)? onPagesSkipped,
+      void Function(ImagePageImportError error)? onImageError,
+      core.PdfPathResolver pdfPaths = core.PdfPathResolver.passthrough,
+      ChoosePdfPageRange? chooseRange,
+    }) async {
+      chooser = chooseRange;
+      return [];
+    }
+
+    await _pumpPanel(tester, importer: fakeImporter);
+    final importItem = find.text('İçe aktar');
+    await tester.ensureVisible(importItem);
+    await tester.tap(importItem);
+    await tester.pumpAndSettle();
+
+    expect(chooser, isNotNull);
+    // The panel is gone by now; the sheet must still open and return.
+    final result = chooser!(640, 500);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pdf-range-first')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pdf-range-first')));
+    await tester.pumpAndSettle();
+    expect(await result, const PdfPageRange(1, 500));
   });
 }

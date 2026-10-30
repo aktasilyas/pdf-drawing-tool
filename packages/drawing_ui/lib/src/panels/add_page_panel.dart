@@ -12,6 +12,7 @@ import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/new_page_size.dart';
+import 'package:drawing_ui/src/widgets/pdf_page_range_sheet.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 /// Quick-access template IDs shown in the horizontal thumbnail strip.
@@ -176,12 +177,20 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final insertIdx = _resolveInsertionIndex(curIdx, doc.pages.length);
     final messenger = ScaffoldMessenger.maybeOf(context);
     final strings = context.drawingStrings;
+    // onClose unmounts this panel; the root navigator outlives it and hosts
+    // the page-range sheet for PDFs over the page limit.
+    final navigator = Navigator.of(context, rootNavigator: true);
     widget.onClose();
 
     final imported = await importer(
       insertIndex: insertIdx,
       defaultPageSize: resolveNewPageSize(doc, curIdx),
       pdfPaths: ref.read(pdfPathResolverProvider),
+      chooseRange: (count, max) => showPdfPageRangeSheet(
+        navigator.context,
+        pageCount: count,
+        maxPages: max,
+      ),
       onImageError: (e) => messenger?.showSnackBar(
         SnackBar(content: Text(imagePageImportMessage(strings.errors, e))),
       ),
