@@ -125,6 +125,7 @@ class TemplateCard extends StatelessWidget {
       selected: isSelected,
       label: name,
       excludeSemantics: true,
+      onTap: onTap,
       child: card,
     );
   }

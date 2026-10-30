@@ -68,6 +68,7 @@ class TemplatePreviewCard extends StatelessWidget {
       selected: isSelected,
       label: label,
       excludeSemantics: true,
+      onTap: onTap,
       child: card,
     );
   }

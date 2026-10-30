@@ -136,6 +136,7 @@ class _CategoryChip extends StatelessWidget {
       selected: isSelected,
       label: label,
       excludeSemantics: true,
+      onTap: onTap,
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
