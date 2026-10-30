@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'package:drawing_ui/src/rendering/element_paint_order.dart';
 import 'package:drawing_ui/src/rendering/variable_width_renderer.dart';
 
 import 'pdf_background_patterns.dart';
@@ -62,7 +63,8 @@ class PdfContentPainter {
     }
   }
 
-  /// Paints all layer content as vector operations using [elementOrder].
+  /// Paints all layer content as vector operations in canvas z-order
+  /// ([elementPaintOrder]).
   ///
   /// Images whose file is missing or unreadable are skipped and passed to
   /// [onMissingImage].
@@ -80,29 +82,23 @@ class PdfContentPainter {
       if (!drawn) onMissingImage?.call(img);
     }
 
-    final strokeMap = {for (final s in layer.strokes) s.id: s};
-    final shapeMap = {for (final s in layer.shapes) s.id: s};
-    final imageMap = {for (final i in layer.images) i.id: i};
-
-    if (layer.elementOrder.isNotEmpty) {
-      for (final id in layer.elementOrder) {
-        if (strokeMap.containsKey(id)) {
-          _paintStroke(g, strokeMap[id]!, w, h);
-        } else if (shapeMap.containsKey(id)) {
-          _shapeRenderer.paintShape(g, shapeMap[id]!, w, h);
-        } else if (imageMap.containsKey(id)) {
-          await paintImage(imageMap[id]!);
-        }
-      }
-    } else {
-      for (final stroke in layer.strokes) {
-        _paintStroke(g, stroke, w, h);
-      }
-      for (final shape in layer.shapes) {
-        _shapeRenderer.paintShape(g, shape, w, h);
-      }
-      for (final image in layer.images) {
-        await paintImage(image);
+    // Same z-order as the canvas, including elements missing from
+    // elementOrder (#583). Vector layers never hold texts.
+    final ordered = elementPaintOrder<Object>(
+      elementOrder: layer.elementOrder,
+      strokes: {for (final s in layer.strokes) s.id: s},
+      shapes: {for (final s in layer.shapes) s.id: s},
+      images: {for (final i in layer.images) i.id: i},
+      entry: (_, element) => element,
+    );
+    for (final element in ordered) {
+      switch (element) {
+        case final Stroke s:
+          _paintStroke(g, s, w, h);
+        case final Shape s:
+          _shapeRenderer.paintShape(g, s, w, h);
+        case final ImageElement i:
+          await paintImage(i);
       }
     }
   }

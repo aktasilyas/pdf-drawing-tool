@@ -3,6 +3,7 @@ import 'package:flutter/painting.dart';
 
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
+import 'package:drawing_ui/src/rendering/element_paint_order.dart';
 import 'package:drawing_ui/src/rendering/element_text_layout.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
 import 'package:drawing_ui/src/rendering/tiles/element_bounds.dart';
@@ -92,97 +93,48 @@ class ElementSceneRenderer {
 
   // ── Ordering ──
 
-  List<_Entry> _orderedEntries() {
-    final strokeMap = <String, Stroke>{};
-    for (final s in strokes) {
-      if (!excludedStrokeIds.contains(s.id) &&
-          !strokeEraserPreview.contains(s.id)) {
-        strokeMap[s.id] = s;
-      }
-    }
-    final shapeMap = <String, Shape>{};
-    for (final s in shapes) {
-      if (!excludedShapeIds.contains(s.id)) shapeMap[s.id] = s;
-    }
-    final imageMap = <String, ImageElement>{};
-    for (final img in images) {
-      if (!excludedImageIds.contains(img.id)) imageMap[img.id] = img;
-    }
-    final textMap = <String, TextElement>{};
-    for (final txt in texts) {
-      if (!excludedTextIds.contains(txt.id)) textMap[txt.id] = txt;
-    }
+  /// Visible elements (Stroke/Shape/ImageElement/TextElement) in z-order.
+  List<Object> _orderedEntries() => elementPaintOrder<Object>(
+        elementOrder: elementOrder,
+        strokes: {
+          for (final s in strokes)
+            if (!excludedStrokeIds.contains(s.id) &&
+                !strokeEraserPreview.contains(s.id))
+              s.id: s,
+        },
+        shapes: {
+          for (final s in shapes)
+            if (!excludedShapeIds.contains(s.id)) s.id: s,
+        },
+        images: {
+          for (final img in images)
+            if (!excludedImageIds.contains(img.id)) img.id: img,
+        },
+        texts: {
+          for (final txt in texts)
+            if (!excludedTextIds.contains(txt.id)) txt.id: txt,
+        },
+        entry: (_, element) => element,
+      );
 
-    final result = <_Entry>[];
-    if (elementOrder.isNotEmpty) {
-      final painted = <String>{};
-      for (final id in elementOrder) {
-        painted.add(id);
-        final stroke = strokeMap[id];
-        final shape = shapeMap[id];
-        final img = imageMap[id];
-        final txt = textMap[id];
-        if (stroke != null) {
-          result.add(_Entry(id: id, stroke: stroke));
-        } else if (shape != null) {
-          result.add(_Entry(id: id, shape: shape));
-        } else if (img != null) {
-          result.add(_Entry(id: id, image: img));
-        } else if (txt != null) {
-          result.add(_Entry(id: id, text: txt));
-        }
-      }
+  Rect _boundsOf(Object e) => switch (e) {
+        final Stroke s => strokeBounds(s),
+        final Shape s => shapeBounds(s),
+        final ImageElement i => imageBounds(i),
+        final TextElement t => textBounds(t),
+        _ => Rect.zero,
+      };
 
-      // Elements not in elementOrder (backward compat), sorted by ID.
-      final remaining = <_Entry>[
-        for (final e in strokeMap.entries)
-          if (!painted.contains(e.key)) _Entry(id: e.key, stroke: e.value),
-        for (final e in shapeMap.entries)
-          if (!painted.contains(e.key)) _Entry(id: e.key, shape: e.value),
-        for (final e in imageMap.entries)
-          if (!painted.contains(e.key)) _Entry(id: e.key, image: e.value),
-        for (final e in textMap.entries)
-          if (!painted.contains(e.key)) _Entry(id: e.key, text: e.value),
-      ]..sort((a, b) => a.id.compareTo(b.id));
-      result.addAll(remaining);
-    } else {
-      // No elementOrder: strokes, then shapes, then images/texts by ID
-      // (microsecond timestamp). Preserves old document behaviour.
-      for (final s in strokes) {
-        if (strokeMap.containsKey(s.id)) {
-          result.add(_Entry(id: s.id, stroke: s));
-        }
-      }
-      for (final s in shapes) {
-        if (shapeMap.containsKey(s.id)) {
-          result.add(_Entry(id: s.id, shape: s));
-        }
-      }
-      final objects = <_Entry>[
-        for (final e in imageMap.entries) _Entry(id: e.key, image: e.value),
-        for (final e in textMap.entries) _Entry(id: e.key, text: e.value),
-      ]..sort((a, b) => a.id.compareTo(b.id));
-      result.addAll(objects);
-    }
-    return result;
-  }
-
-  Rect _boundsOf(_Entry e) {
-    if (e.stroke != null) return strokeBounds(e.stroke!);
-    if (e.shape != null) return shapeBounds(e.shape!);
-    if (e.image != null) return imageBounds(e.image!);
-    return textBounds(e.text!);
-  }
-
-  void _paintEntry(Canvas canvas, _Entry e) {
-    if (e.stroke != null) {
-      _renderStroke(canvas, e.stroke!);
-    } else if (e.shape != null) {
-      ShapePainter.paintSingleShape(canvas, e.shape!);
-    } else if (e.image != null) {
-      _drawImage(canvas, e.image!);
-    } else {
-      drawText(canvas, e.text!);
+  void _paintEntry(Canvas canvas, Object e) {
+    switch (e) {
+      case final Stroke s:
+        _renderStroke(canvas, s);
+      case final Shape s:
+        ShapePainter.paintSingleShape(canvas, s);
+      case final ImageElement i:
+        _drawImage(canvas, i);
+      case final TextElement t:
+        drawText(canvas, t);
     }
   }
 
@@ -241,21 +193,4 @@ class ElementSceneRenderer {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0);
   }
-}
-
-/// Lightweight wrapper to tag an element for ordering.
-class _Entry {
-  final String id;
-  final Stroke? stroke;
-  final Shape? shape;
-  final ImageElement? image;
-  final TextElement? text;
-
-  const _Entry({
-    required this.id,
-    this.stroke,
-    this.shape,
-    this.image,
-    this.text,
-  });
 }
