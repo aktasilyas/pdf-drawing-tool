@@ -17,13 +17,12 @@ Map<String, dynamic> _layerToJson(Layer layer) {
   return {
     'id': layer.id,
     'name': layer.name,
-    'strokes':
-        withUnreadable('strokes', layer.strokes.map((s) => s.toJson())),
+    'strokes': withUnreadable('strokes', layer.strokes.map((s) => s.toJson())),
     'shapes': withUnreadable('shapes', layer.shapes.map((s) => s.toJson())),
     'texts': withUnreadable('texts', layer.texts.map((t) => t.toJson())),
     'images': withUnreadable('images', layer.images.map((i) => i.toJson())),
-    'stickyNotes': withUnreadable(
-        'stickyNotes', layer.stickyNotes.map((n) => n.toJson())),
+    'stickyNotes':
+        withUnreadable('stickyNotes', layer.stickyNotes.map((n) => n.toJson())),
     'elementOrder': layer.elementOrder,
     'isVisible': layer.isVisible,
     'isLocked': layer.isLocked,
