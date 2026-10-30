@@ -59,26 +59,6 @@ final selectionProvider =
   return notifier;
 });
 
-/// Whether there is an active selection.
-final hasSelectionProvider = Provider<bool>((ref) {
-  return ref.watch(selectionProvider) != null;
-});
-
-/// Number of selected elements.
-final selectionCountProvider = Provider<int>((ref) {
-  return ref.watch(selectionProvider)?.count ?? 0;
-});
-
-/// The bounding box of the current selection.
-final selectionBoundsProvider = Provider<BoundingBox?>((ref) {
-  return ref.watch(selectionProvider)?.bounds;
-});
-
-/// IDs of currently selected strokes.
-final selectedStrokeIdsProvider = Provider<List<String>>((ref) {
-  return ref.watch(selectionProvider)?.selectedStrokeIds ?? [];
-});
-
 /// The active selection tool type (lasso or rectangle).
 /// Default matches LassoSettings.defaultSettings() which is freeform (lasso).
 final activeSelectionToolTypeProvider = StateProvider<SelectionType>((ref) {

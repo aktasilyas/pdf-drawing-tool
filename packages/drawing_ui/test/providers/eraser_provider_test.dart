@@ -40,28 +40,6 @@ void main() {
       });
     });
 
-    group('eraserSizeProvider', () {
-      test('default size is 20.0', () {
-        final size = container.read(eraserSizeProvider);
-        expect(size, equals(20.0));
-      });
-
-      test('can change size', () {
-        container.read(eraserSettingsProvider.notifier).setSize(40.0);
-        expect(container.read(eraserSizeProvider), equals(40.0));
-      });
-
-      test('can set small size', () {
-        container.read(eraserSettingsProvider.notifier).setSize(5.0);
-        expect(container.read(eraserSizeProvider), equals(5.0));
-      });
-
-      test('can set large size', () {
-        container.read(eraserSettingsProvider.notifier).setSize(100.0);
-        expect(container.read(eraserSizeProvider), equals(100.0));
-      });
-    });
-
     group('eraserToolProvider', () {
       test('creates EraserTool with default settings', () {
         final tool = container.read(eraserToolProvider);
@@ -102,13 +80,6 @@ void main() {
 
         final tool = container.read(eraserToolProvider);
         expect(tool.tolerance, equals(15.0));
-      });
-    });
-
-    group('isEraserActiveProvider', () {
-      test('default is false', () {
-        final isActive = container.read(isEraserActiveProvider);
-        expect(isActive, isFalse);
       });
     });
   });

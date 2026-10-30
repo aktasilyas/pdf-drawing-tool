@@ -322,7 +322,7 @@ void main() {
       container.dispose();
     });
 
-    test('redoCountProvider reflects history state', () {
+    test('redoCount reflects history state', () {
       final container = ProviderContainer();
 
       container.read(historyManagerProvider.notifier).addStroke(
@@ -337,7 +337,7 @@ void main() {
       container.read(historyManagerProvider.notifier).undo();
       container.read(historyManagerProvider.notifier).undo();
 
-      expect(container.read(redoCountProvider), 2);
+      expect(container.read(historyManagerProvider).redoCount, 2);
 
       container.dispose();
     });
@@ -368,7 +368,7 @@ void main() {
       container.read(historyManagerProvider.notifier).undo();
 
       expect(container.read(strokeCountProvider), 0);
-      expect(container.read(isDocumentEmptyProvider), true);
+      expect(container.read(documentProvider).isEmpty, true);
 
       // Redo all
       container.read(historyManagerProvider.notifier).redo();
@@ -376,7 +376,7 @@ void main() {
       container.read(historyManagerProvider.notifier).redo();
 
       expect(container.read(strokeCountProvider), 3);
-      expect(container.read(isDocumentEmptyProvider), false);
+      expect(container.read(documentProvider).isEmpty, false);
 
       container.dispose();
     });
