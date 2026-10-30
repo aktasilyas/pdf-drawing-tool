@@ -113,14 +113,16 @@ void main() {
         final before = undoCount();
 
         final a = pathFor(tool, 200);
+        // Finger 1 crosses the ink before finger 2 lands, so an erase is
+        // pending when the gesture turns into a pinch.
         down(1, a.first);
-        move(1, a[1]); // first finger moves before the second lands
+        for (var i = 1; i < a.length - 1; i++) {
+          move(1, a[i]);
+        }
         down(2, const Offset(400, 400));
         scaleStart(const Offset(300, 300));
-        for (var i = 2; i < a.length; i++) {
-          move(1, a[i]);
-          move(2, Offset(400.0 + i * 5, 400.0 + i * 5));
-        }
+        move(1, a.last);
+        move(2, const Offset(450, 450));
         up(2, const Offset(450, 450));
         up(1, a.last);
         scaleEnd();
@@ -141,10 +143,15 @@ void main() {
 
         final a = pathFor(tool, 200);
         final b = pathFor(tool, 260);
+        // Finger 1 is already across the ink when finger 2 lands.
+        final half = a.length ~/ 2 + 1;
         down(1, a.first);
-        down(2, b.first);
-        scaleStart(const Offset(230, 150));
-        for (var i = 1; i < a.length; i++) {
+        for (var i = 1; i < half; i++) {
+          move(1, a[i]);
+        }
+        down(2, b[half]);
+        scaleStart(const Offset(230, 200));
+        for (var i = half; i < a.length; i++) {
           move(1, a[i]);
           move(2, b[i]);
         }
@@ -189,10 +196,11 @@ void main() {
 
         final a = pathFor(tool, 200);
         down(1, a.first);
-        down(2, const Offset(400, 400));
-        for (final p in a.skip(1)) {
-          move(1, p);
+        for (var i = 1; i < a.length - 1; i++) {
+          move(1, a[i]);
         }
+        down(2, const Offset(400, 400));
+        move(1, a.last);
         up(2, const Offset(400, 400));
         up(1, a.last);
 
@@ -202,8 +210,9 @@ void main() {
 
       testWidgets('a pinch starting outside the page does not erase',
           (tester) async {
-        // Page-bounded drawing with the page at the screen origin (an
-        // infinite mode skips page centering), so x < 0 is off the page.
+        // allowDrawingOutsidePage defaults to false, so drawing is bounded
+        // to the page; an infinite mode skips page centering, which keeps
+        // the page at the screen origin and x < 0 off the page.
         await pump(
           tester,
           mode: const core.CanvasMode(isInfinite: true),
