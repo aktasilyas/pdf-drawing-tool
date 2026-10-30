@@ -71,8 +71,7 @@ void main() {
     expect(fileOf(second).existsSync(), isTrue);
   });
 
-  test('a previous path outside the managed files is never deleted',
-      () async {
+  test('a previous path outside the managed files is never deleted', () async {
     final doc = await create('A');
     final own = File('${dir.path}/own.png')..writeAsBytesSync(png);
     final row = await fx.documentDs.getDocument(doc.id);
