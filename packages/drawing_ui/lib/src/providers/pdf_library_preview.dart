@@ -41,8 +41,7 @@ class LibraryPreviewPins {
   final Map<String, int> _counts = {};
 
   /// Marks [key] as shown by one more tile.
-  void pin(String key) =>
-      _counts.update(key, (c) => c + 1, ifAbsent: () => 1);
+  void pin(String key) => _counts.update(key, (c) => c + 1, ifAbsent: () => 1);
 
   /// Marks [key] as shown by one tile less; unknown keys are ignored.
   void unpin(String key) {

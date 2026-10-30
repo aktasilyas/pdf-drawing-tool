@@ -120,9 +120,8 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
     if (!mounted) return;
     final container = ProviderScope.containerOf(context, listen: false);
     // A throwing rasteriser counts as a failed render (PDF icon).
-    final result =
-        await renderLibraryPreview(container, cacheKey, width: width)
-            .catchError((Object _) => null);
+    final result = await renderLibraryPreview(container, cacheKey, width: width)
+        .catchError((Object _) => null);
     if (_inFlight == key) _inFlight = null;
     if (!mounted) return;
     if (key != _key) return;
