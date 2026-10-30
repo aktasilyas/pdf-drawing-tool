@@ -16,6 +16,7 @@ import 'package:drawing_ui/src/canvas/page_background_view.dart';
 import 'package:drawing_ui/src/canvas/pdf_page_placeholder.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
+import 'package:drawing_ui/src/canvas/editor_memory_pressure_observer.dart';
 import 'package:drawing_ui/src/canvas/laser_controller.dart';
 import 'package:drawing_ui/src/canvas/laser_overlay_widget.dart';
 import 'package:drawing_ui/src/utils/drawing_log.dart';
@@ -31,6 +32,8 @@ import 'package:drawing_ui/src/providers/shape_provider.dart';
 import 'package:drawing_ui/src/providers/text_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/pdf_page_cache.dart'
+    show clearPdfCacheProvider;
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
@@ -152,6 +155,15 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     super.initState();
     _drawingController = DrawingController();
     _laserController = LaserController();
+    _memoryPressure = EditorMemoryPressureObserver(_onMemoryPressure);
+  }
+
+  late final EditorMemoryPressureObserver _memoryPressure;
+
+  /// Low memory: drop the PDF byte caches and images not painted lately.
+  void _onMemoryPressure() {
+    ref.read(clearPdfCacheProvider)();
+    _imageCacheManager.trim();
   }
 
   @override
@@ -167,6 +179,7 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
 
   @override
   void dispose() {
+    _memoryPressure.dispose();
     _drawingController.dispose();
     _laserController.dispose();
     _imageCacheManager.dispose();

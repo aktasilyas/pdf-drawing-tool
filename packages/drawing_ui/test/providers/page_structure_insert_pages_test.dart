@@ -71,4 +71,31 @@ void main() {
     actions().insertPages(99, [page('a', 0)]);
     expect(docIds(), ['p0', 'p1', 'a']);
   });
+
+  test('with a cover, inserting at 0 lands at 1 and undo restores order',
+      () async {
+    final doc = DrawingDocument.multiPage(
+      id: 'd',
+      title: 't',
+      pages: [
+        Page.createCover(index: 0, size: PageSize.a4Portrait),
+        page('p1', 1),
+        page('p2', 2),
+      ],
+      createdAt: DateTime(2024),
+      updatedAt: DateTime(2024),
+    );
+    final coverId = doc.pages.first.id;
+    container.read(documentProvider.notifier).updateDocument(doc);
+    container.read(pageManagerProvider.notifier).initializeFromDocument(
+          doc.pages,
+          currentIndex: 0,
+        );
+
+    final change = actions().insertPages(0, [page('a', 0)]);
+
+    expect(docIds(), [coverId, 'a', 'p1', 'p2']);
+    expect(await actions().undo(change!), isTrue);
+    expect(docIds(), [coverId, 'p1', 'p2']);
+  });
 }

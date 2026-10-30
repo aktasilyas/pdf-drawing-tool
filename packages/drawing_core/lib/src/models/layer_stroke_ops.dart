@@ -13,6 +13,7 @@ mixin _LayerStrokeOps {
   List<ImageElement> get images;
   List<StickyNote> get stickyNotes;
   List<String> get elementOrder;
+  List<UnreadableElement> get unreadableElements;
   bool get isVisible;
   bool get isLocked;
   double get opacity;
@@ -27,6 +28,7 @@ mixin _LayerStrokeOps {
     List<ImageElement>? images,
     List<StickyNote>? stickyNotes,
     List<String>? elementOrder,
+    List<UnreadableElement>? unreadableElements,
     bool? isVisible,
     bool? isLocked,
     double? opacity,
@@ -52,6 +54,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -73,6 +76,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -102,6 +106,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -121,6 +126,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -168,6 +174,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -189,6 +196,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 
@@ -218,6 +226,7 @@ mixin _LayerStrokeOps {
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
+      unreadableElements: unreadableElements,
     );
   }
 

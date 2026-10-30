@@ -85,7 +85,15 @@ class LoadDocumentUseCase {
               }
               // Library metadata owns the title and the id; stored content may
               // be stale (or carry the source's id, for pre-fix duplicates).
-              final doc = stored.copyWith(id: documentId, title: docInfo.title);
+              var doc = stored.copyWith(id: documentId, title: docInfo.title);
+              // The cover is always page 1; repair stored order if it drifted.
+              final coverAt = doc.pages.indexWhere((p) => p.isCover);
+              if (coverAt > 0) {
+                final currentId = doc.pages[doc.currentPageIndex].id;
+                final list = List<Page>.from(doc.pages);
+                list.insert(0, list.removeAt(coverAt));
+                doc = doc.replacePages(list, currentPageId: currentId);
+              }
               logger.i('Document loaded: ${doc.id}');
               return Right(doc);
             },

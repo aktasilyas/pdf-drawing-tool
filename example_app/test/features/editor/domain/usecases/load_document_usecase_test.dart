@@ -132,6 +132,33 @@ void main() {
       verify(() => mockRepository.getDrawingDocument(testDocId)).called(1);
     });
 
+    test('moves a cover found at index 2 to the front', () async {
+      final cover = Page.createCover(index: 2, size: PageSize.a4Portrait);
+      final stored = DrawingDocument.multiPage(
+        id: testDocId,
+        title: 'Test Document',
+        pages: [
+          Page.create(index: 0),
+          Page.create(index: 1),
+          cover,
+        ],
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+      );
+      when(() => mockRepository.getDocument(testDocId))
+          .thenAnswer((_) async => Right(testDocInfo));
+      when(() => mockRepository.getDrawingDocument(testDocId))
+          .thenAnswer((_) async => Right(stored));
+
+      final document =
+          (await useCase(testDocId)).getOrElse(() => throw Exception());
+
+      expect(document.pages.first.id, cover.id);
+      expect(document.pages.first.isCover, isTrue);
+      expect(document.pages.where((p) => p.isCover), hasLength(1));
+      expect([for (final p in document.pages) p.index], [0, 1, 2]);
+    });
+
     test('uses the library title when the stored content title is stale',
         () async {
       final staleContent = DrawingDocument.multiPage(

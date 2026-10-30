@@ -107,7 +107,9 @@ class PageStructureActions {
       insertedPageIds: [for (final p in pages) p.id],
       insertedPageLayers: {for (final p in pages) p.id: p.layers},
     );
-    final at = index.clamp(0, doc.pages.length);
+    // A cover stays page 1, so nothing is inserted before it.
+    final floor = doc.pages.isNotEmpty && doc.pages.first.isCover ? 1 : 0;
+    final at = index.clamp(floor, doc.pages.length);
     final list = List<Page>.from(doc.pages)..insertAll(at, pages);
     _apply(doc.replacePages(list, currentPageId: pages.first.id));
     return change;

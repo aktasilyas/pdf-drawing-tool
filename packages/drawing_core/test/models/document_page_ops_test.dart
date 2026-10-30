@@ -151,5 +151,41 @@ void main() {
         expect(doc.activeLayer, isNotNull);
       });
     });
+
+    group('cover stays first', () {
+      DrawingDocument withCover() => DrawingDocument.multiPage(
+            id: 'd',
+            title: 't',
+            pages: [
+              Page.createCover(index: 0, size: PageSize.a4Portrait),
+              for (var i = 1; i < 4; i++) page('p$i', i),
+            ],
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+
+      test('movePage(2, 0) keeps the cover first', () {
+        final doc = withCover();
+        final coverId = doc.pages.first.id;
+        final moved = doc.movePage(2, 0);
+        expect(moved.pages.first.id, coverId);
+        expect(moved.pages[1].id, 'p2');
+      });
+
+      test('moving the cover is a no-op', () {
+        final doc = withCover();
+        expect(identical(doc.movePage(0, 3), doc), isTrue);
+      });
+
+      test('insertPageAt(0) lands at 1', () {
+        final doc = withCover().insertPageAt(0, page('x', 0));
+        expect(doc.pages[0].isCover, isTrue);
+        expect(doc.pages[1].id, 'x');
+      });
+
+      test('without a cover index 0 is still allowed', () {
+        expect(ids(fourPages().insertPageAt(0, page('x', 0))).first, 'x');
+      });
+    });
   });
 }

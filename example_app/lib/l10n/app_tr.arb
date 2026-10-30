@@ -555,6 +555,53 @@
   "editorPdfRelinkDone": "PDF yeniden bağlandı",
   "editorPdfRelinkPageCountMismatch": "Bu PDF {found} sayfa; defter {required} sayfa gerektiriyor.",
   "editorPdfRelinkFailed": "PDF yeniden bağlanamadı",
+  "editorPdfRangeTitle": "Bu PDF {count} sayfa",
+  "@editorPdfRangeTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeLimitHint": "Bir seferde en fazla {max} sayfa içe aktarılabilir.",
+  "@editorPdfRangeLimitHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeImportFirst": "İlk {max} sayfayı içe aktar",
+  "@editorPdfRangeImportFirst": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeChoose": "Aralık seç",
+  "editorPdfRangeStart": "Başlangıç",
+  "editorPdfRangeEnd": "Bitiş",
+  "editorPdfRangeImport": "İçe aktar",
+  "editorPdfRangeCancel": "Vazgeç",
+  "editorPdfRangeErrorStartBelowOne": "Başlangıç en az 1 olmalı",
+  "editorPdfRangeErrorStartAfterEnd": "Başlangıç, bitişten büyük olamaz",
+  "editorPdfRangeErrorEndAfterTotal": "Bitiş {total} sayfadan büyük olamaz",
+  "@editorPdfRangeErrorEndAfterTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRangeErrorTooLong": "En fazla {max} sayfa seçilebilir",
+  "@editorPdfRangeErrorTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "editorErrorPdfLoadFailed": "PDF Yüklenemedi",
   "editorErrorPdfPagesSkipped": "{count, plural, other{{count} sayfa okunamadı ve atlandı}}",
   "editorCanvasAddLayer": "Katman Ekle",

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:equatable/equatable.dart';
 
 import 'package:drawing_core/src/models/bounding_box.dart';
@@ -6,8 +8,10 @@ import 'package:drawing_core/src/models/shape.dart';
 import 'package:drawing_core/src/models/sticky_note.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/text_element.dart';
+import 'package:drawing_core/src/models/unreadable_element.dart';
 
 part 'layer_element_ops.dart';
+part 'layer_json.dart';
 part 'layer_stroke_ops.dart';
 
 /// Represents a layer in a drawing document.
@@ -55,6 +59,13 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
   /// [ImageElement]s, and [TextElement]s.
   final List<String> elementOrder;
 
+  /// Stored elements this app version could not decode.
+  ///
+  /// Kept only so [toJson] writes them back unchanged; they are never
+  /// rendered, hit-tested or exported. Their ids may stay in [elementOrder].
+  /// This list is unmodifiable.
+  final List<UnreadableElement> unreadableElements;
+
   /// Whether this layer is visible.
   final bool isVisible;
 
@@ -78,6 +89,7 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
     List<ImageElement>? images,
     List<StickyNote>? stickyNotes,
     List<String>? elementOrder,
+    List<UnreadableElement>? unreadableElements,
     this.isVisible = true,
     this.isLocked = false,
     double opacity = 1.0,
@@ -87,6 +99,7 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
         images = List.unmodifiable(images ?? const []),
         stickyNotes = List.unmodifiable(stickyNotes ?? const []),
         elementOrder = List.unmodifiable(elementOrder ?? const []),
+        unreadableElements = List.unmodifiable(unreadableElements ?? const []),
         opacity = opacity.clamp(0.0, 1.0);
 
   /// Creates an empty layer with a generated ID.
@@ -150,6 +163,7 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
     List<ImageElement>? images,
     List<StickyNote>? stickyNotes,
     List<String>? elementOrder,
+    List<UnreadableElement>? unreadableElements,
     bool? isVisible,
     bool? isLocked,
     double? opacity,
@@ -163,6 +177,7 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
       images: images ?? this.images,
       stickyNotes: stickyNotes ?? this.stickyNotes,
       elementOrder: elementOrder ?? this.elementOrder,
+      unreadableElements: unreadableElements ?? this.unreadableElements,
       isVisible: isVisible ?? this.isVisible,
       isLocked: isLocked ?? this.isLocked,
       opacity: opacity ?? this.opacity,
@@ -170,54 +185,15 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
   }
 
   /// Converts this [Layer] to a JSON map.
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'strokes': strokes.map((s) => s.toJson()).toList(),
-      'shapes': shapes.map((s) => s.toJson()).toList(),
-      'texts': texts.map((t) => t.toJson()).toList(),
-      'images': images.map((i) => i.toJson()).toList(),
-      'stickyNotes': stickyNotes.map((n) => n.toJson()).toList(),
-      'elementOrder': elementOrder,
-      'isVisible': isVisible,
-      'isLocked': isLocked,
-      'opacity': opacity,
-    };
-  }
+  ///
+  /// [unreadableElements] are written back into their original lists.
+  Map<String, dynamic> toJson() => _layerToJson(this);
 
   /// Creates a [Layer] from a JSON map.
-  factory Layer.fromJson(Map<String, dynamic> json) {
-    return Layer(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      strokes: (json['strokes'] as List)
-          .map((s) => Stroke.fromJson(s as Map<String, dynamic>))
-          .toList(),
-      shapes: (json['shapes'] as List?)
-              ?.map((s) => Shape.fromJson(s as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      texts: (json['texts'] as List?)
-              ?.map((t) => TextElement.fromJson(t as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      images: (json['images'] as List?)
-              ?.map((i) => ImageElement.fromJson(i as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      stickyNotes: (json['stickyNotes'] as List?)
-              ?.map((n) => StickyNote.fromJson(n as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      elementOrder:
-          (json['elementOrder'] as List?)?.map((e) => e as String).toList() ??
-              const [],
-      isVisible: json['isVisible'] as bool? ?? true,
-      isLocked: json['isLocked'] as bool? ?? false,
-      opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
-    );
-  }
+  ///
+  /// An element that fails to decode does not fail the layer: it is kept in
+  /// [unreadableElements] and logged.
+  factory Layer.fromJson(Map<String, dynamic> json) => _layerFromJson(json);
 
   @override
   List<Object?> get props => [
@@ -229,6 +205,7 @@ class Layer extends Equatable with _LayerStrokeOps, _LayerElementOps {
         images,
         stickyNotes,
         elementOrder,
+        unreadableElements,
         isVisible,
         isLocked,
         opacity

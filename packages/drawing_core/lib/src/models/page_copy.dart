@@ -62,5 +62,7 @@ Layer _copyLayer(Layer layer) {
       for (final id in layer.elementOrder)
         if (ids[id] != null) ids[id]!,
     ],
+    // Their ids cannot be remapped, so a copy would duplicate them.
+    unreadableElements: const [],
   );
 }
