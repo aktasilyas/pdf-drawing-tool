@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Transient editor UI (popovers, the phone page drawer) that system Back
 /// must close before it leaves the notebook (#482).
@@ -42,4 +42,42 @@ class DismissibleOverlays {
 class _Entry {
   _Entry(this.close);
   final VoidCallback close;
+}
+
+/// An [OverlayEntry] that is registered with [DismissibleOverlays] while it
+/// is shown, so system Back closes it. [close] is idempotent: Back, a tap on
+/// the scrim and widget disposal may race.
+class DismissibleOverlayEntry {
+  DismissibleOverlayEntry._(this._entry);
+
+  /// Inserts the overlay built by [builder] into [overlay] and registers it.
+  /// [onClosed] runs once, after the entry is removed.
+  factory DismissibleOverlayEntry.show(
+    OverlayState overlay,
+    WidgetBuilder builder, {
+    VoidCallback? onClosed,
+  }) {
+    final self = DismissibleOverlayEntry._(OverlayEntry(builder: builder));
+    self._onClosed = onClosed;
+    overlay.insert(self._entry);
+    self._unregister = DismissibleOverlays.instance.register(self.close);
+    return self;
+  }
+
+  final OverlayEntry _entry;
+  VoidCallback? _onClosed;
+  late final VoidCallback _unregister;
+  bool _closed = false;
+
+  /// Whether the overlay has been closed.
+  bool get isClosed => _closed;
+
+  /// Removes the overlay and unregisters it. Safe to call repeatedly.
+  void close() {
+    if (_closed) return;
+    _closed = true;
+    _unregister();
+    _entry.remove();
+    _onClosed?.call();
+  }
 }

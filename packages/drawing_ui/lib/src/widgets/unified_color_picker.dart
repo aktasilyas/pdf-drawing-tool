@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/widgets/dismissible_overlays.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
@@ -72,10 +73,11 @@ class UnifiedColorPicker extends StatelessWidget {
     // Use custom full-screen overlay for color picker
     // This ensures it appears above all panels and is centered on screen
     final overlay = Overlay.of(context);
-    late OverlayEntry overlayEntry;
+    late DismissibleOverlayEntry overlayEntry;
 
-    overlayEntry = OverlayEntry(
-      builder: (overlayContext) {
+    overlayEntry = DismissibleOverlayEntry.show(
+      overlay,
+      (overlayContext) {
         return Material(
           color: Theme.of(overlayContext)
               .colorScheme
@@ -83,7 +85,7 @@ class UnifiedColorPicker extends StatelessWidget {
               .withValues(alpha: 0.54),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => overlayEntry.remove(),
+            onTap: () => overlayEntry.close(),
             child: Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -97,9 +99,9 @@ class UnifiedColorPicker extends StatelessWidget {
                     selectedColor: selectedColor,
                     onColorSelected: (color) {
                       onColorSelected(color);
-                      overlayEntry.remove();
+                      overlayEntry.close();
                     },
-                    onClose: () => overlayEntry.remove(),
+                    onClose: () => overlayEntry.close(),
                   ),
                 ),
               ),
@@ -108,8 +110,6 @@ class UnifiedColorPicker extends StatelessWidget {
         );
       },
     );
-
-    overlay.insert(overlayEntry);
   }
 
   bool _colorsMatch(Color a, Color b) {
