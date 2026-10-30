@@ -13,7 +13,7 @@ import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 
 import 'package:drawing_ui/src/screens/drawing_screen_add_page_preview.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_navigation.dart';
-import 'package:drawing_ui/src/screens/drawing_screen_overlays.dart';
+import 'package:drawing_ui/src/screens/drawing_screen_sidebars.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_toolbar_actions.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_viewport_sync.dart';
 import 'package:drawing_ui/src/services/new_page_size.dart';
@@ -163,8 +163,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
     final isCompactMode = screenWidth < ToolbarLayoutMode.compactBreakpoint;
     final isSidebarOpen = ref.watch(sidebarOpenProvider);
     final showSidebar = isSidebarOpen && ref.watch(pageCountProvider) > 1;
-    // Phone drawer: min(280, 85% of the screen).
-    final drawerWidth = (screenWidth * 0.85).clamp(0.0, 280.0);
     _syncDrawerBack(
       isCompactMode &&
           (showSidebar ||
@@ -212,25 +210,16 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                   Expanded(
                     child: Row(
                       children: [
-                        // External left sidebar (e.g. AI chat) — tablet only
-                        if (!isCompactMode &&
-                            widget.externalLeftSidebar != null)
-                          CollapsibleSidePanel(
-                            width: widget.isExternalLeftSidebarOpen
-                                ? widget.externalLeftSidebarWidth
-                                : 0.0,
-                            contentWidth: widget.externalLeftSidebarWidth,
-                            child: widget.externalLeftSidebar!,
-                          ),
-                        // Page sidebar — tablet only
                         if (!isCompactMode)
-                          CollapsibleSidePanel(
-                            width: showSidebar ? kPageSidebarWidth : 0.0,
-                            contentWidth: kPageSidebarWidth,
-                            child: PageSidebar(
-                              thumbnailCache: _thumbnailCache,
-                              onPageTap: navigateToPage,
-                            ),
+                          ...buildTabletSidePanels(
+                            externalLeftSidebar: widget.externalLeftSidebar,
+                            isExternalLeftSidebarOpen:
+                                widget.isExternalLeftSidebarOpen,
+                            externalLeftSidebarWidth:
+                                widget.externalLeftSidebarWidth,
+                            showPageSidebar: showSidebar,
+                            thumbnailCache: _thumbnailCache,
+                            onPageTap: navigateToPage,
                           ),
                         Expanded(
                           child: buildDrawingCanvasArea(
@@ -272,32 +261,18 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                 ],
               ),
 
-              // Phone external left sidebar overlay + drawer
-              if (isCompactMode &&
-                  widget.externalLeftSidebar != null &&
-                  widget.isExternalLeftSidebarOpen)
-                DrawerScrim(onTap: widget.onExternalLeftSidebarClose),
-              if (isCompactMode && widget.externalLeftSidebar != null)
-                SlidingLeftDrawer(
-                  isOpen: widget.isExternalLeftSidebarOpen,
-                  width: widget.externalLeftSidebarWidth,
-                  child: Material(
-                    elevation: 8,
-                    child: widget.externalLeftSidebar!,
-                  ),
-                ),
-              // Phone page sidebar overlay + drawer
-              if (isCompactMode && showSidebar)
-                DrawerScrim(onTap: closeSidebar),
               if (isCompactMode)
-                SlidingLeftDrawer(
-                  isOpen: showSidebar,
-                  width: drawerWidth,
-                  child: PageSidebar(
-                    thumbnailCache: _thumbnailCache,
-                    onPageTap: navigateToPage,
-                    variant: PageSidebarVariant.drawer,
-                  ),
+                ...buildPhoneDrawers(
+                  externalLeftSidebar: widget.externalLeftSidebar,
+                  isExternalLeftSidebarOpen: widget.isExternalLeftSidebarOpen,
+                  externalLeftSidebarWidth: widget.externalLeftSidebarWidth,
+                  onExternalLeftSidebarClose:
+                      widget.onExternalLeftSidebarClose,
+                  showPageSidebar: showSidebar,
+                  screenWidth: screenWidth,
+                  onClosePageSidebar: closeSidebar,
+                  thumbnailCache: _thumbnailCache,
+                  onPageTap: navigateToPage,
                 ),
             ],
           ),

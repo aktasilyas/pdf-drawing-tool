@@ -92,6 +92,7 @@ export 'presentation/widgets/documents_menus.dart';
 export 'presentation/widgets/rename_document_dialog.dart';
 export 'presentation/widgets/trashed_page_menu.dart';
 export 'presentation/widgets/documents_sidebar.dart';
+export 'presentation/widgets/documents_view_mode_switcher.dart';
 export 'presentation/widgets/empty_state.dart';
 export 'presentation/widgets/folder_card.dart';
 export 'presentation/widgets/folder_color_picker.dart';
