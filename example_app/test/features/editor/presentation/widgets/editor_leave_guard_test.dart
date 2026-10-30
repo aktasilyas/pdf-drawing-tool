@@ -134,4 +134,61 @@ void main() {
       expect(leaveCalls, 1);
     });
   });
+
+  group('text being typed (#489)', () {
+    void type(ProviderContainer container, String value) {
+      final notifier = container.read(textToolProvider.notifier);
+      notifier.startNewText(10, 20, layerIndex: 0);
+      final active = container.read(textToolProvider).activeText!;
+      notifier.updateText(active.copyWith(text: value));
+    }
+
+    List<String> savedTexts() {
+      final saved =
+          verify(() => save(captureAny())).captured.last as DrawingDocument;
+      return saved.layers.first.texts.map((t) => t.text).toList();
+    }
+
+    testWidgets('Back saves the typed text before leaving', (tester) async {
+      late ProviderContainer container;
+      container = await pumpGuard(
+        tester,
+        onLeave: () async {
+          await saveBeforeLeavingEditor(container.read);
+          leaveCalls++;
+        },
+      );
+      type(container, 'Hello');
+
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump();
+
+      expect(leaveCalls, 1);
+      expect(savedTexts(), ['Hello']);
+    });
+
+    testWidgets('pausing the app saves the typed text', (tester) async {
+      final container = await pumpGuard(tester);
+      type(container, 'Hello');
+
+      setLifecycle(tester, const [AppLifecycleState.inactive]);
+      expect(container.read(textToolProvider).isEditing, isTrue);
+
+      setLifecycle(tester, const [
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ]);
+      await tester.pump();
+
+      expect(container.read(textToolProvider).isEditing, isFalse);
+      expect(savedTexts(), ['Hello']);
+
+      setLifecycle(tester, const [
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ]);
+    });
+  });
 }

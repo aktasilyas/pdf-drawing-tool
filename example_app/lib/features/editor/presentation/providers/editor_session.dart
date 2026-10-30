@@ -60,11 +60,24 @@ void onEditorDocumentChanged(
   read(hasUnsavedChangesProvider.notifier).state = true;
 }
 
-/// Writes what is left to save before the editor closes: a pending or failed
-/// save, after waiting for one that is running. Nothing is written when the
-/// notebook was only read. Returns false when the save failed; the editor
-/// then stays open and its banner offers Retry.
+/// Commits the text box being typed in, if any, so it is part of the next
+/// save (#489). Typed text lives only in the text tool until it is committed;
+/// an empty text box creates nothing. The commit is reported to autosave
+/// here as well, so it does not depend on the editor's document listener.
+void commitTextBeingEdited(ProviderReader read) {
+  final before = read(documentProvider);
+  read(textToolActionsProvider).commit();
+  final after = read(documentProvider);
+  if (!identical(before, after)) onEditorDocumentChanged(read, before, after);
+}
+
+/// Writes what is left to save before the editor closes: the text being
+/// typed (see [commitTextBeingEdited]), a pending or failed save, after
+/// waiting for one that is running. Nothing is written when the notebook was
+/// only read. Returns false when the save failed; the editor then stays open
+/// and its banner offers Retry.
 Future<bool> saveBeforeLeavingEditor(ProviderReader read) async {
+  commitTextBeingEdited(read);
   await read(autoSaveProvider.notifier).flush();
   return read(saveFailureProvider) == null;
 }
