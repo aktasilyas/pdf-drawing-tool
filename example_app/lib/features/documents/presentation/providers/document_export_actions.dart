@@ -31,6 +31,7 @@ class DocumentExportActions {
               document,
               strings: strings,
               share: true,
+              isInfiniteCanvas: document.isInfiniteCanvas,
             );
         return true;
       },

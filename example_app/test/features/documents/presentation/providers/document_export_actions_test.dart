@@ -48,6 +48,7 @@ void main() {
           any(),
           strings: any(named: 'strings'),
           share: any(named: 'share'),
+          isInfiniteCanvas: any(named: 'isInfiniteCanvas'),
         )).thenAnswer((_) async {});
     container = ProviderContainer(overrides: [
       loadDocumentUseCaseProvider.overrideWithValue(load),
@@ -70,9 +71,27 @@ void main() {
           captureAny(),
           strings: strings,
           share: true,
+          isInfiniteCanvas: false,
         )).captured.single as DrawingDocument;
     expect(captured.pages, hasLength(3));
     expect(container.read(libraryErrorProvider), isNull);
+  });
+
+  test('a whiteboard document is exported as an infinite canvas', () async {
+    final whiteboard = document.copyWith(documentType: DocumentType.whiteboard);
+    when(() => load('doc-1')).thenAnswer((_) async => Right(whiteboard));
+
+    await container
+        .read(documentExportActionsProvider)
+        .exportAsPdf('doc-1', strings: strings);
+
+    verify(() => runner.run(
+          any(),
+          any(),
+          strings: strings,
+          share: true,
+          isInfiniteCanvas: true,
+        )).called(1);
   });
 
   test('a failed load reports exportDocument and never exports', () async {
@@ -91,6 +110,7 @@ void main() {
           any(),
           strings: any(named: 'strings'),
           share: any(named: 'share'),
+          isInfiniteCanvas: any(named: 'isInfiniteCanvas'),
         ));
   });
 }
