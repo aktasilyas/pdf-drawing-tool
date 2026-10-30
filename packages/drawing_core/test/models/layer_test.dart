@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 import 'package:drawing_core/src/models/bounding_box.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
+import 'package:drawing_core/src/models/image_element.dart';
 import 'package:drawing_core/src/models/layer.dart';
 import 'package:drawing_core/src/models/shape.dart';
 import 'package:drawing_core/src/models/shape_type.dart';
@@ -1429,6 +1430,28 @@ void main() {
             .addStroke(testStroke1);
         expect(layer.strokes.length, 1);
         expect(layer.elementOrder, [testStroke1.id]);
+      });
+
+      test('addShape and addText ignore an id already on the layer', () {
+        const text = TextElement(id: 'dup-text', text: 'x', x: 0, y: 0);
+        final layer = Layer(id: 'l', name: 'L', strokes: const [])
+            .addShape(testShape1)
+            .addShape(testShape1)
+            .addText(text)
+            .addText(text);
+        expect(layer.shapes.length, 1);
+        expect(layer.texts.length, 1);
+        expect(layer.elementOrder, [testShape1.id, text.id]);
+      });
+
+      test('addImage ignores an id already on the layer', () {
+        const image = ImageElement(
+            id: 'dup-img', filePath: 'a.png', x: 0, y: 0, width: 1, height: 1);
+        final layer = Layer(id: 'l', name: 'L', strokes: const [])
+            .addImage(image)
+            .addImage(image);
+        expect(layer.images.length, 1);
+        expect(layer.elementOrder, ['dup-img']);
       });
     });
   });
