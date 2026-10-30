@@ -16,6 +16,7 @@
   "commonRestore": "Kurtar",
   "commonMenu": "Menü",
   "commonErrorDetail": "Hata: {error}",
+  "commonRemoveItem": "Kaldır: {label}",
   "settingsTitle": "Ayarlar",
   "settingsSectionAppearance": "GÖRÜNÜM",
   "settingsSectionAccount": "HESAP",

@@ -146,7 +146,8 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
+          // Chips carry their own 48dp tap band around a 32dp pill.
+          runSpacing: 0,
           children: [
             PaperSizePreset.a4,
             PaperSizePreset.a5,

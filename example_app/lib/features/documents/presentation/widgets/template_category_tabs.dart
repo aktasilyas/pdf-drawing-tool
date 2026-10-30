@@ -48,7 +48,7 @@ class TemplateCategoryTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return SizedBox(
-      height: 40,
+      height: AppSpacing.minTouchTarget,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

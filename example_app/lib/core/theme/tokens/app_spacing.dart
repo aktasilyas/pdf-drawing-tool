@@ -89,6 +89,9 @@ abstract class AppSpacing {
   /// Navigation rail genişliği (80dp)
   static const double navigationRailWidth = 80;
 
+  /// Visible height of an `AppChip` pill; its tap area is [minTouchTarget].
+  static const double chipHeight = 32;
+
   // ══════════════════════════════════════════════════════════════════════════
   // TOUCH TARGETS
   // ══════════════════════════════════════════════════════════════════════════
