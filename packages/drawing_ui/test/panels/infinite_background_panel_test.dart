@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/panel_harness.dart';
 
+const _strings = DrawingStringsTr();
+
 void main() {
   final panel = InfiniteBackgroundPanel(onClose: () {});
 
@@ -54,6 +56,49 @@ void main() {
     await pumpPanel(tester, panel);
     expectMinTapTarget(tester, find.byType(InfiniteBackgroundPatternChip));
     expectMinTapTarget(tester, find.byType(InfiniteBackgroundColorChip));
+  });
+
+  testWidgets('meets tap-target and label guidelines', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(tester, panel);
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    expect(find.byTooltip(_strings.panels.close), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('chips are buttons that report selection', (tester) async {
+    final handle = tester.ensureSemantics();
+    final c = await pumpPanel(tester, panel);
+    final t = _strings.templates;
+
+    // Defaults: plain pattern, white colour.
+    expect(
+      tester.getSemantics(find.bySemanticsLabel(t.patternPlain)),
+      containsSemantics(isButton: true, isSelected: true, hasTapAction: true),
+    );
+    expect(
+      tester.getSemantics(find.bySemanticsLabel(t.colorWhite)),
+      containsSemantics(isButton: true, isSelected: true, hasTapAction: true),
+    );
+    expect(
+      tester.getSemantics(find.bySemanticsLabel(t.patternGrid)),
+      containsSemantics(isButton: true, isSelected: false),
+    );
+
+    // TalkBack double-tap goes through the semantics tap action.
+    tester.semantics.tap(find.semantics.byLabel(t.patternGrid));
+    await tester.pump();
+    tester.semantics.tap(find.semantics.byLabel(t.colorBlack));
+    await tester.pump();
+    final bg = c.read(currentPageProvider).background;
+    expect(bg.type, BackgroundType.grid);
+    expect(bg.color, InfiniteBackgroundColors.black);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel(t.colorBlack)),
+      containsSemantics(isButton: true, isSelected: true),
+    );
+    handle.dispose();
   });
 
   testWidgets('no overflow at textScaler 1.3', (tester) async {

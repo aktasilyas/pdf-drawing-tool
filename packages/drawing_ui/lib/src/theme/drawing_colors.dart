@@ -75,4 +75,11 @@ class DrawingColors {
 
   /// Eraser preview color.
   static const Color eraserPreview = Color(0x40EF4444);
+
+  /// Text and check marks drawn on a dark paper swatch, independent of the
+  /// app theme (the swatch shows the page colour, not chrome).
+  static const Color onDarkPaper = Color(0xFFF2F3F6);
+
+  /// Text drawn on a light paper swatch, independent of the app theme.
+  static const Color onLightPaper = Color(0xFF1B1F23);
 }
