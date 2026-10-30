@@ -33,7 +33,6 @@ export 'selection_toolbar.dart';
 export 'selection_toolbar_buttons.dart';
 export 'selection_overflow_menu.dart';
 export 'spectrum_picker.dart';
-export 'text_context_menu.dart';
 export 'text_input_overlay.dart';
 export 'text_style_popup.dart';
 export 'thickness_slider.dart';

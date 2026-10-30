@@ -2024,24 +2024,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the screenshot'**
   String get editorSelectionScreenshotSaveFailed;
 
-  /// No description provided for @editorSelectionContextEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get editorSelectionContextEdit;
-
-  /// No description provided for @editorSelectionContextStyle.
-  ///
-  /// In en, this message translates to:
-  /// **'Style'**
-  String get editorSelectionContextStyle;
-
-  /// No description provided for @editorSelectionContextMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Move'**
-  String get editorSelectionContextMove;
-
   /// No description provided for @editorDocumentNameLabel.
   ///
   /// In en, this message translates to:
