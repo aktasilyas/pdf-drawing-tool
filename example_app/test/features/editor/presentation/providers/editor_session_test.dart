@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/editor/editor.dart';
@@ -23,6 +24,19 @@ void main() {
   tearDown(() => container.dispose());
 
   HistoryState history() => container.read(historyManagerProvider);
+
+  /// Leaves the canvas fitted to a wide page, then zoomed and panned away,
+  /// like a user would.
+  void zoomAndPan() {
+    container.read(canvasTransformProvider.notifier)
+      ..initializeForPage(
+        viewportSize: const Size(800, 1200),
+        pageSize: const Size(1190, 842),
+      )
+      ..setZoom(4)
+      ..setOffset(const Offset(-900, -1200));
+    expect(container.read(canvasTransformProvider).baselineZoom, isNot(1.0));
+  }
 
   test('opening a document empties the undo history', () {
     startEditorSession(container.read, docA);
@@ -109,6 +123,52 @@ void main() {
 
       startEditorSession(container.read, docA);
       expect(history().canUndo, isFalse);
+    });
+
+    test('resets the canvas transform to the default view (#474)', () {
+      startEditorSession(container.read, docA);
+      zoomAndPan();
+
+      closeEditorSession(container.read, container.invalidate);
+
+      expect(container.read(canvasTransformProvider), const CanvasTransform());
+    });
+  });
+
+  group('canvas transform per document (#474)', () {
+    final whiteboard = DrawingDocument.emptyMultiPage(
+      'W',
+      documentType: DocumentType.whiteboard,
+    ).copyWith(id: 'whiteboard');
+
+    test('a whiteboard opened after a zoomed document starts at 100%', () {
+      startEditorSession(container.read, docA);
+      zoomAndPan();
+
+      startEditorSession(container.read, whiteboard);
+
+      final transform = container.read(canvasTransformProvider);
+      expect(whiteboard.canvasMode.isInfinite, isTrue);
+      expect(transform.zoom, 1.0);
+      expect(transform.baselineZoom, 1.0);
+      expect(transform.offset, Offset.zero);
+      expect(container.read(zoomPercentageProvider), '100%');
+    });
+
+    test('a notebook is still fitted to its page after the reset', () {
+      startEditorSession(container.read, whiteboard);
+      zoomAndPan();
+
+      startEditorSession(container.read, docA);
+      container.read(canvasTransformProvider.notifier).initializeForPage(
+            viewportSize: const Size(800, 1200),
+            pageSize: const Size(595, 842),
+          );
+
+      final transform = container.read(canvasTransformProvider);
+      expect(transform.zoom, transform.baselineZoom);
+      expect(transform.zoom, isNot(4));
+      expect(container.read(zoomPercentageProvider), '100%');
     });
   });
 }
