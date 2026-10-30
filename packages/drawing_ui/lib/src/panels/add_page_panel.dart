@@ -53,9 +53,14 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
         .toList();
   }
 
-  int _resolveInsertionIndex(int currentIndex, int pageCount) =>
+  int _resolveInsertionIndex(
+    int currentIndex,
+    int pageCount, {
+    bool currentIsCover = false,
+  }) =>
       switch (_selectedPosition) {
-        AddPagePosition.before => currentIndex,
+        // Nothing goes before the cover: "Before" acts like "After" there.
+        AddPagePosition.before => currentIsCover ? 1 : currentIndex,
         AddPagePosition.after => currentIndex + 1,
         AddPagePosition.lastPage => pageCount,
       };
@@ -72,7 +77,11 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       actions: ref.read(pageStructureActionsProvider),
       messenger: ScaffoldMessenger.maybeOf(context),
       strings: strings,
-      index: _resolveInsertionIndex(currentIndex, doc.pages.length),
+      index: _resolveInsertionIndex(
+        currentIndex,
+        doc.pages.length,
+        currentIsCover: doc.pages[currentIndex].isCover,
+      ),
       size: size ?? resolveNewPageSize(doc, currentIndex),
       background: background,
     );

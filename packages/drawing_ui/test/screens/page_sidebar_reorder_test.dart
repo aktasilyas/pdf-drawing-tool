@@ -129,4 +129,37 @@ void main() {
     await tester.pump();
     expect(taps, [3]);
   });
+
+  testWidgets('cover cell is not draggable and not a drop target',
+      (tester) async {
+    final pages = sidebarPages(4);
+    pages[0] = pages[0].copyWith(isCover: true);
+    final container = await pumpSidebar(
+      tester,
+      variant: PageSidebarVariant.docked,
+      pages: pages,
+    );
+
+    // 3 reorderable cells, none for the cover.
+    expect(find.byType(ReorderablePageCell), findsNWidgets(3));
+    expect(
+      find.descendant(
+        of: find.byType(PageGridItem).first,
+        matching: find.byType(LongPressDraggable<int>),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.ancestor(
+        of: find.byType(PageGridItem).first,
+        matching: find.byType(DragTarget<int>),
+      ),
+      findsNothing,
+    );
+
+    await drag(tester, 2, 0);
+
+    final ids = [for (final p in container.read(documentProvider).pages) p.id];
+    expect(ids.first, 'page_0');
+  });
 }
