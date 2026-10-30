@@ -220,15 +220,12 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   Widget _buildThumbnailContent() {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // SPECIAL CASE: PDF pages - use pdfPageRenderProvider directly
-    if (widget.page.background.type == BackgroundType.pdf &&
-        widget.page.background.pdfFilePath != null &&
-        widget.page.background.pdfPageIndex != null) {
-      return PdfPageThumbnail(background: widget.page.background);
-    }
-
-    // Normal page thumbnail rendering
+    // PDF pages go through the rasterizer like every other page: it draws
+    // the PDF background under the annotations (#496).
     if (_isLoading) {
+      if (widget.page.background.type == BackgroundType.pdf) {
+        return const PdfThumbnailPlaceholder();
+      }
       return const Center(
         child: CircularProgressIndicator(),
       );
