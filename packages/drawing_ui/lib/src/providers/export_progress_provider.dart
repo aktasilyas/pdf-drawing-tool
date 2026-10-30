@@ -78,8 +78,31 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
 
   Timer? _autoDismissTimer;
   bool _cancelRequested = false;
+  bool _running = false;
 
   bool get isCancelRequested => _cancelRequested;
+
+  /// Whether an export flow holds the run (between [tryBegin] and [end]).
+  ///
+  /// Stays true after Cancel until the exporter has actually stopped, so a
+  /// new export cannot reset the cancel flag of one that is still running
+  /// (#491).
+  bool get isBusy => _running;
+
+  /// Claims the single export run and shows progress for [totalPages].
+  /// Returns false, changing nothing, while another export is running.
+  bool tryBegin(int totalPages) {
+    if (_running) return false;
+    _running = true;
+    start(totalPages);
+    return true;
+  }
+
+  /// Releases the run claimed by [tryBegin]. Call once the flow is over,
+  /// including the save/share step.
+  void end() {
+    _running = false;
+  }
 
   /// Asks the running export to stop. The overlay switches to the
   /// cancelled state at once, so the tap is answered even while the

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:drawing_ui/src/l10n/l10n.dart';
+import 'package:drawing_ui/src/panels/export_guard.dart';
 import 'package:drawing_ui/src/panels/pdf_export_action.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
@@ -45,7 +46,9 @@ class DocumentOptionsPanel extends ConsumerWidget {
             icon: ElyanotesIcons.image,
             label: s.export.exportPng,
             onTap: () {
+              final busy = rejectIfExportRunning(context, ref);
               onClose();
+              if (busy) return;
               exportCurrentPageAsPNG(ref, strings: s.export);
             },
           )
@@ -54,7 +57,9 @@ class DocumentOptionsPanel extends ConsumerWidget {
             icon: ElyanotesIcons.pdfFile,
             label: s.export.exportPdf,
             onTap: () {
+              final busy = rejectIfExportRunning(context, ref);
               onClose();
+              if (busy) return;
               final document = ref.read(documentProvider);
               final notifier = ref.read(exportProgressProvider.notifier);
               performPDFExport(

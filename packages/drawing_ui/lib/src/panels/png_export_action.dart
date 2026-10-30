@@ -30,6 +30,9 @@ void exportCurrentPageAsPNG(
   final document = ref.read(documentProvider);
   final page = document.currentPage;
   final progress = ref.read(exportProgressProvider.notifier);
+  // Never overwrite the state of an export that is still running (#491).
+  // Silent here: UI callers show the message via rejectIfExportRunning.
+  if (progress.isBusy) return;
   if (page == null) {
     progress.setError(ExportFailure.noPages);
     return;
@@ -55,7 +58,8 @@ Future<void> performPNGExport(
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   PngExportRenderer render = PagePngExporter.export,
 }) async {
-  progress.start(1);
+  // One export at a time (#491).
+  if (!progress.tryBegin(1)) return;
 
   try {
     final rendered = await render(
@@ -93,5 +97,7 @@ Future<void> performPNGExport(
   } catch (e) {
     DrawingLog.e('PNG export failed', e);
     progress.setError(exportFailureFor(e));
+  } finally {
+    progress.end();
   }
 }

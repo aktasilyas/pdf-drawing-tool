@@ -808,6 +808,7 @@
     }
   },
   "editorExportCancelled": "Cancelled",
+  "editorExportInProgress": "An export is already in progress",
   "editorExportPagesWithoutPdfBackground": "{count, plural, =1{1 page was exported without its PDF background} other{{count} pages were exported without their PDF background}}",
   "@editorExportPagesWithoutPdfBackground": {
     "placeholders": {

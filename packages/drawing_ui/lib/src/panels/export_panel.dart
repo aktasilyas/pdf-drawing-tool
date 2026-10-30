@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/export_options.dart';
+import 'package:drawing_ui/src/panels/export_guard.dart';
 import 'package:drawing_ui/src/panels/export_options_section.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/pdf_export_action.dart';
@@ -90,7 +91,9 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
 
   void _exportPDF(BuildContext context, WidgetRef ref, {bool share = false}) {
     final strings = context.drawingStrings.export;
+    final busy = rejectIfExportRunning(context, ref);
     onClose();
+    if (busy) return;
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
     final watermark = ref.read(exportWatermarkProvider);
@@ -111,7 +114,9 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
   /// Renders the current page off-screen and saves it as PNG.
   void _exportPNG(BuildContext context, WidgetRef ref) {
     final strings = context.drawingStrings.export;
+    final busy = rejectIfExportRunning(context, ref);
     onClose();
+    if (busy) return;
     exportCurrentPageAsPNG(ref, strings: strings);
   }
 }
