@@ -15,6 +15,7 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/widgets/ruler_overlay.dart'
     show rulerStripLength, rulerStripHeight;
 
+part 'gestures/pointer_kind_gate.dart';
 part 'gestures/ruler_snapping.dart';
 part 'gestures/sticky_note_gestures.dart';
 part 'gestures/text_gestures.dart';
@@ -111,6 +112,7 @@ abstract class DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     with
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
+        _PointerKindGate<T>,
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
         _TextGestures<T>,

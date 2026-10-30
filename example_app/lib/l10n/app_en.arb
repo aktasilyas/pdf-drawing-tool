@@ -115,6 +115,8 @@
     "description": "Log out button and dialog title."
   },
   "settingsLogoutConfirm": "Are you sure you want to log out of your account?",
+  "settingsDrawWithFinger": "Draw with finger",
+  "settingsDrawWithFingerSubtitle": "When off, only the stylus draws and fingers scroll and zoom",
   "settingsCrashReports": "Send crash reports",
   "settingsCrashReportsSubtitle": "Anonymous error reports; note content is never sent",
   "settingsVersion": "Version",
