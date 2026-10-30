@@ -229,6 +229,21 @@ class ImageCacheManager extends ChangeNotifier {
     _bytes = total;
   }
 
+  /// Evicts every image not read through [get] within [protectWindow]
+  /// (memory pressure). Evicted images reload on their next paint.
+  void trim() {
+    final now = _clock.elapsedMilliseconds;
+    for (final key in _cache.keys.toList()) {
+      final touched = _touchedMs[key];
+      if (touched != null && now - touched < protectWindow.inMilliseconds) {
+        continue;
+      }
+      _cache.remove(key)!.dispose();
+      _touchedMs.remove(key);
+    }
+    _recount();
+  }
+
   /// Stores [image] for [filePath] as if it had just loaded, and notifies.
   @visibleForTesting
   void debugPut(String filePath, ui.Image image) {

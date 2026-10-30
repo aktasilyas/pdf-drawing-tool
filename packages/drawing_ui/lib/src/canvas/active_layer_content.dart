@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
+import 'package:drawing_ui/src/canvas/editor_memory_pressure_observer.dart';
 import 'package:drawing_ui/src/canvas/element_preview_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/tiled_element_painter.dart';
@@ -56,6 +57,7 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
   bool _interacting = false;
   bool _hasRaster = false;
   ElementScene? _applied;
+  late final EditorMemoryPressureObserver _memoryPressure;
 
   /// File paths of applied scene images that have not loaded yet.
   Set<String> _unloaded = const {};
@@ -68,6 +70,14 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
     super.initState();
     _createCache();
     widget.cacheManager.addListener(_onImagesChanged);
+    _memoryPressure = EditorMemoryPressureObserver(_onMemoryPressure);
+  }
+
+  /// Low memory: drop off-screen tiles. The image cache may be trimmed too,
+  /// so re-raster the tiles under each image once it loads again.
+  void _onMemoryPressure() {
+    _cache.trimToVisible();
+    _unloaded = {for (final image in widget.scene.images) image.filePath};
   }
 
   void _createCache() {
@@ -170,6 +180,7 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
   @override
   void dispose() {
     _settleTimer?.cancel();
+    _memoryPressure.dispose();
     widget.cacheManager.removeListener(_onImagesChanged);
     _disposeCache();
     super.dispose();

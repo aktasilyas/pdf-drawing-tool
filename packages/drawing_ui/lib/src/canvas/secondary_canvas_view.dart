@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
+import 'package:drawing_ui/src/canvas/editor_memory_pressure_observer.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/secondary_canvas_layers.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
@@ -62,8 +63,18 @@ class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
   /// Max duration for a gesture to qualify as a tap.
   static const int _tapMaxDurationMs = 300;
 
+  late final EditorMemoryPressureObserver _memoryPressure;
+
+  @override
+  void initState() {
+    super.initState();
+    _memoryPressure =
+        EditorMemoryPressureObserver(() => _imageCacheManager.trim());
+  }
+
   @override
   void dispose() {
+    _memoryPressure.dispose();
     _imageCacheManager.dispose();
     super.dispose();
   }
