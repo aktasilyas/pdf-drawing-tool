@@ -146,14 +146,12 @@ class _InkThumbnail extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final cacheWidth = width.isFinite && width > 0
-            ? (width * pixelRatio).ceil()
-            : null;
+        final cacheWidth =
+            width.isFinite && width > 0 ? (width * pixelRatio).ceil() : null;
         final base = imageFor(stored);
         return Image(
-          image: cacheWidth == null
-              ? base
-              : ResizeImage(base, width: cacheWidth),
+          image:
+              cacheWidth == null ? base : ResizeImage(base, width: cacheWidth),
           // The page rect already has the page aspect; cover avoids
           // hairline gaps from rounding.
           fit: BoxFit.cover,

@@ -100,9 +100,9 @@ void main() {
   test('without a documents root it fails and writes nothing', () async {
     final plain = LibraryFixture();
     addTearDown(plain.close);
-    final doc = (await plain.documents
-            .createDocument(title: 'A', templateId: 'blank'))
-        .getOrElse(() => throw StateError('create failed'));
+    final doc =
+        (await plain.documents.createDocument(title: 'A', templateId: 'blank'))
+            .getOrElse(() => throw StateError('create failed'));
 
     final result = await plain.documents.saveThumbnail(doc.id, png);
 
