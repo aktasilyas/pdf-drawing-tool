@@ -69,7 +69,7 @@ void main() {
 
     final layerJson = ((stored['pages'] as List).first['layers'] as List).first
         as Map<String, dynamic>;
-    expect(layerJson['shapes'], contains(heart));
+    expect(layerJson['shapes'], contains(equals(heart)));
     expect(layerJson['elementOrder'], contains('heart-1'));
   });
 }
