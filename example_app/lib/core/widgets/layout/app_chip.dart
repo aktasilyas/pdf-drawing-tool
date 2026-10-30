@@ -21,6 +21,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/buttons/app_icon_button.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 /// ElyaNotes chip komponenti.
@@ -140,10 +141,13 @@ class AppChip extends StatelessWidget {
   }
 
   Widget _deleteButton(BuildContext context, Color contentColor) {
-    return IconButton(
-      onPressed: onDelete,
+    return AppIconButton(
+      icon: Icons.close,
       tooltip: context.l10n.commonRemoveItem(label),
-      icon: Icon(Icons.close, size: AppIconSize.sm, color: contentColor),
+      onPressed: onDelete,
+      variant: AppIconButtonVariant.ghost,
+      size: AppIconButtonSize.small,
+      iconColor: contentColor,
     );
   }
 }

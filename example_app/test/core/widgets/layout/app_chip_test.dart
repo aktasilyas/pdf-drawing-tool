@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/buttons/app_icon_button.dart';
 import 'package:example_app/core/widgets/layout/app_chip.dart';
 import 'package:example_app/l10n/l10n.dart';
 
@@ -98,6 +99,6 @@ void main() {
 
   testWidgets('no delete button without onDelete', (tester) async {
     await _pump(tester, AppChip(label: 'A4', onTap: () {}));
-    expect(find.byType(IconButton), findsNothing);
+    expect(find.byType(AppIconButton), findsNothing);
   });
 }
