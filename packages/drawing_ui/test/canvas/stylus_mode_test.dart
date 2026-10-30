@@ -25,8 +25,8 @@ void main() {
     container = ProviderScope.containerOf(tester.element(finder));
   }
 
-  void down(int id, Offset p, PointerDeviceKind kind) => state
-      .handlePointerDown(PointerDownEvent(
+  void down(int id, Offset p, PointerDeviceKind kind) =>
+      state.handlePointerDown(PointerDownEvent(
           pointer: id, kind: kind, position: p, timeStamp: clock));
 
   void move(int id, Offset p, PointerDeviceKind kind) {
