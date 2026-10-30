@@ -51,8 +51,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-  testWidgets('clear button exposes the given localized label',
-      (tester) async {
+  testWidgets('clear button exposes the given localized label', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
