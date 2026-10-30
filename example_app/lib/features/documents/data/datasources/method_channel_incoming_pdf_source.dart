@@ -9,8 +9,10 @@ import 'package:example_app/features/documents/domain/repositories/incoming_pdf_
 /// Receives PDFs from the Android side over the `elyanotes/incoming_pdf`
 /// channel.
 ///
-/// Dart calls `ready` once it listens; native answers with the PDFs queued so
-/// far and afterwards pushes each new one with `onPdf`.
+/// Dart calls `ready` once it listens; native answers with the events queued
+/// so far and afterwards pushes each new PDF with `onPdf` ({path, name, size})
+/// and each PDF it could not copy with `onPdfError` ({name, reason}). In the
+/// `ready` list a failure is told apart by its `reason` key.
 class MethodChannelIncomingPdfSource implements IncomingPdfSource {
   MethodChannelIncomingPdfSource({MethodChannel? channel})
       : _channel = channel ?? const MethodChannel(channelName);
@@ -20,28 +22,34 @@ class MethodChannelIncomingPdfSource implements IncomingPdfSource {
   final MethodChannel _channel;
 
   @override
-  Stream<IncomingPdf> watch() {
-    final controller = StreamController<IncomingPdf>();
+  Stream<IncomingPdfEvent> watch() {
+    final controller = StreamController<IncomingPdfEvent>();
+
+    void add(IncomingPdfEvent? event) {
+      if (event != null && !controller.isClosed) controller.add(event);
+    }
 
     Future<void> start() async {
       _channel.setMethodCallHandler((call) async {
-        if (call.method != 'onPdf') return null;
-        final pdf = _parse(call.arguments);
-        if (pdf != null && !controller.isClosed) controller.add(pdf);
+        switch (call.method) {
+          case 'onPdf':
+            add(_parsePdf(call.arguments));
+          case 'onPdfError':
+            add(_parseFailure(call.arguments));
+        }
         return null;
       });
       try {
         final pending = await _channel.invokeMethod<List<Object?>>('ready');
         for (final item in pending ?? const <Object?>[]) {
-          final pdf = _parse(item);
-          if (pdf != null && !controller.isClosed) controller.add(pdf);
+          add(_parsePending(item));
         }
       } on MissingPluginException {
         // No native side (tests, other platforms): nothing will ever arrive.
         _channel.setMethodCallHandler(null);
         await controller.close();
       } catch (e, st) {
-        // Native failed to answer; PDFs pushed later are still delivered.
+        // Native failed to answer; events pushed later are still delivered.
         logger.w('Incoming PDF channel not ready', error: e, stackTrace: st);
       }
     }
@@ -51,7 +59,12 @@ class MethodChannelIncomingPdfSource implements IncomingPdfSource {
     return controller.stream;
   }
 
-  static IncomingPdf? _parse(Object? raw) {
+  static IncomingPdfEvent? _parsePending(Object? raw) {
+    if (raw is Map && raw.containsKey('reason')) return _parseFailure(raw);
+    return _parsePdf(raw);
+  }
+
+  static IncomingPdf? _parsePdf(Object? raw) {
     if (raw is! Map) return null;
     final path = raw['path'];
     final name = raw['name'];
@@ -59,5 +72,19 @@ class MethodChannelIncomingPdfSource implements IncomingPdfSource {
     if (path is! String || path.isEmpty) return null;
     if (name is! String || size is! int) return null;
     return IncomingPdf(path: path, name: name, size: size);
+  }
+
+  static IncomingPdfFailure? _parseFailure(Object? raw) {
+    if (raw is! Map) return null;
+    final name = raw['name'];
+    final reason = raw['reason'];
+    if (name is! String || reason is! String) return null;
+    return IncomingPdfFailure(
+      name: name,
+      // An unknown reason still tells the user the file was not imported.
+      reason: reason == 'storageFull'
+          ? IncomingPdfFailureReason.storageFull
+          : IncomingPdfFailureReason.unreadable,
+    );
   }
 }

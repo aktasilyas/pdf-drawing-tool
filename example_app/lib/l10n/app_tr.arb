@@ -365,6 +365,22 @@
   "libraryPdfTooLarge": "PDF dosyası çok büyük! Maksimum boyut: 200MB",
   "libraryPdfOpening": "PDF açılıyor...",
   "libraryPdfImportFailed": "PDF import başarısız",
+  "incomingPdfStorageFull": "{name} için yeterli depolama alanı yok. Yer açıp tekrar deneyin.",
+  "@incomingPdfStorageFull": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomingPdfUnreadable": "{name} açılamadı. Dosyayı yeniden paylaşmayı deneyin.",
+  "@incomingPdfUnreadable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "libraryOpening": "{title} açılıyor",
   "@libraryOpening": {
     "placeholders": {

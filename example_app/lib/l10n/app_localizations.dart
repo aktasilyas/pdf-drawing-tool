@@ -2204,6 +2204,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t import the PDF'**
   String get libraryPdfImportFailed;
 
+  /// SnackBar when a PDF opened or shared from another app could not be copied because storage is full. name = file name.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to import {name}. Free up space and try again.'**
+  String incomingPdfStorageFull(String name);
+
+  /// SnackBar when a PDF opened or shared from another app could not be read. name = file name.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {name}. Try sharing it again.'**
+  String incomingPdfUnreadable(String name);
+
   /// No description provided for @libraryOpening.
   ///
   /// In en, this message translates to:

@@ -8,6 +8,11 @@ void main() {
   const a = IncomingPdf(path: '/a.pdf', name: 'a.pdf', size: 1);
   const b = IncomingPdf(path: '/b.pdf', name: 'b.pdf', size: 2);
 
+  const failed = IncomingPdfFailure(
+    name: 'c.pdf',
+    reason: IncomingPdfFailureReason.unreadable,
+  );
+
   late FakeIncomingPdfSource source;
   late ProviderContainer container;
 
@@ -20,7 +25,7 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  List<IncomingPdf> queue() => container.read(incomingPdfQueueProvider);
+  List<IncomingPdfEvent> queue() => container.read(incomingPdfQueueProvider);
 
   test('items are queued in arrival order', () async {
     expect(queue(), isEmpty);
@@ -28,6 +33,15 @@ void main() {
     source.emit(b);
     await pumpEventQueue();
     expect(queue(), [a, b]);
+  });
+
+  test('failures are queued in order with PDFs', () async {
+    expect(queue(), isEmpty);
+    source.emit(a);
+    source.emit(failed);
+    source.emit(b);
+    await pumpEventQueue();
+    expect(queue(), [a, failed, b]);
   });
 
   test('remove drops only the given item', () async {

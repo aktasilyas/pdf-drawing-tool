@@ -1195,6 +1195,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryPdfImportFailed => 'PDF import başarısız';
 
   @override
+  String incomingPdfStorageFull(String name) {
+    return '$name için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';
+  }
+
+  @override
+  String incomingPdfUnreadable(String name) {
+    return '$name açılamadı. Dosyayı yeniden paylaşmayı deneyin.';
+  }
+
+  @override
   String libraryOpening(String title) {
     return '$title açılıyor';
   }

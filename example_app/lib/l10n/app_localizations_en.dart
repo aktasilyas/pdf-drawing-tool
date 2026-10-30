@@ -1215,6 +1215,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryPdfImportFailed => 'Couldn\'t import the PDF';
 
   @override
+  String incomingPdfStorageFull(String name) {
+    return 'Not enough storage to import $name. Free up space and try again.';
+  }
+
+  @override
+  String incomingPdfUnreadable(String name) {
+    return 'Could not open $name. Try sharing it again.';
+  }
+
+  @override
   String libraryOpening(String title) {
     return 'Opening $title';
   }
