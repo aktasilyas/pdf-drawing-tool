@@ -28,6 +28,51 @@ core.DrawingDocument _twoPagesWithInk() {
 }
 
 void main() {
+  testWidgets('confirm clears every layer even when layer 2 is active',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 1400);
+    addTearDown(tester.view.reset);
+
+    final container = ProviderContainer(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    );
+    addTearDown(container.dispose);
+
+    final base = core.DrawingDocument.emptyMultiPage('Test');
+    final page = base.pages[0].copyWith(layers: [
+      core.Layer.empty('A').addStroke(_stroke('a')),
+      core.Layer.empty('B').addStroke(_stroke('b')),
+    ]);
+    container.read(documentProvider.notifier).updateDocument(
+          base.copyWith(pages: [page], activeLayerIndex: 1),
+        );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: PageOptionsPanel(onClose: () {}, pageIndex: 0),
+          ),
+        ),
+      ),
+    );
+
+    final clearItem = find.text('Sayfayı temizle');
+    await tester.ensureVisible(clearItem);
+    await tester.tap(clearItem);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Temizle'));
+    await tester.pumpAndSettle();
+
+    final layers = container.read(documentProvider).pages[0].layers;
+    expect(layers.length, 2);
+    expect(layers.every((l) => l.isEmpty), isTrue);
+  });
+
   testWidgets('clear from a non-current thumbnail targets that page',
       (tester) async {
     SharedPreferences.setMockInitialValues({});

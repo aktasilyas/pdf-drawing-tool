@@ -170,9 +170,11 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
+              final page = doc.pages[pageIndex];
+              if (ClearPageCommand.isNoop(page.layers)) return;
               historyManager.execute(
-                ClearLayerCommand(layerIndex: doc.activeLayerIndex),
-                pageId: doc.pages[pageIndex].id,
+                ClearPageCommand(),
+                pageId: page.id,
               );
             },
             style: TextButton.styleFrom(

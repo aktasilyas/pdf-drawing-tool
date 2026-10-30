@@ -124,9 +124,8 @@ class EraserSettingsPanel extends ConsumerWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                historyManager.execute(
-                  core.ClearLayerCommand(layerIndex: document.activeLayerIndex),
-                );
+                if (core.ClearPageCommand.isNoop(document.layers)) return;
+                historyManager.execute(core.ClearPageCommand());
               },
               style: TextButton.styleFrom(foregroundColor: palette.danger),
               child: Text(p.clearPageConfirm),
