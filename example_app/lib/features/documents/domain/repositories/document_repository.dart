@@ -37,6 +37,23 @@ abstract class DocumentRepository {
     double paperHeightMm = 297.0,
   });
 
+  /// Creates a document and stores its first content in one transaction, so
+  /// a failed write or the app closing mid-import never leaves a row without
+  /// content (a blank "ghost" notebook, #602). [buildContent] receives the new
+  /// document (id, dates) and returns the content to store for it.
+  Future<Either<Failure, DocumentInfo>> createDocumentWithContent({
+    required String title,
+    required String templateId,
+    String? folderId,
+    String paperColor = 'Sarı kağıt',
+    bool isPortrait = true,
+    DocumentType documentType = DocumentType.notebook,
+    double paperWidthMm = 210.0,
+    double paperHeightMm = 297.0,
+    required int pageCount,
+    required Map<String, dynamic> Function(DocumentInfo document) buildContent,
+  });
+
   /// Update document metadata
   Future<Either<Failure, DocumentInfo>> updateDocument({
     required String id,

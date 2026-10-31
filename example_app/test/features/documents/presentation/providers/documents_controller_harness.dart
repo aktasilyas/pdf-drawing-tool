@@ -44,7 +44,10 @@ void registerDocumentsFallbacks() {
   registerFallbackValue(<String, dynamic>{});
   registerFallbackValue(DateTime(2026));
   registerFallbackValue(copyTitle);
+  registerFallbackValue(_noContent);
 }
+
+Map<String, dynamic> _noContent(DocumentInfo _) => const {};
 
 /// A [ProviderContainer] with mocked repositories that counts how often each
 /// list provider is built, so tests can assert which ones were invalidated.
