@@ -204,8 +204,8 @@ void main() {
         final coverless = testModel.copyWith(hasCover: false);
         when(() => mockDatasource.getDocument('doc-1'))
             .thenAnswer((_) async => coverless);
-        when(() => mockDatasource.updateDocument(any()))
-            .thenAnswer((invocation) async =>
+        when(() => mockDatasource.updateDocument(any())).thenAnswer(
+            (invocation) async =>
                 invocation.positionalArguments[0] as DocumentModel);
 
         final result = await repository.updateCover('doc-1', 'linen_sage');

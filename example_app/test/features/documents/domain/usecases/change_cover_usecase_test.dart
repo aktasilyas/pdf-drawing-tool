@@ -185,8 +185,7 @@ void main() {
       verifyNoWrites();
     });
 
-    test('a notebook without cover fails validation without writing',
-        () async {
+    test('a notebook without cover fails validation without writing', () async {
       when(() => repo.getDocument(_id))
           .thenAnswer((_) async => Right(_info(hasCover: false)));
 
