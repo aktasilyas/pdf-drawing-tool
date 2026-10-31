@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/l10n/l10n.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
@@ -60,6 +61,9 @@ class AddPagePositionSelector extends StatelessWidget {
 }
 
 /// A single quick-access template thumbnail with label.
+///
+/// Exposed to accessibility services as one selectable button named after
+/// the template; the whole cell (well above 48dp) is the tap area.
 class QuickTemplateThumbnail extends StatelessWidget {
   const QuickTemplateThumbnail({
     super.key,
@@ -72,20 +76,36 @@ class QuickTemplateThumbnail extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  static const double _previewWidth = 68;
+
+  /// Size of the page preview inside the border.
+  static const Size previewSize = Size(_previewWidth, 92);
+
+  /// Room for the selected (thickest) border: 2dp on each side.
+  static const double _borderAllowance = 2 * ChromeSpacing.xxs;
+
+  /// Cell width: the preview plus the selected border.
+  static const double width = _previewWidth + _borderAllowance;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final name = context.drawingStrings.templates.templateName(template);
 
-    return GestureDetector(
+    final cell = GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 72,
+        width: width,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Radii moved from 6/5 literals to the chrome scale (8, inner 6
+            // so the preview stays concentric inside the 2dp border).
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(ChromeRadius.sm),
                 border: Border.all(
                   color: isSelected ? cs.primary : cs.outlineVariant,
                   width: isSelected ? 2 : 1,
@@ -93,16 +113,16 @@ class QuickTemplateThumbnail extends StatelessWidget {
               ),
               child: TemplatePreviewWidget(
                 template: template,
-                size: const Size(68, 92),
-                borderRadius: BorderRadius.circular(5),
+                size: previewSize,
+                borderRadius:
+                    BorderRadius.circular(ChromeRadius.sm - ChromeSpacing.xxs),
                 showBorder: false,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: ChromeSpacing.xs),
             Text(
-              context.drawingStrings.templates.templateName(template),
-              style: TextStyle(
-                fontSize: 11,
+              name,
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: isSelected ? cs.primary : cs.onSurfaceVariant,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -112,6 +132,17 @@ class QuickTemplateThumbnail extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    // One node per thumbnail: the caption is not read a second time, and the
+    // selection (shown only by colour) is announced.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: name,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: cell,
     );
   }
 }
