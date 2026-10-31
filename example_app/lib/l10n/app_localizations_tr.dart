@@ -51,6 +51,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonRestore => 'Kurtar';
 
   @override
+  String get commonUndo => 'Geri al';
+
+  @override
   String get commonMenu => 'Menü';
 
   @override
@@ -557,6 +560,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryDocumentMoved => 'Belge taşındı';
+
+  @override
+  String get libraryDocumentTrashed => 'Son Silinenler\'e taşındı';
 
   @override
   String get libraryDocumentRestored => 'Belge geri yüklendi';
