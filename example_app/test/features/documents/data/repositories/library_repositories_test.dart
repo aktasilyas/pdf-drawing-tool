@@ -3,6 +3,7 @@ import 'package:drawing_core/drawing_core.dart' show DocumentType;
 import 'package:example_app/core/core.dart' show Failure;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/data/models/folder_model.dart';
 import '../../../../helpers/library_fixture.dart';
 
 /// Behaviour of the repositories against a real Drift database.
@@ -195,7 +196,16 @@ void main() {
       () async {
     final root = await folder('Okul');
     final sub = await folder('Ders', parentId: root.id);
-    final subsub = await folder('Hafta', parentId: sub.id);
+    // The UI caps nesting at two levels, but older or synced data can be
+    // deeper, so seed the third level through the datasource.
+    final subsub = await fx.folderDs.createFolder(
+      FolderModel(
+        id: 'subsub',
+        name: 'Hafta',
+        parentId: sub.id,
+        createdAt: DateTime(2026),
+      ),
+    );
     final a = await create('A', folderId: root.id);
     final b = await create('B', folderId: sub.id);
     final c = await create('C', folderId: subsub.id);
