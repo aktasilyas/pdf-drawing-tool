@@ -215,8 +215,8 @@ void main() {
     expect(child.top, lessThan(next.top));
     expect(child.left - parent.left, AppSpacing.xl);
     expect(next.left, parent.left);
-    final childTile =
-        find.ancestor(of: find.text('Biyoloji'), matching: find.byType(ListTile));
+    final childTile = find.ancestor(
+        of: find.text('Biyoloji'), matching: find.byType(ListTile));
     expect(tester.getSize(childTile).height, greaterThanOrEqualTo(48));
   });
 

@@ -81,8 +81,8 @@ void main() {
     test('a folder without subfolders is offered top-level folders only', () {
       // Repository rule: LibraryRule.folderMoveDepth (no subfolder targets),
       // and a folder is never its own target.
-      expect(ids(MoveToFolderActions.targetsFor(tree, const ['f'])),
-          ['a', 'd']);
+      expect(
+          ids(MoveToFolderActions.targetsFor(tree, const ['f'])), ['a', 'd']);
       expect(ids(MoveToFolderActions.targetsFor(tree, const ['b'])),
           ['a', 'd', 'f']);
       expect(
