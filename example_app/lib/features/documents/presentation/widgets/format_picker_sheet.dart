@@ -21,6 +21,10 @@ class FormatPickerSheet extends StatefulWidget {
   static Future<PaperSize?> show(BuildContext context, PaperSize currentSize) {
     return showModalBottomSheet<PaperSize>(
       context: context,
+      // Size to content; the body scrolls when the screen is too short
+      // (phones in landscape) instead of overflowing the default 9/16 cap.
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: context.palette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -56,23 +60,25 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
     final textSecondary = context.palette.textMuted;
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDragHandle(),
-            const SizedBox(height: AppSpacing.md),
-            _buildHeader(textSecondary),
-            const SizedBox(height: AppSpacing.lg),
-            _buildOrientationSection(textSecondary),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSizeSection(textSecondary),
-            const SizedBox(height: AppSpacing.lg),
-            _buildConfirmButton(),
-            const SizedBox(height: AppSpacing.sm),
-          ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDragHandle(),
+              const SizedBox(height: AppSpacing.md),
+              _buildHeader(textSecondary),
+              const SizedBox(height: AppSpacing.lg),
+              _buildOrientationSection(textSecondary),
+              const SizedBox(height: AppSpacing.lg),
+              _buildSizeSection(textSecondary),
+              const SizedBox(height: AppSpacing.lg),
+              _buildConfirmButton(),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
         ),
       ),
     );
