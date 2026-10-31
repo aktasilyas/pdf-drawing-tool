@@ -69,7 +69,7 @@ class SaveDocumentUseCase {
     } catch (e) {
       logger.e('Save document exception',
           error: e, stackTrace: StackTrace.current);
-      return Left(CacheFailure('Failed to save document: $e'));
+      return Left(cacheFailureFor(e, 'Failed to save document: $e'));
     }
   }
 }

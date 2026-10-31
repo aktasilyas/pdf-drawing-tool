@@ -1123,6 +1123,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kaydedilemedi. Değişiklikleriniz henüz kaydedilmedi.';
 
   @override
+  String get editorSaveStorageFullMessage =>
+      'Kaydetmek için yeterli depolama alanı yok. Yer açın; değişiklikleriniz henüz kaydedilmedi.';
+
+  @override
   String get startupErrorTitle => 'Uygulama başlatılamadı';
 
   @override

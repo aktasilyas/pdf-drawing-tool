@@ -75,9 +75,9 @@ class DocumentRepositoryImpl
       final created = await _localDatasource.createDocument(document);
       return Right(created.toEntity());
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(cacheFailureFor(e, e.message));
     } catch (e) {
-      return Left(CacheFailure('Failed to create document: $e'));
+      return Left(cacheFailureFor(e, 'Failed to create document: $e'));
     }
   }
 
@@ -90,9 +90,9 @@ class DocumentRepositoryImpl
     try {
       return Right(await _runner.run(action));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(cacheFailureFor(e, e.message));
     } catch (e) {
-      return Left(CacheFailure('Failed to $what: $e'));
+      return Left(cacheFailureFor(e, 'Failed to $what: $e'));
     }
   }
 

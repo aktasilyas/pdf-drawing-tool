@@ -85,6 +85,31 @@ void main() {
     expect(find.textContaining('Kaydedilemedi'), findsNothing);
   });
 
+  testWidgets('a full device gets the storage-full message', (tester) async {
+    final doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
+    when(() => save(any())).thenAnswer(
+      (_) async => const Left<Failure, void>(StorageFullFailure('full')),
+    );
+    final container = await pumpBanner(tester);
+
+    await container.read(autoSaveProvider.notifier).saveNow(doc);
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.textContaining('yeterli depolama alanı yok'), findsOneWidget);
+    expect(find.textContaining('Kaydedilemedi'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Tekrar dene'), findsOneWidget);
+  });
+
+  testWidgets('other failures keep the generic message', (tester) async {
+    final doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
+    when(() => save(any())).thenAnswer((_) async => failed);
+    final container = await pumpBanner(tester);
+
+    await container.read(autoSaveProvider.notifier).saveNow(doc);
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.textContaining('Kaydedilemedi'), findsOneWidget);
+    expect(find.textContaining('depolama alanı'), findsNothing);
+  });
+
   testWidgets('no overflow at 380dp width and textScaler 1.3', (tester) async {
     final doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
     when(() => save(any())).thenAnswer((_) async => failed);

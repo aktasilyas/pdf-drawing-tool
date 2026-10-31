@@ -1143,6 +1143,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t save. Your changes haven\'t been saved yet.';
 
   @override
+  String get editorSaveStorageFullMessage =>
+      'Not enough storage to save. Free up space; your changes haven\'t been saved yet.';
+
+  @override
   String get startupErrorTitle => 'The app couldn\'t start';
 
   @override

@@ -121,7 +121,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       await _db.into(_db.documents).insert(document.toCompanion());
       return document;
     } catch (e) {
-      throw CacheException('Failed to create document: $e');
+      throw CacheException('Failed to create document: $e', originalError: e);
     }
   }
 
@@ -134,7 +134,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       if (count == 0) throw const CacheException('Document not found');
       return document;
     } catch (e) {
-      throw CacheException('Failed to update document: $e');
+      throw CacheException('Failed to update document: $e', originalError: e);
     }
   }
 
@@ -259,7 +259,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
             ),
           );
     } catch (e) {
-      throw CacheException('Failed to save document content: $e');
+      throw CacheException('Failed to save document content: $e',
+          originalError: e);
     }
   }
 

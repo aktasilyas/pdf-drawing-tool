@@ -2072,6 +2072,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save. Your changes haven\'t been saved yet.'**
   String get editorSaveFailedMessage;
 
+  /// No description provided for @editorSaveStorageFullMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to save. Free up space; your changes haven\'t been saved yet.'**
+  String get editorSaveStorageFullMessage;
+
   /// No description provided for @startupErrorTitle.
   ///
   /// In en, this message translates to:

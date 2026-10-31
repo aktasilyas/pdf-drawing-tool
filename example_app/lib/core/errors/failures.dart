@@ -36,6 +36,11 @@ class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Yerel veri hatası']);
 }
 
+/// A local write failed because the device has no space left.
+class StorageFullFailure extends CacheFailure {
+  const StorageFullFailure([super.message = 'Not enough storage']);
+}
+
 /// Network connectivity failures
 class NetworkFailure extends Failure {
   const NetworkFailure([super.message = 'İnternet bağlantısı yok']);
