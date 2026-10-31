@@ -13,9 +13,9 @@ const double _line = 0.5;
 /// One row of the layers panel: drag handle, name (double tap to rename),
 /// visibility and lock toggles. Tapping the row activates the layer.
 ///
-/// Semantics: the name area is the row's button node (label = layer name,
-/// selected = active, tap activates) with a custom "Rename" action. The
-/// drag handle and the toggles stay separate nodes; toggles announce state.
+/// Semantics: the row is one button node (label = layer name, selected =
+/// active, tap activates) with a custom "Rename" action next to the list's
+/// reorder actions. The toggles are separate nodes that announce state.
 class LayerRow extends ConsumerStatefulWidget {
   const LayerRow({
     super.key,
@@ -164,9 +164,10 @@ class _LayerRowState extends ConsumerState<LayerRow> {
     final nameStyle = base?.copyWith(fontSize: 13, color: cs.onSurface);
     // A screen reader's double tap is one activation, so rename gets a
     // custom action; the row tap (activate) is the node's default action.
+    // Not a container: these properties merge into the list item's node, so
+    // the row is one node that also carries the list's move up/down actions.
     return Semantics(
       key: ValueKey('layer-semantics-${layer.id}'),
-      container: true,
       button: true,
       selected: widget.isActive,
       label: layer.name,

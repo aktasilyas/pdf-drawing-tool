@@ -173,6 +173,29 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('row node keeps the list reorder actions', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+      const l10n = DefaultWidgetsLocalizations();
+      final moves = {
+        CustomSemanticsAction(label: l10n.reorderItemToStart),
+        CustomSemanticsAction(label: l10n.reorderItemToEnd),
+      }.map(CustomSemanticsAction.getIdentifier).toSet();
+
+      for (final layer in layers()) {
+        final data = tester
+            .getSemantics(byKey('layer-semantics-${layer.id}'))
+            .getSemanticsData();
+        expect(data.label, layer.name);
+        expect(
+          data.customSemanticsActionIds!.toSet().intersection(moves),
+          isNotEmpty,
+          reason: layer.name,
+        );
+      }
+      handle.dispose();
+    });
+
     testWidgets('rename custom action opens the name field', (tester) async {
       final handle = tester.ensureSemantics();
       await pumpList(tester);
