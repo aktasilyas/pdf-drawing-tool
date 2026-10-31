@@ -1991,6 +1991,31 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String libraryDeleteFoldersMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klasör silinecek. İçindeki notlar çöp kutusuna taşınacak.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDeleteSelectionMessage(int folders, int notes) {
+    return '$folders klasör silinecek, $notes not çöp kutusuna taşınacak. Klasörlerdeki notlar da çöp kutusuna gider.';
+  }
+
+  @override
+  String libraryFoldersDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count klasör silindi',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get libraryFolderManagement => 'Klasör Yönetimi';
 
   @override

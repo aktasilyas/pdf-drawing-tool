@@ -1092,6 +1092,33 @@
       }
     }
   },
+  "libraryDeleteFoldersMessage": "{count, plural, =1{This folder will be deleted. Its notes will be moved to the trash.} other{These {count} folders will be deleted. Their notes will be moved to the trash.}}",
+  "@libraryDeleteFoldersMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDeleteSelectionMessage": "{folders, plural, =1{1 folder} other{{folders} folders}} will be deleted and {notes, plural, =1{1 note} other{{notes} notes}} will be moved to the trash. Notes inside the folders also go to the trash.",
+  "@libraryDeleteSelectionMessage": {
+    "placeholders": {
+      "folders": {
+        "type": "int"
+      },
+      "notes": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryFoldersDeleted": "{count, plural, =1{1 folder deleted} other{{count} folders deleted}}",
+  "@libraryFoldersDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "libraryFolderManagement": "Folder management",
   "libraryMoveFolderTitle": "Move folder",
   "libraryMoveToFolderTitle": "Move to folder",

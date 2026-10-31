@@ -9,17 +9,23 @@ import 'package:example_app/core/core.dart' show CacheFailure;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
+import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
+import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
 import '../../../../helpers/l10n.dart';
 
 class _MockDocumentRepository extends Mock implements DocumentRepository {}
 
+class _MockFolderRepository extends Mock implements FolderRepository {}
+
 void main() {
   Future<ProviderContainer> pump(
     WidgetTester tester, {
     Set<String> selected = const {},
+    Set<String> selectedFolders = const {},
     DocumentRepository? repository,
+    FolderRepository? folderRepository,
     bool isTrashSection = false,
   }) async {
     tester.view.physicalSize = const Size(1000, 800);
@@ -30,6 +36,9 @@ void main() {
         overrides: [
           selectionModeProvider.overrideWith((ref) => true),
           selectedDocumentsProvider.overrideWith((ref) => selected),
+          selectedFoldersProvider.overrideWith((ref) => selectedFolders),
+          if (folderRepository != null)
+            folderRepositoryProvider.overrideWithValue(folderRepository),
           if (repository != null)
             documentRepositoryProvider.overrideWithValue(repository),
         ],
@@ -137,6 +146,103 @@ void main() {
       verify(() => repo.permanentlyDelete(any())).called(3);
       expect(container.read(selectionModeProvider), isFalse);
       expect(container.read(selectedDocumentsProvider), isEmpty);
+    });
+  });
+
+  group('folder selection', () {
+    late _MockFolderRepository folders;
+    late _MockDocumentRepository docs;
+
+    setUp(() {
+      folders = _MockFolderRepository();
+      docs = _MockDocumentRepository();
+      when(() => folders.deleteFolder(any(),
+              deleteContents: any(named: 'deleteContents')))
+          .thenAnswer((_) async => const Right(null));
+      when(() => docs.moveToTrash(any()))
+          .thenAnswer((_) async => const Right(null));
+    });
+
+    testWidgets('folders-only Delete confirms and calls deleteFolder',
+        (tester) async {
+      final container = await pump(
+        tester,
+        selectedFolders: {'f1'},
+        repository: docs,
+        folderRepository: folders,
+      );
+      await tester.tap(find.byIcon(ElyanotesIcons.libraryTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(AppButton, 'Sil'));
+      await tester.pumpAndSettle();
+
+      verify(() => folders.deleteFolder('f1',
+          deleteContents: any(named: 'deleteContents'))).called(1);
+      verifyNever(() => docs.moveToTrash(any()));
+      expect(container.read(selectionModeProvider), isFalse);
+    });
+
+    testWidgets('cancelling the dialog deletes nothing', (tester) async {
+      final container = await pump(
+        tester,
+        selectedFolders: {'f1'},
+        folderRepository: folders,
+      );
+      await tester.tap(find.byIcon(ElyanotesIcons.libraryTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(AppButton, 'İptal'));
+      await tester.pumpAndSettle();
+
+      verifyNever(() => folders.deleteFolder(any(),
+          deleteContents: any(named: 'deleteContents')));
+      expect(container.read(selectedFoldersProvider), {'f1'});
+    });
+
+    testWidgets('mixed selection handles notebooks and folders',
+        (tester) async {
+      final container = await pump(
+        tester,
+        selected: {'a'},
+        selectedFolders: {'f1'},
+        repository: docs,
+        folderRepository: folders,
+      );
+      await tester.tap(find.byIcon(ElyanotesIcons.libraryTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(AppButton, 'Sil'));
+      await tester.pumpAndSettle();
+
+      verify(() => docs.moveToTrash('a')).called(1);
+      verify(() => folders.deleteFolder('f1',
+          deleteContents: any(named: 'deleteContents'))).called(1);
+      expect(container.read(selectionModeProvider), isFalse);
+    });
+
+    testWidgets('a failed folder stays selected', (tester) async {
+      when(() => folders.deleteFolder(any(),
+              deleteContents: any(named: 'deleteContents')))
+          .thenAnswer((_) async => const Left(CacheFailure('disk')));
+      final container = await pump(
+        tester,
+        selectedFolders: {'f1'},
+        folderRepository: folders,
+      );
+      await tester.tap(find.byIcon(ElyanotesIcons.libraryTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(AppButton, 'Sil'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(selectionModeProvider), isTrue);
+      expect(container.read(selectedFoldersProvider), {'f1'});
+    });
+
+    testWidgets('Duplicate is disabled for folders-only', (tester) async {
+      await pump(tester, selectedFolders: {'f1'});
+      final button = tester.widget<AppIconButton>(find.ancestor(
+        of: find.byIcon(ElyanotesIcons.libraryCopy),
+        matching: find.byType(AppIconButton),
+      ));
+      expect(button.onPressed, isNull);
     });
   });
 }

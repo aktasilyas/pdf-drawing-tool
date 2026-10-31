@@ -3596,6 +3596,24 @@ abstract class AppLocalizations {
   /// **'Delete the folder \"{name}\"?\nIts notes will be moved to the trash.'**
   String libraryDeleteFolderConfirm(String name);
 
+  /// No description provided for @libraryDeleteFoldersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This folder will be deleted. Its notes will be moved to the trash.} other{These {count} folders will be deleted. Their notes will be moved to the trash.}}'**
+  String libraryDeleteFoldersMessage(int count);
+
+  /// No description provided for @libraryDeleteSelectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{folders, plural, =1{1 folder} other{{folders} folders}} will be deleted and {notes, plural, =1{1 note} other{{notes} notes}} will be moved to the trash. Notes inside the folders also go to the trash.'**
+  String libraryDeleteSelectionMessage(int folders, int notes);
+
+  /// No description provided for @libraryFoldersDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 folder deleted} other{{count} folders deleted}}'**
+  String libraryFoldersDeleted(int count);
+
   /// No description provided for @libraryFolderManagement.
   ///
   /// In en, this message translates to:
