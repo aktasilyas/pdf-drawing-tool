@@ -103,7 +103,10 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
     }
 
     // Insert page at clamped original position, then re-index.
-    final insertIndex = min(model.originalPageIndex, pages.length);
+    // A cover is pinned first, so the page never lands in front of it.
+    final minIndex = pages.isNotEmpty && pages.first['isCover'] == true ? 1 : 0;
+    final insertIndex = min(model.originalPageIndex, pages.length)
+        .clamp(minIndex, pages.length);
     pages.insert(insertIndex, model.pageData);
     for (int i = 0; i < pages.length; i++) {
       pages[i]['index'] = i;
