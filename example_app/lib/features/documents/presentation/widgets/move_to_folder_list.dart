@@ -2,27 +2,28 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
-import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/presentation/providers/move_to_folder_actions.dart';
 import 'package:example_app/l10n/l10n.dart';
 
-/// Target list of the move dialog: the root option followed by [folders].
+/// Target list of the move dialog: the root option followed by [targets],
+/// subfolders indented under their parent.
 class MoveToFolderList extends StatelessWidget {
   const MoveToFolderList({
     super.key,
-    required this.folders,
+    required this.targets,
     required this.selectedFolderId,
     required this.isMovingFolder,
     required this.onSelected,
   });
 
-  final List<Folder> folders;
+  final List<MoveTarget> targets;
   final String? selectedFolderId;
   final bool isMovingFolder;
   final ValueChanged<String?> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    if (folders.isEmpty && !isMovingFolder) {
+    if (targets.isEmpty && !isMovingFolder) {
       final l10n = context.l10n;
       return AppEmptyState(
           icon: Icons.folder_outlined,
@@ -32,10 +33,10 @@ class MoveToFolderList extends StatelessWidget {
     return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      itemCount: folders.length + 1,
+      itemCount: targets.length + 1,
       itemBuilder: (ctx, i) => i == 0
           ? _rootOption(context)
-          : _folderOption(context, folders[i - 1]),
+          : _folderOption(context, targets[i - 1]),
     );
   }
 
@@ -57,10 +58,15 @@ class MoveToFolderList extends StatelessWidget {
     );
   }
 
-  Widget _folderOption(BuildContext context, Folder folder) {
+  Widget _folderOption(BuildContext context, MoveTarget target) {
     final palette = context.palette;
+    final folder = target.folder;
     final sel = selectedFolderId == folder.id;
     return ListTile(
+      contentPadding: EdgeInsetsDirectional.only(
+        start: AppSpacing.lg + target.depth * AppSpacing.xl,
+        end: AppSpacing.lg,
+      ),
       leading: Icon(Icons.folder,
           color: sel ? palette.accent : Color(folder.colorValue)),
       title: Text(folder.name,

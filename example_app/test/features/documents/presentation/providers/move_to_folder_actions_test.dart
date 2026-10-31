@@ -47,27 +47,63 @@ void main() {
   });
 
   group('targetsFor', () {
+    // Top-level folders a and d; b and c are subfolders of a; e of d.
     final tree = [
-      _f('a'),
       _f('b', parent: 'a'),
-      _f('c', parent: 'b'),
+      _f('a'),
       _f('d'),
+      _f('c', parent: 'a'),
+      _f('e', parent: 'd'),
+      _f('f'),
     ];
 
-    test('returns everything when only documents move', () {
-      expect(MoveToFolderActions.targetsFor(tree, const []), tree);
+    List<String> ids(List<MoveTarget> targets) =>
+        targets.map((t) => t.folder.id).toList();
+
+    test('documents may go anywhere; subfolders follow their parent', () {
+      final targets = MoveToFolderActions.targetsFor(tree, const []);
+      expect(ids(targets), ['a', 'b', 'c', 'd', 'e', 'f']);
+      expect(targets.map((t) => t.depth), [0, 1, 1, 0, 1, 0]);
     });
 
-    test('excludes the moved folder and all its descendants', () {
-      final ids =
-          MoveToFolderActions.targetsFor(tree, const ['a']).map((f) => f.id);
-      expect(ids, ['d']);
+    test('a folder with a missing parent is listed at the top level', () {
+      final targets =
+          MoveToFolderActions.targetsFor([_f('x', parent: 'gone')], const []);
+      expect(targets, [MoveTarget(_f('x', parent: 'gone'), 0)]);
     });
 
-    test('a leaf only excludes itself', () {
-      final ids =
-          MoveToFolderActions.targetsFor(tree, const ['c']).map((f) => f.id);
-      expect(ids, ['a', 'b', 'd']);
+    test('a folder with subfolders can only go to the root', () {
+      // Repository rule: LibraryRule.folderWithSubfoldersMove.
+      expect(MoveToFolderActions.targetsFor(tree, const ['a']), isEmpty);
+      expect(MoveToFolderActions.targetsFor(tree, const ['f', 'd']), isEmpty);
+    });
+
+    test('a folder without subfolders is offered top-level folders only', () {
+      // Repository rule: LibraryRule.folderMoveDepth (no subfolder targets),
+      // and a folder is never its own target.
+      expect(ids(MoveToFolderActions.targetsFor(tree, const ['f'])),
+          ['a', 'd']);
+      expect(ids(MoveToFolderActions.targetsFor(tree, const ['b'])),
+          ['a', 'd', 'f']);
+      expect(
+        MoveToFolderActions.targetsFor(tree, const ['b'])
+            .every((t) => t.depth == 0),
+        isTrue,
+      );
+    });
+  });
+
+  group('FolderMoveRules', () {
+    test('a subfolder target is refused', () {
+      expect(FolderMoveRules.checkTarget(targetIsSubfolder: true),
+          LibraryRule.folderMoveDepth);
+      expect(FolderMoveRules.checkTarget(targetIsSubfolder: false), isNull);
+    });
+
+    test('a folder with subfolders may not leave the root', () {
+      expect(FolderMoveRules.checkMoved(hasSubfolders: true),
+          LibraryRule.folderWithSubfoldersMove);
+      expect(FolderMoveRules.checkMoved(hasSubfolders: false), isNull);
     });
   });
 

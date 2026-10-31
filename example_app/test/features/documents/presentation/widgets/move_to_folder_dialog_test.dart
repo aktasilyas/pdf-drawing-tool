@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:example_app/core/core.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/documents.dart';
 
@@ -185,12 +186,38 @@ void main() {
     expect(move.onPressed, isNotNull);
   });
 
-  testWidgets('a moved folder is not offered as its own target',
+  testWidgets('a folder with subfolders is only offered the root',
       (tester) async {
     await pumpDialog(tester, folderIds: const ['f-ders']);
-    expect(find.text('Ders Notları'), findsNothing);
-    expect(find.text('Biyoloji'), findsNothing);
+    expect(find.text('Ana Klasörler'), findsOneWidget);
+    for (final name in ['Ders Notları', 'Biyoloji', 'Projeler', 'Okuma']) {
+      expect(find.text(name), findsNothing);
+    }
+  });
+
+  testWidgets('a moved folder sees top-level folders but no subfolders',
+      (tester) async {
+    await pumpDialog(tester, folderIds: const ['f-okuma']);
+    expect(find.text('Ders Notları'), findsOneWidget);
     expect(find.text('Projeler'), findsOneWidget);
+    expect(find.text('Okuma'), findsNothing);
+    expect(find.text('Biyoloji'), findsNothing);
+  });
+
+  testWidgets('moving notebooks lists subfolders indented under the parent',
+      (tester) async {
+    await pumpDialog(tester, documentIds: const ['doc-1']);
+    final parent = tester.getRect(find.text('Ders Notları'));
+    final child = tester.getRect(find.text('Biyoloji'));
+    final next = tester.getRect(find.text('Projeler'));
+    // Biyoloji sits right below its parent, before the next top-level folder.
+    expect(child.top, greaterThan(parent.top));
+    expect(child.top, lessThan(next.top));
+    expect(child.left - parent.left, AppSpacing.xl);
+    expect(next.left, parent.left);
+    final childTile =
+        find.ancestor(of: find.text('Biyoloji'), matching: find.byType(ListTile));
+    expect(tester.getSize(childTile).height, greaterThanOrEqualTo(48));
   });
 
   testWidgets('every row is at least 48dp', (tester) async {

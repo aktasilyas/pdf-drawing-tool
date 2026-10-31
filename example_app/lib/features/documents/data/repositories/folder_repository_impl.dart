@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/folder_move_rules.dart';
 import 'package:example_app/features/documents/domain/entities/library_rule.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
@@ -201,21 +202,20 @@ class FolderRepositoryImpl implements FolderRepository {
           return Left(LibraryRuleFailure(LibraryRule.folderIntoOwnSubfolder));
         }
 
-        // 2 seviye max kuralı: Hedef klasör zaten alt klasörse engelle
+        // Folders are one level deep: a subfolder accepts no folders.
         final targetFolder = await _localDatasource.getFolder(newParentId);
-        if (targetFolder.parentId != null) {
-          return Left(LibraryRuleFailure(LibraryRule.folderMoveDepth));
-        }
+        final targetRule = FolderMoveRules.checkTarget(
+          targetIsSubfolder: targetFolder.parentId != null,
+        );
+        if (targetRule != null) return Left(LibraryRuleFailure(targetRule));
 
-        // Taşınan klasörün alt klasörleri varsa ve hedef root değilse engelle
+        // A root folder with subfolders can only stay at the root.
         if (folder.parentId == null) {
-          // Root klasör taşınıyor - alt klasörleri var mı kontrol et
           final subfolders = await _localDatasource.getFolders(parentId: id);
-          if (subfolders.isNotEmpty) {
-            return Left(
-              LibraryRuleFailure(LibraryRule.folderWithSubfoldersMove),
-            );
-          }
+          final movedRule = FolderMoveRules.checkMoved(
+            hasSubfolders: subfolders.isNotEmpty,
+          );
+          if (movedRule != null) return Left(LibraryRuleFailure(movedRule));
         }
       }
 
