@@ -53,15 +53,14 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
           Text(
             s.catalog.stickersTitle,
             style: textTheme.bodyMedium?.copyWith(
-              fontSize: 15,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: ChromeSpacing.sm),
           // Category tabs
           SizedBox(
-            height: 32,
+            height: ChromeSizes.minTouchTarget,
             child: TabBar(
               controller: _tabController,
               isScrollable: true,

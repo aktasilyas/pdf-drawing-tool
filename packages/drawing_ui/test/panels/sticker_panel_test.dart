@@ -192,4 +192,31 @@ void main() {
     await pumpPanel(tester, panel, textScale: 1.3);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('category tab bar is a 48dp target', (tester) async {
+    await pumpPanel(tester, panel);
+    expectMinTapTarget(tester, find.byType(TabBar));
+  });
+
+  testWidgets('full panel meets the tap-target guidelines at 380dp',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(tester, panel);
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('selecting a tab via semantics switches the grid',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpPanel(tester, panel);
+    expect(find.text('🐶'), findsNothing);
+
+    tester.semantics.tap(find.semantics.byLabel(RegExp('Hayvanlar')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('🐶'), findsOneWidget);
+    handle.dispose();
+  });
 }
