@@ -3,8 +3,9 @@ name: Android manifest
 # Release builds must not request frozen-feature permissions (issue #102).
 # Merges the release and debug manifests and checks them with
 # scripts/check-android-manifest.sh, then builds a release APK without any
-# Firebase config (crash reporting must stay optional, #60). Runs only when the Android project,
-# dependencies or the check itself change.
+# Firebase config (crash reporting must stay optional, #60) and checks that its
+# native libraries are 16 KB page-size compatible (#584). Runs only when the
+# Android project, dependencies or the checks themselves change.
 on:
   pull_request:
     paths:
@@ -12,6 +13,7 @@ on:
       - '**/pubspec.yaml'
       - '**/pubspec.lock'
       - scripts/check-android-manifest.sh
+      - scripts/check-16kb-alignment*.sh
       - .github/workflows/android-manifest.yml
   push:
     branches: [main]
@@ -20,6 +22,7 @@ on:
       - '**/pubspec.yaml'
       - '**/pubspec.lock'
       - scripts/check-android-manifest.sh
+      - scripts/check-16kb-alignment*.sh
       - .github/workflows/android-manifest.yml
   workflow_dispatch:
 
@@ -63,6 +66,12 @@ jobs:
       - name: Check permissions
         run: ./scripts/check-android-manifest.sh
 
+      - name: 16 KB alignment check self-test
+        run: ./scripts/check-16kb-alignment-test.sh
+
       - name: Release build without Firebase config
         working-directory: example_app
         run: flutter build apk --release
+
+      - name: 16 KB page-size alignment
+        run: ./scripts/check-16kb-alignment.sh example_app/build/app/outputs/flutter-apk/app-release.apk

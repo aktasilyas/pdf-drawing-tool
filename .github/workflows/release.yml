@@ -17,6 +17,7 @@ on:
     paths:
       - .github/workflows/release.yml
       - scripts/release-*.sh
+      - scripts/check-16kb-alignment.sh
       - example_app/android/build.gradle.kts
       - example_app/android/settings.gradle.kts
       - example_app/android/app/build.gradle.kts
@@ -162,6 +163,9 @@ jobs:
           fi
           echo "Signed with the upload key: SHA256 $bundle_sha"
 
+      - name: 16 KB page-size alignment (bundle)
+        run: ./scripts/check-16kb-alignment.sh example_app/build/app/outputs/bundle/release/app-release.aab
+
       - name: Universal APK for the smoke test
         run: |
           curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
@@ -171,6 +175,9 @@ jobs:
             --output=example_app/build/app-release.apks \
             --ks="$ANDROID_KEYSTORE_PATH" --ks-pass="pass:$ANDROID_KEYSTORE_PASSWORD" \
             --ks-key-alias="$ANDROID_KEY_ALIAS" --key-pass="pass:$ANDROID_KEY_PASSWORD"
+
+      - name: 16 KB page-size alignment (universal APK)
+        run: ./scripts/check-16kb-alignment.sh example_app/build/app-release.apks
 
       - uses: actions/upload-artifact@v4
         with:
