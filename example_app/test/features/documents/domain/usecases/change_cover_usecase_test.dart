@@ -56,6 +56,8 @@ void main() {
   late MockDocumentRepository repo;
   late ChangeCoverUseCase useCase;
 
+  setUpAll(() => registerFallbackValue(<String, dynamic>{}));
+
   setUp(() {
     repo = MockDocumentRepository();
     useCase = ChangeCoverUseCase(repo);
