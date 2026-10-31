@@ -57,6 +57,8 @@
   "libraryErrorMoveDocument": "Belge taşınamadı",
   "libraryErrorExportDocument": "Belge PDF olarak dışa aktarılamadı",
   "libraryExportAsPdf": "PDF olarak dışa aktar",
+  "libraryChangeCover": "Kapağı değiştir",
+  "libraryErrorChangeCover": "Kapak değiştirilemedi",
   "libraryErrorToggleFavorite": "Favori durumu değiştirilemedi",
   "libraryErrorTrashDocument": "Belge çöpe taşınamadı",
   "libraryErrorDeleteDocument": "Belge silinemedi",

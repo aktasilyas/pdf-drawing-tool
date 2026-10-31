@@ -46,6 +46,10 @@ abstract class DocumentRepository {
     int? pageCount,
   });
 
+  /// Sets the cover of [id] (hasCover = true) and bumps updatedAt; stored
+  /// content is untouched.
+  Future<Either<Failure, void>> updateCover(String id, String coverId);
+
   /// Delete document
   Future<Either<Failure, void>> deleteDocument(String id);
 

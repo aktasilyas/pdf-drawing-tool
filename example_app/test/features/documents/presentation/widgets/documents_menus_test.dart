@@ -7,6 +7,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
+import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 import '../providers/documents_controller_harness.dart';
@@ -77,6 +78,7 @@ void main() {
         ],
         child: localizedApp(
           theme: AppTheme.light,
+          builder: (context, child) => AppDrawingStringsScope(child: child!),
           home: Scaffold(
             body: Consumer(
               builder: (context, ref, _) => TextButton(
@@ -92,10 +94,25 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> openDocMenu(WidgetTester tester, {bool isTrash = false}) => open(
+  Future<void> openDocMenu(
+    WidgetTester tester, {
+    bool isTrash = false,
+    DocumentInfo? document,
+  }) =>
+      open(
         tester,
-        (c, r) => showDocumentMenu(c, r, testDocument, isTrash: isTrash),
+        (c, r) => showDocumentMenu(
+          c,
+          r,
+          document ?? testDocument,
+          isTrash: isTrash,
+        ),
       );
+
+  final coverDocument = testDocument.copyWith(
+    coverId: 'linen_sage',
+    hasCover: true,
+  );
 
   group('normal document menu', () {
     testWidgets('shows all actions with tiles of at least 48dp',
@@ -137,6 +154,61 @@ void main() {
       await tester.tap(trash);
       await tester.pumpAndSettle();
       verify(() => repo.moveToTrash(testDocument.id)).called(1);
+    });
+
+    testWidgets('hides change cover without a cover', (tester) async {
+      await openDocMenu(tester);
+      expect(find.text('Kapağı değiştir'), findsNothing);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      await openDocMenu(
+        tester,
+        document: testDocument.copyWith(hasCover: false, coverId: 'linen_sage'),
+      );
+      expect(find.text('Kapağı değiştir'), findsNothing);
+    });
+
+    testWidgets('shows change cover with a 48dp tile for a cover notebook',
+        (tester) async {
+      await openDocMenu(tester, document: coverDocument);
+      expect(find.text('Kapağı değiştir'), findsOneWidget);
+      final tile = find.ancestor(
+        of: find.text('Kapağı değiştir'),
+        matching: find.byType(MenuTile),
+      );
+      expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('change cover opens the grid with the current cover selected',
+        (tester) async {
+      await openDocMenu(tester, document: coverDocument);
+      await tester.tap(find.text('Kapağı değiştir'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CoverGridView), findsOneWidget);
+
+      final currentTile = find
+          .ancestor(
+            of: find.text('Adaçayı Keten'),
+            matching: find.byType(GestureDetector),
+          )
+          .first;
+      expect(
+        find.descendant(of: currentTile, matching: find.byIcon(Icons.check)),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.check), findsOneWidget);
+    });
+
+    testWidgets('tapping the current cover closes the sheet without a write',
+        (tester) async {
+      await openDocMenu(tester, document: coverDocument);
+      await tester.tap(find.text('Kapağı değiştir'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Adaçayı Keten'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CoverGridView), findsNothing);
+      verifyNever(() => repo.getDocument(any()));
     });
 
     testWidgets('rename saves the new title', (tester) async {

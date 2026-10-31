@@ -21,6 +21,7 @@ export 'domain/repositories/page_trash_repository.dart';
 export 'domain/repositories/pdf_source_files.dart';
 
 // Domain - Use Cases
+export 'domain/usecases/change_cover_usecase.dart';
 export 'domain/usecases/create_document_usecase.dart';
 export 'domain/usecases/get_documents_usecase.dart';
 export 'domain/usecases/delete_document_usecase.dart';

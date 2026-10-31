@@ -194,6 +194,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryExportAsPdf => 'Export as PDF';
 
   @override
+  String get libraryChangeCover => 'Change cover';
+
+  @override
+  String get libraryErrorChangeCover => 'Couldn\'t change the cover';
+
+  @override
   String get libraryErrorToggleFavorite => 'Couldn\'t update favorites';
 
   @override

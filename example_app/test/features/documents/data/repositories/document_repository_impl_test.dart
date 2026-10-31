@@ -199,6 +199,27 @@ void main() {
       });
     });
 
+    group('updateCover', () {
+      test('sets coverId, hasCover and updatedAt', () async {
+        final coverless = testModel.copyWith(hasCover: false);
+        when(() => mockDatasource.getDocument('doc-1'))
+            .thenAnswer((_) async => coverless);
+        when(() => mockDatasource.updateDocument(any()))
+            .thenAnswer((invocation) async =>
+                invocation.positionalArguments[0] as DocumentModel);
+
+        final result = await repository.updateCover('doc-1', 'linen_sage');
+
+        expect(result.isRight(), true);
+        final saved = verify(() => mockDatasource.updateDocument(captureAny()))
+            .captured
+            .single as DocumentModel;
+        expect(saved.coverId, 'linen_sage');
+        expect(saved.hasCover, true);
+        expect(saved.updatedAt.isAfter(testModel.updatedAt), true);
+      });
+    });
+
     group('search', () {
       test('should return matching documents', () async {
         // Arrange

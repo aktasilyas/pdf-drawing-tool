@@ -440,6 +440,18 @@ abstract class AppLocalizations {
   /// **'Export as PDF'**
   String get libraryExportAsPdf;
 
+  /// No description provided for @libraryChangeCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get libraryChangeCover;
+
+  /// No description provided for @libraryErrorChangeCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the cover'**
+  String get libraryErrorChangeCover;
+
   /// No description provided for @libraryErrorToggleFavorite.
   ///
   /// In en, this message translates to:
