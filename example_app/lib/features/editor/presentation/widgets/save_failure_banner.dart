@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/core.dart' show StorageFullFailure;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 /// Persistent "Save failed" bar with a Retry action, shown while the last
-/// save of the open document failed. Renders nothing otherwise.
+/// save of the open document failed; a full device gets its own message.
+/// Renders nothing otherwise.
 class SaveFailureBanner extends ConsumerWidget {
   const SaveFailureBanner({super.key});
 
@@ -41,7 +43,9 @@ class SaveFailureBanner extends ConsumerWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
-                  context.l10n.editorSaveFailedMessage,
+                  failure is StorageFullFailure
+                      ? context.l10n.editorSaveStorageFullMessage
+                      : context.l10n.editorSaveFailedMessage,
                   style: textStyle,
                 ),
               ),

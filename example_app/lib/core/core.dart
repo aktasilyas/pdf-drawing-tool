@@ -49,3 +49,4 @@ export 'di/injection.dart' show getIt, configureDependencies;
 // Database - export only public interfaces
 export 'database/app_database.dart';
 export 'database/local_transaction_runner.dart';
+export 'database/storage_full_error.dart';
