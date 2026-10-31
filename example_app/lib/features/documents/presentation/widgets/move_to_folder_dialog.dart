@@ -110,7 +110,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildFolderList(List<Folder> folders) => MoveToFolderList(
-        folders: MoveToFolderActions.targetsFor(folders, widget.folderIds),
+        targets: MoveToFolderActions.targetsFor(folders, widget.folderIds),
         selectedFolderId: _selectedFolderId,
         isMovingFolder: _isMovingFolder,
         onSelected: (id) => setState(() => _selectedFolderId = id),
