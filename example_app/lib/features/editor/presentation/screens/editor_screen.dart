@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/utils/logger.dart';
+import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -160,8 +162,9 @@ class EditorScreen extends ConsumerWidget {
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
     final title = await showDialog<String>(
       context: context,
-      builder: (_) => RenameDocumentDialog(
+      builder: (ctx) => RenameDialog(
         initialTitle: ref.read(documentProvider).title,
+        labelText: ctx.l10n.editorDocumentNameLabel,
       ),
     );
     if (title != null) {
