@@ -26,8 +26,9 @@ Future<bool> confirmAndDeleteFolder(
   );
   if (confirmed != true || !context.mounted) return false;
 
-  final trashed =
-      await ref.read(foldersControllerProvider.notifier).deleteFolder(folder.id);
+  final trashed = await ref
+      .read(foldersControllerProvider.notifier)
+      .deleteFolder(folder.id);
   // Failures are shown by LibraryErrorListener.
   if (trashed == null) return false;
   if (context.mounted) {

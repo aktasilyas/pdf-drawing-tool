@@ -28,7 +28,8 @@ void main() {
 
   setUp(() {
     repo = _MockFolderRepository();
-    when(() => repo.deleteFolder(any())).thenAnswer((_) async => const Right(3));
+    when(() => repo.deleteFolder(any()))
+        .thenAnswer((_) async => const Right(3));
   });
 
   Future<void> pump(WidgetTester tester, Widget home,
@@ -147,7 +148,8 @@ void main() {
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     final l10n = AppLocalizations.of(tester.element(find.byType(Scaffold)));
-    expect(find.text(l10n.libraryDeleteFolderConfirm('Ders', 3)), findsOneWidget);
+    expect(
+        find.text(l10n.libraryDeleteFolderConfirm('Ders', 3)), findsOneWidget);
 
     await tester.tap(find.widgetWithText(AppButton, 'Delete'));
     await tester.pumpAndSettle();
