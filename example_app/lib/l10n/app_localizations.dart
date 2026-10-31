@@ -1076,23 +1076,17 @@ abstract class AppLocalizations {
   /// **'Delete folder'**
   String get libraryDeleteFolderTitle;
 
-  /// No description provided for @libraryDeleteFolderNonEmptyMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{This folder contains 1 document. Deleting the folder also deletes that document. Continue?} other{This folder contains {count} documents. Deleting it also deletes them. Continue?}}'**
-  String libraryDeleteFolderNonEmptyMessage(int count);
-
-  /// No description provided for @libraryDeleteFolderMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this folder?'**
-  String get libraryDeleteFolderMessage;
-
   /// No description provided for @libraryFolderDeleted.
   ///
   /// In en, this message translates to:
   /// **'Folder deleted'**
   String get libraryFolderDeleted;
+
+  /// No description provided for @libraryFolderDeletedNotesTrashed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Folder deleted. 1 note moved to Recently deleted} other{Folder deleted. {count} notes moved to Recently deleted}}'**
+  String libraryFolderDeletedNotesTrashed(int count);
 
   /// No description provided for @libraryRenameFolderTitle.
   ///
@@ -3593,8 +3587,8 @@ abstract class AppLocalizations {
   /// No description provided for @libraryDeleteFolderConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Delete the folder \"{name}\"?\nIts notes will be moved to the trash.'**
-  String libraryDeleteFolderConfirm(String name);
+  /// **'{count, plural, =0{Delete the folder \"{name}\"?} =1{Delete the folder \"{name}\"? The 1 note inside it (subfolders included) will be moved to Recently deleted, where you can restore it.} other{Delete the folder \"{name}\"? The {count} notes inside it (subfolders included) will be moved to Recently deleted, where you can restore them.}}'**
+  String libraryDeleteFolderConfirm(String name, int count);
 
   /// No description provided for @libraryFolderManagement.
   ///

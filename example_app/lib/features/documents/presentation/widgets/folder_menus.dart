@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_delete_flow.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/l10n/l10n.dart';
@@ -128,56 +129,14 @@ Widget _buildDeleteFolderTile(
   Folder folder,
   VoidCallback? onDeleted,
 ) {
-  final surfaceColor = context.palette.surface;
-  final textPrimary = context.palette.textPrimary;
-  final l10n = context.l10n;
-
   return MenuTile(
     icon: Icons.delete_outline,
-    label: l10n.commonDelete,
+    label: context.l10n.commonDelete,
     isDestructive: true,
     onTap: () async {
       Navigator.pop(context);
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: surfaceColor,
-          title: Text(l10n.libraryDeleteFolderTitle,
-              style: AppTypography.titleLarge.copyWith(color: textPrimary)),
-          content: Text(
-            folder.documentCount > 0
-                ? l10n.libraryDeleteFolderNonEmptyMessage(folder.documentCount)
-                : l10n.libraryDeleteFolderMessage,
-            style: AppTypography.bodyMedium.copyWith(color: textPrimary),
-          ),
-          actions: [
-            AppButton(
-              label: l10n.commonCancel,
-              variant: AppButtonVariant.text,
-              onPressed: () => Navigator.pop(ctx, false),
-            ),
-            AppButton(
-              label: l10n.commonDelete,
-              variant: AppButtonVariant.destructive,
-              onPressed: () => Navigator.pop(ctx, true),
-            ),
-          ],
-        ),
-      );
-      if (confirmed == true && context.mounted) {
-        final controller = ref.read(foldersControllerProvider.notifier);
-        final success = await controller.deleteFolder(folder.id);
-        // Failures are shown by LibraryErrorListener.
-        if (success && context.mounted) {
-          onDeleted?.call();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.libraryFolderDeleted),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      }
+      final deleted = await confirmAndDeleteFolder(context, ref, folder);
+      if (deleted) onDeleted?.call();
     },
   );
 }

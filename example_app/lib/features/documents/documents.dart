@@ -98,6 +98,7 @@ export 'presentation/widgets/documents_view_mode_switcher.dart';
 export 'presentation/widgets/empty_state.dart';
 export 'presentation/widgets/folder_card.dart';
 export 'presentation/widgets/folder_color_picker.dart';
+export 'presentation/widgets/folder_delete_flow.dart';
 export 'presentation/widgets/folder_list_tile.dart';
 export 'presentation/widgets/folder_menus.dart';
 export 'presentation/widgets/document_quota.dart';

@@ -145,26 +145,25 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteFolder(
+  Future<Either<Failure, int>> deleteFolder(
     String id, {
     bool deleteContents = false,
   }) async {
     try {
       // Documents go to trash and folders are removed in one transaction.
-      await _runner.run(() async {
-        await _moveDocumentsToTrash(id);
-
-        // Recursively handle subfolders
-        final subfolders = await _localDatasource.getFolders(parentId: id);
-        for (final subfolder in subfolders) {
-          await _moveDocumentsToTrash(subfolder.id);
-          await _localDatasource.deleteFolder(subfolder.id);
+      final trashed = await _runner.run(() async {
+        final allFolders = await _localDatasource.getFolders();
+        final folderIds = {
+          id,
+          ...FolderTree.descendantIds(id, allFolders),
+        };
+        final count = await _moveDocumentsToTrash(folderIds);
+        for (final folderId in folderIds) {
+          await _localDatasource.deleteFolder(folderId);
         }
-
-        // Delete the folder itself
-        await _localDatasource.deleteFolder(id);
+        return count;
       });
-      return const Right(null);
+      return Right(trashed);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -172,19 +171,22 @@ class FolderRepositoryImpl implements FolderRepository {
     }
   }
 
-  /// Moves all non-trashed documents in a folder to trash.
-  Future<void> _moveDocumentsToTrash(String folderId) async {
+  /// Moves all non-trashed documents in [folderIds] to trash and returns
+  /// how many were moved.
+  Future<int> _moveDocumentsToTrash(Set<String> folderIds) async {
     final allDocs = await _documentDatasource.getAllDocuments();
     final folderDocs = allDocs.where(
-      (doc) => doc.folderId == folderId && !doc.isInTrash,
+      (doc) => folderIds.contains(doc.folderId) && !doc.isInTrash,
     );
+    final now = DateTime.now();
+    var count = 0;
     for (final doc in folderDocs) {
-      final updated = doc.copyWith(
-        isInTrash: true,
-        deletedAt: DateTime.now(),
+      await _documentDatasource.updateDocument(
+        doc.copyWith(isInTrash: true, deletedAt: now),
       );
-      await _documentDatasource.updateDocument(updated);
+      count++;
     }
+    return count;
   }
 
   @override

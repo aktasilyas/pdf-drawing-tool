@@ -3,6 +3,7 @@ import 'package:drawing_core/drawing_core.dart' show DocumentType;
 import 'package:example_app/core/core.dart' show Failure;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/data/models/folder_model.dart';
 import '../../../../helpers/library_fixture.dart';
 
 /// Behaviour of the repositories against a real Drift database.
@@ -189,6 +190,37 @@ void main() {
     expect(trash.map((x) => x.id), unorderedEquals([inRoot.id, inSub.id]));
     final live = (await fx.documents.getDocuments()).getOrElse(() => []);
     expect(live.map((x) => x.id), [outside.id]);
+  });
+
+  test('deleting a folder trashes notes at every depth and returns the count',
+      () async {
+    final root = await folder('Okul');
+    final sub = await folder('Ders', parentId: root.id);
+    // The UI caps nesting at two levels, but older or synced data can be
+    // deeper, so seed the third level through the datasource.
+    final subsub = await fx.folderDs.createFolder(
+      FolderModel(
+        id: 'subsub',
+        name: 'Hafta',
+        parentId: sub.id,
+        createdAt: DateTime(2026),
+      ),
+    );
+    final a = await create('A', folderId: root.id);
+    final b = await create('B', folderId: sub.id);
+    final c = await create('C', folderId: subsub.id);
+
+    final r = await fx.folders.deleteFolder(root.id);
+    expect(r.getOrElse(() => -1), 3);
+    expect((await fx.folders.getFolders()).getOrElse(() => []), isEmpty);
+    final trash = (await fx.documents.getTrash()).getOrElse(() => []);
+    expect(trash.map((x) => x.id), unorderedEquals([a.id, b.id, c.id]));
+  });
+
+  test('deleting an empty folder returns zero', () async {
+    final root = await folder('Bos');
+    final r = await fx.folders.deleteFolder(root.id);
+    expect(r.getOrElse(() => -1), 0);
   });
 
   test('folder delete rolls back when a document update fails', () async {

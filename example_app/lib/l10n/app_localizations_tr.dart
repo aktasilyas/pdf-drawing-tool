@@ -593,22 +593,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryDeleteFolderTitle => 'Klasörü Sil';
 
   @override
-  String libraryDeleteFolderNonEmptyMessage(int count) {
+  String get libraryFolderDeleted => 'Klasör silindi';
+
+  @override
+  String libraryFolderDeletedNotesTrashed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'Bu klasörde $count belge var. Klasörü silmek belgelerini de siler. Devam etmek istiyor musunuz?',
+      other: 'Klasör silindi. $count not Son Silinenler\'e taşındı',
     );
     return '$_temp0';
   }
-
-  @override
-  String get libraryDeleteFolderMessage =>
-      'Bu klasörü silmek istediğinize emin misiniz?';
-
-  @override
-  String get libraryFolderDeleted => 'Klasör silindi';
 
   @override
   String get libraryRenameFolderTitle => 'Klasörü Yeniden Adlandır';
@@ -1986,8 +1981,15 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String libraryDeleteFolderConfirm(String name) {
-    return '\"$name\" klasörünü silmek istediğinize emin misiniz?\nİçindeki notlar çöp kutusuna taşınacak.';
+  String libraryDeleteFolderConfirm(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '\"$name\" klasörü silinsin mi? İçindeki $count not (alt klasörler dahil) Son Silinenler\'e taşınacak; oradan geri yükleyebilirsiniz.',
+      zero: '\"$name\" klasörü silinsin mi?',
+    );
+    return '$_temp0';
   }
 
   @override

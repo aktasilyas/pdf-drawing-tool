@@ -14,6 +14,7 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_delete_flow.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/l10n/l10n.dart';
 
@@ -244,24 +245,8 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
   }
 
   Future<void> _showDeleteConfirm(Folder folder) async {
-    final l10n = context.l10n;
-    final confirmed = await AppConfirmDialog.show(
-      context: context,
-      title: l10n.libraryDeleteFolderTitle,
-      message: l10n.libraryDeleteFolderConfirm(folder.name),
-      confirmLabel: l10n.commonDelete,
-      isDestructive: true,
-    );
-    if (confirmed == true) {
-      final deleted = await ref
-          .read(foldersControllerProvider.notifier)
-          .deleteFolder(folder.id);
-      ref.invalidate(foldersProvider);
-      // Failures are shown by LibraryErrorListener.
-      if (deleted && mounted) {
-        AppToast.success(context, context.l10n.libraryFolderDeleted);
-      }
-    }
+    final deleted = await confirmAndDeleteFolder(context, ref, folder);
+    if (deleted) ref.invalidate(foldersProvider);
   }
 
   Widget _buildBottomBar() {

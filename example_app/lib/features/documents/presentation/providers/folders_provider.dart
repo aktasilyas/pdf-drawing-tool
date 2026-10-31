@@ -190,17 +190,19 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     );
   }
 
-  Future<bool> deleteFolder(String folderId) async {
+  /// Deletes [folderId] with its subfolders and returns how many notes moved
+  /// to the trash, or null when the delete failed (already reported).
+  Future<int?> deleteFolder(String folderId) async {
     final result = await _repository.deleteFolder(folderId);
     return result.fold(
       (failure) {
         reportLibraryFailure(_ref, failure, LibraryAction.deleteFolder);
-        return false;
+        return null;
       },
-      (_) {
+      (trashed) {
         _invalidateFolders();
         _invalidateDocuments();
-        return true;
+        return trashed;
       },
     );
   }
