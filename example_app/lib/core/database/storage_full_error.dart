@@ -8,6 +8,9 @@ import 'package:example_app/core/errors/failures.dart';
 /// SQLite primary result code SQLITE_FULL ("database or disk is full").
 const _sqliteFull = 13;
 
+/// SQLite's message for SQLITE_FULL.
+const _sqliteFullMessage = 'database or disk is full';
+
 /// POSIX errno ENOSPC ("No space left on device").
 const _enospc = 28;
 
@@ -18,10 +21,13 @@ const _enospc = 28;
 bool isStorageFull(Object? error) {
   for (var e = error, depth = 0; e != null && depth < 8; depth++) {
     if (e is SqliteException) return e.resultCode == _sqliteFull;
+    // Same check as drawing_ui's isStorageFullError (not exported there).
     if (e is FileSystemException) {
       final text = '${e.message} ${e.osError?.message ?? ''}'.toLowerCase();
       return e.osError?.errorCode == _enospc || text.contains('no space left');
     }
+    // A serialized remote error keeps only SQLite's message text.
+    if (e is String) return e.contains(_sqliteFullMessage);
     if (e is DriftRemoteException) {
       e = e.remoteCause;
     } else if (e is AppException && e.originalError != null) {
