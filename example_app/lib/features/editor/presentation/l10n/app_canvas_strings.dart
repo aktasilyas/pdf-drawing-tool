@@ -33,6 +33,9 @@ class AppCanvasStrings extends CanvasStrings {
   String get unlockLayer => _l10n.editorCanvasUnlockLayer;
 
   @override
+  String get renameLayer => _l10n.editorCanvasRenameLayer;
+
+  @override
   String get zoomLock => _l10n.editorCanvasZoomLock;
 
   @override

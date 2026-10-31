@@ -1024,6 +1024,7 @@
   "editorCanvasShowLayer": "Show",
   "editorCanvasLockLayer": "Lock",
   "editorCanvasUnlockLayer": "Unlock",
+  "editorCanvasRenameLayer": "Rename",
   "editorCanvasZoomLock": "Zoom lock",
   "editorCanvasZoomLevel": "Zoom {percent}%, favorite levels",
   "@editorCanvasZoomLevel": {

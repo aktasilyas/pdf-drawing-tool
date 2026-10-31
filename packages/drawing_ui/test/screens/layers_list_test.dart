@@ -1,8 +1,10 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/canvas_strings.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -121,5 +123,147 @@ void main() {
       expect(size.width, greaterThanOrEqualTo(48), reason: '$finder');
       expect(size.height, greaterThanOrEqualTo(48), reason: '$finder');
     }
+  });
+
+  group('semantics', () {
+    testWidgets('panel meets the tap-target guidelines', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('row is a button named after the layer; active is selected',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+      final inactive = layers()[0];
+      final active = layers()[1];
+
+      expect(
+        tester.getSemantics(byKey('layer-semantics-${active.id}')),
+        isSemantics(
+          label: active.name,
+          isButton: true,
+          hasSelectedState: true,
+          isSelected: true,
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(byKey('layer-semantics-${inactive.id}')),
+        isSemantics(
+          label: inactive.name,
+          isButton: true,
+          hasSelectedState: true,
+          isSelected: false,
+          hasTapAction: true,
+        ),
+      );
+
+      final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
+      owner.performAction(
+        tester.getSemantics(byKey('layer-semantics-${inactive.id}')).id,
+        SemanticsAction.tap,
+      );
+      await tester.pump();
+      expect(container.read(activeLayerIndexProvider), 0);
+      handle.dispose();
+    });
+
+    testWidgets('row node keeps the list reorder actions', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+      const l10n = DefaultWidgetsLocalizations();
+      final moves = {
+        CustomSemanticsAction(label: l10n.reorderItemToStart),
+        CustomSemanticsAction(label: l10n.reorderItemToEnd),
+      }.map(CustomSemanticsAction.getIdentifier).toSet();
+
+      for (final layer in layers()) {
+        final data = tester
+            .getSemantics(byKey('layer-semantics-${layer.id}'))
+            .getSemanticsData();
+        expect(data.label, layer.name);
+        expect(
+          data.customSemanticsActionIds!.toSet().intersection(moves),
+          isNotEmpty,
+          reason: layer.name,
+        );
+      }
+      handle.dispose();
+    });
+
+    testWidgets('long press action (hint: rename) opens the name field',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+      final id = layers()[0].id;
+      final node = tester.getSemantics(byKey('layer-semantics-$id'));
+
+      // The hint is a custom action; the row node also holds the list's
+      // move actions, so check membership rather than the exact list.
+      expect(node, isSemantics(hasLongPressAction: true));
+      final hint = CustomSemanticsAction.overridingAction(
+        hint: const CanvasStringsTr().renameLayer,
+        action: SemanticsAction.longPress,
+      );
+      expect(
+        node.getSemanticsData().customSemanticsActionIds,
+        contains(CustomSemanticsAction.getIdentifier(hint)),
+      );
+      final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
+      owner.performAction(node.id, SemanticsAction.longPress);
+      await tester.pumpAndSettle();
+
+      expect(byKey('layer-rename-$id'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('visibility and lock toggles announce their state',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpList(tester);
+      final id = layers()[0].id;
+      const strings = CanvasStringsTr();
+
+      expect(
+        tester.getSemantics(byKey('layer-visibility-$id')),
+        isSemantics(
+          label: strings.hideLayer,
+          isButton: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(byKey('layer-lock-$id')),
+        isSemantics(
+          label: strings.lockLayer,
+          isButton: true,
+          hasToggledState: true,
+          isToggled: false,
+          hasTapAction: true,
+        ),
+      );
+
+      await tester.tap(byKey('layer-visibility-$id'));
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(byKey('layer-visibility-$id')),
+        isSemantics(
+          label: strings.showLayer,
+          isButton: true,
+          hasToggledState: true,
+          isToggled: false,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
+    });
   });
 }

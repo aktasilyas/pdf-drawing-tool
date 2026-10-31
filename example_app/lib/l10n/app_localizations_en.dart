@@ -1884,6 +1884,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorCanvasUnlockLayer => 'Unlock';
 
   @override
+  String get editorCanvasRenameLayer => 'Rename';
+
+  @override
   String get editorCanvasZoomLock => 'Zoom lock';
 
   @override

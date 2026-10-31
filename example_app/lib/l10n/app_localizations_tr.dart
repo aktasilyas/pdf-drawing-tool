@@ -1860,6 +1860,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorCanvasUnlockLayer => 'Kilidi Aç';
 
   @override
+  String get editorCanvasRenameLayer => 'Yeniden Adlandır';
+
+  @override
   String get editorCanvasZoomLock => 'Yakınlaştırma kilidi';
 
   @override

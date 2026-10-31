@@ -13,6 +13,7 @@ abstract class CanvasStrings {
   String get showLayer;
   String get lockLayer;
   String get unlockLayer;
+  String get renameLayer;
   String get zoomLock;
   String zoomLevel(int percent);
   String get favoriteZoom;
@@ -50,6 +51,7 @@ abstract class CanvasStrings {
         'showLayer': showLayer,
         'lockLayer': lockLayer,
         'unlockLayer': unlockLayer,
+        'renameLayer': renameLayer,
         'zoomLock': zoomLock,
         'zoomLevel': zoomLevel(1),
         'favoriteZoom': favoriteZoom,
@@ -106,6 +108,9 @@ class CanvasStringsTr extends CanvasStrings {
 
   @override
   String get unlockLayer => 'Kilidi Aç';
+
+  @override
+  String get renameLayer => 'Yeniden Adlandır';
 
   @override
   String get zoomLock => 'Yakınlaştırma kilidi';
