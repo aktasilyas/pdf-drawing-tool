@@ -3350,6 +3350,12 @@ abstract class AppLocalizations {
   /// **'Unlock'**
   String get editorCanvasUnlockLayer;
 
+  /// No description provided for @editorCanvasRenameLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get editorCanvasRenameLayer;
+
   /// No description provided for @editorCanvasZoomLock.
   ///
   /// In en, this message translates to:

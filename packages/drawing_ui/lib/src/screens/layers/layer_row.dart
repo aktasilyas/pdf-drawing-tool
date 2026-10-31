@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
+import 'package:drawing_ui/src/l10n/canvas_strings.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -11,6 +12,10 @@ const double _line = 0.5;
 
 /// One row of the layers panel: drag handle, name (double tap to rename),
 /// visibility and lock toggles. Tapping the row activates the layer.
+///
+/// Semantics: the name area is the row's button node (label = layer name,
+/// selected = active, tap activates) with a custom "Rename" action. The
+/// drag handle and the toggles stay separate nodes; toggles announce state.
 class LayerRow extends ConsumerStatefulWidget {
   const LayerRow({
     super.key,
@@ -66,14 +71,21 @@ class _LayerRowState extends ConsumerState<LayerRow> {
     setState(() => _isEditing = false);
   }
 
+  void _activate() =>
+      ref.read(documentProvider.notifier).setActiveLayer(widget.dataIndex);
+
+  void _startEditing() => setState(() => _isEditing = true);
+
   @override
   Widget build(BuildContext context) {
     final cs = widget.cs;
     final layer = widget.layer;
+    final strings = context.drawingStrings.canvas;
     return GestureDetector(
       key: ValueKey('layer-row-${layer.id}'),
-      onTap: () =>
-          ref.read(documentProvider.notifier).setActiveLayer(widget.dataIndex),
+      // The name area below is the row's semantics node.
+      excludeFromSemantics: true,
+      onTap: _activate,
       child: Container(
         height: ChromeSizes.minTouchTarget + _line,
         padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
@@ -99,7 +111,7 @@ class _LayerRowState extends ConsumerState<LayerRow> {
               ),
             ),
           ),
-          Expanded(child: _buildNameField(cs, layer)),
+          Expanded(child: _buildNameField(cs, layer, strings)),
           _IconToggle(
             key: ValueKey('layer-visibility-${layer.id}'),
             onPressed: () => ref
@@ -109,9 +121,8 @@ class _LayerRowState extends ConsumerState<LayerRow> {
                 ? PhosphorIconsLight.eye
                 : PhosphorIconsLight.eyeSlash,
             color: layer.isVisible ? cs.onSurface : cs.onSurfaceVariant,
-            tooltip: layer.isVisible
-                ? context.drawingStrings.canvas.hideLayer
-                : context.drawingStrings.canvas.showLayer,
+            toggled: layer.isVisible,
+            tooltip: layer.isVisible ? strings.hideLayer : strings.showLayer,
           ),
           _IconToggle(
             key: ValueKey('layer-lock-${layer.id}'),
@@ -121,16 +132,15 @@ class _LayerRowState extends ConsumerState<LayerRow> {
             icon:
                 layer.isLocked ? ElyanotesIcons.lock : ElyanotesIcons.lockOpen,
             color: layer.isLocked ? cs.primary : cs.onSurfaceVariant,
-            tooltip: layer.isLocked
-                ? context.drawingStrings.canvas.unlockLayer
-                : context.drawingStrings.canvas.lockLayer,
+            toggled: layer.isLocked,
+            tooltip: layer.isLocked ? strings.unlockLayer : strings.lockLayer,
           ),
         ]),
       ),
     );
   }
 
-  Widget _buildNameField(ColorScheme cs, Layer layer) {
+  Widget _buildNameField(ColorScheme cs, Layer layer, CanvasStrings strings) {
     final textTheme = Theme.of(context).textTheme;
     if (_isEditing) {
       return TextField(
@@ -152,19 +162,33 @@ class _LayerRowState extends ConsumerState<LayerRow> {
     }
     final base = widget.isActive ? textTheme.titleSmall : textTheme.bodySmall;
     final nameStyle = base?.copyWith(fontSize: 13, color: cs.onSurface);
-    return GestureDetector(
-      key: ValueKey('layer-name-${layer.id}'),
-      behavior: HitTestBehavior.opaque,
-      onDoubleTap: () => setState(() => _isEditing = true),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
-          child: Text(
-            layer.name,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            style: nameStyle,
+    // A screen reader's double tap is one activation, so rename gets a
+    // custom action; the row tap (activate) is the node's default action.
+    return Semantics(
+      key: ValueKey('layer-semantics-${layer.id}'),
+      container: true,
+      button: true,
+      selected: widget.isActive,
+      label: layer.name,
+      excludeSemantics: true,
+      onTap: _activate,
+      customSemanticsActions: {
+        CustomSemanticsAction(label: strings.renameLayer): _startEditing,
+      },
+      child: GestureDetector(
+        key: ValueKey('layer-name-${layer.id}'),
+        behavior: HitTestBehavior.opaque,
+        onDoubleTap: _startEditing,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
+            child: Text(
+              layer.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: nameStyle,
+            ),
           ),
         ),
       ),
@@ -179,27 +203,39 @@ class _IconToggle extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.tooltip,
+    required this.toggled,
   });
   final VoidCallback onPressed;
   final IconData icon;
   final Color color;
   final String tooltip;
 
+  /// Current on/off state announced to screen readers.
+  final bool toggled;
+
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: ChromeSizes.minTouchTarget,
-          height: ChromeSizes.minTouchTarget,
-          child: Center(
-            child: PhosphorIcon(
-              icon,
-              size: ChromeIconSizes.md,
-              color: color,
+    return Semantics(
+      container: true,
+      button: true,
+      toggled: toggled,
+      label: tooltip,
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: ChromeSizes.minTouchTarget,
+            height: ChromeSizes.minTouchTarget,
+            child: Center(
+              child: PhosphorIcon(
+                icon,
+                size: ChromeIconSizes.md,
+                color: color,
+              ),
             ),
           ),
         ),

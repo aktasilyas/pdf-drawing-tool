@@ -632,6 +632,7 @@
   "editorCanvasShowLayer": "Göster",
   "editorCanvasLockLayer": "Kilitle",
   "editorCanvasUnlockLayer": "Kilidi Aç",
+  "editorCanvasRenameLayer": "Yeniden Adlandır",
   "editorCanvasZoomLock": "Yakınlaştırma kilidi",
   "editorCanvasZoomLevel": "Yakınlaştırma {percent}%, favori düzeyler",
   "editorCanvasFavoriteZoom": "Favori yakınlaştırma",
