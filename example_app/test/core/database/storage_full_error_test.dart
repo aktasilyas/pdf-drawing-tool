@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:drift/drift.dart' show CouldNotRollBackException;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
@@ -71,6 +72,16 @@ void main() {
     const remoteFull = 'SqliteException(13): database or disk is full';
     expect(isStorageFull(remoteFull), isTrue);
     expect(isStorageFull('SqliteException(19): constraint failed'), isFalse);
+  });
+
+  test('a failed rollback after SQLITE_FULL is still storage full', () {
+    const full = FileSystemException('x', '', OSError('', 28));
+    final error = CouldNotRollBackException(
+      const CacheException('save', originalError: full),
+      StackTrace.empty,
+      StateError('no transaction is active'),
+    );
+    expect(isStorageFull(error), isTrue);
   });
 
   test('cacheFailureFor picks the failure type', () {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart' show CouldNotRollBackException;
 import 'package:drift/native.dart' show SqliteException;
 // DriftRemoteException is how errors from the background database isolate
 // arrive; only its type is used here.
@@ -19,8 +20,9 @@ const _enospc = 28;
 
 /// Whether [error] says the device has no space left: SQLite `SQLITE_FULL`
 /// (also when Drift's background isolate wraps it in a
-/// [DriftRemoteException]), a disk-full [FileSystemException], or an
-/// [AppException] caused by one of these.
+/// [DriftRemoteException], or inside a transaction Drift could not roll back),
+/// a disk-full [FileSystemException], or an [AppException] caused by one of
+/// these.
 bool isStorageFull(Object? error) {
   for (var e = error, depth = 0; e != null && depth < 8; depth++) {
     if (e is SqliteException) return e.resultCode == _sqliteFull;
@@ -33,6 +35,10 @@ bool isStorageFull(Object? error) {
     if (e is String) return e.contains(_sqliteFullMessage);
     if (e is DriftRemoteException) {
       e = e.remoteCause;
+    } else if (e is CouldNotRollBackException) {
+      // SQLite already rolled the transaction back after SQLITE_FULL, so
+      // Drift's own ROLLBACK fails and wraps the original error.
+      e = e.cause;
     } else if (e is AppException && e.originalError != null) {
       e = e.originalError;
     } else {
