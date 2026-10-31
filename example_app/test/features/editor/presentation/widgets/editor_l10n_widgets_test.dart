@@ -6,10 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:example_app/core/core.dart';
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_dialogs.dart';
 import 'package:example_app/features/editor/presentation/widgets/save_failure_banner.dart';
 
+import 'package:example_app/l10n/l10n.dart';
 import '../../../../helpers/l10n.dart';
 
 class _MockSave extends Mock implements SaveDocumentUseCase {}
@@ -38,12 +40,15 @@ Future<void> _pump(WidgetTester tester, Locale locale, Widget home) async {
 }
 
 void main() {
-  group('RenameDocumentDialog', () {
+  group('RenameDialog', () {
     Widget host() => Builder(
           builder: (context) => TextButton(
             onPressed: () => showDialog<String>(
               context: context,
-              builder: (_) => const RenameDocumentDialog(initialTitle: 'Doc'),
+              builder: (ctx) => RenameDialog(
+                initialTitle: 'Doc',
+                labelText: ctx.l10n.editorDocumentNameLabel,
+              ),
             ),
             child: const Text('open'),
           ),
@@ -77,7 +82,10 @@ void main() {
             builder: (context) => TextButton(
               onPressed: () async => result = await showDialog<String>(
                 context: context,
-                builder: (_) => const RenameDocumentDialog(initialTitle: 'Doc'),
+                builder: (ctx) => RenameDialog(
+                  initialTitle: 'Doc',
+                  labelText: ctx.l10n.editorDocumentNameLabel,
+                ),
               ),
               child: const Text('open'),
             ),
