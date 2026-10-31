@@ -329,6 +329,7 @@
   "editorLoadErrorMessage": "Belge bulunamadı ya da okunamadı.",
   "editorLoadErrorBack": "Geri dön",
   "editorSaveFailedMessage": "Kaydedilemedi. Değişiklikleriniz henüz kaydedilmedi.",
+  "editorSaveStorageFullMessage": "Kaydetmek için yeterli depolama alanı yok. Yer açın; değişiklikleriniz henüz kaydedilmedi.",
   "startupErrorTitle": "Uygulama başlatılamadı",
   "startupErrorMessage": "Notlarınız güvende, hiçbir şey silinmedi. Veriler açılırken bir sorun oluştu. Tekrar deneyin; sorun sürerse uygulamayı kapatıp yeniden açın.",
   "commonPasswordLabel": "Şifre",
