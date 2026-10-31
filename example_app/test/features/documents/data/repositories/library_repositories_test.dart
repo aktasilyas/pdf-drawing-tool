@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:drawing_core/drawing_core.dart' show DocumentType;
+import 'package:example_app/core/core.dart' show Failure;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/library_fixture.dart';
@@ -126,6 +129,50 @@ void main() {
     );
     expect(r.isLeft(), isTrue);
     expect(await fx.documentDs.getAllDocuments(), hasLength(1));
+  });
+
+  group('createDocumentWithContent (#602)', () {
+    Future<Either<Failure, DocumentInfo>> importDoc({required int pages}) =>
+        fx.documents.createDocumentWithContent(
+          title: 'Imported',
+          templateId: 'blank',
+          documentType: DocumentType.pdf,
+          pageCount: pages,
+          buildContent: (doc) => content(pages, id: doc.id),
+        );
+
+    test('writes the row and its content under the same id', () async {
+      final r = await importDoc(pages: 3);
+      final doc = r.getOrElse(() => throw StateError('import failed'));
+      final row = await fx.documentDs.getDocument(doc.id);
+      expect(row.title, 'Imported');
+      expect(row.pageCount, 3);
+      expect(
+        (await fx.documents.getDocumentContent(doc.id)).toOption().toNullable(),
+        content(3, id: doc.id),
+      );
+    });
+
+    test('leaves no row behind when the content write fails', () async {
+      await fx.db.customStatement(
+        'CREATE TRIGGER no_content BEFORE INSERT ON document_contents '
+        "BEGIN SELECT RAISE(ABORT, 'no space'); END",
+      );
+      final r = await importDoc(pages: 1);
+      expect(r.isLeft(), isTrue);
+      expect(await fx.documentDs.getAllDocuments(), isEmpty);
+    });
+
+    test('leaves no row behind when building the content throws', () async {
+      final r = await fx.documents.createDocumentWithContent(
+        title: 'Imported',
+        templateId: 'blank',
+        pageCount: 1,
+        buildContent: (_) => throw StateError('encode'),
+      );
+      expect(r.isLeft(), isTrue);
+      expect(await fx.documentDs.getAllDocuments(), isEmpty);
+    });
   });
 
   test('deleting a folder trashes its documents and subfolders', () async {

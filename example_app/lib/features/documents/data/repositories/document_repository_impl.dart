@@ -8,13 +8,18 @@ import 'package:example_app/features/documents/domain/repositories/document_repo
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
+import 'package:example_app/features/documents/data/repositories/document_creation.dart';
 import 'package:example_app/features/documents/data/repositories/document_queries.dart';
 import 'package:example_app/features/documents/data/repositories/document_thumbnails.dart';
 import 'package:example_app/features/documents/data/repositories/document_trash_purge.dart';
 
 @Injectable(as: DocumentRepository)
 class DocumentRepositoryImpl
-    with DocumentQueries, DocumentTrashPurge, DocumentThumbnails
+    with
+        DocumentCreation,
+        DocumentQueries,
+        DocumentTrashPurge,
+        DocumentThumbnails
     implements DocumentRepository {
   final DocumentLocalDatasource _localDatasource;
   final FolderLocalDatasource _folderDatasource;
@@ -35,51 +40,10 @@ class DocumentRepositoryImpl
   DocumentLocalDatasource get localDatasource => _localDatasource;
 
   @override
-  PdfPathResolver get thumbnailPaths => _pdfPaths;
+  Uuid get uuid => _uuid;
 
   @override
-  Future<Either<Failure, DocumentInfo>> createDocument({
-    required String title,
-    required String templateId,
-    String? folderId,
-    String paperColor = 'Sarı kağıt',
-    bool isPortrait = true,
-    DocumentType documentType = DocumentType.notebook,
-    String? coverId,
-    bool hasCover = true,
-    double paperWidthMm = 210.0,
-    double paperHeightMm = 297.0,
-  }) async {
-    try {
-      final now = DateTime.now();
-      final document = DocumentModel(
-        id: _uuid.v4(),
-        title: title,
-        templateId: templateId,
-        folderId: folderId,
-        createdAt: now,
-        updatedAt: now,
-        pageCount: 1,
-        isFavorite: false,
-        isInTrash: false,
-        syncState: SyncState.local.index,
-        paperColor: paperColor,
-        isPortrait: isPortrait,
-        documentType: documentType.name,
-        coverId: coverId,
-        hasCover: hasCover,
-        paperWidthMm: paperWidthMm,
-        paperHeightMm: paperHeightMm,
-      );
-
-      final created = await _localDatasource.createDocument(document);
-      return Right(created.toEntity());
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to create document: $e'));
-    }
-  }
+  PdfPathResolver get thumbnailPaths => _pdfPaths;
 
   /// Runs [action] in one transaction and maps errors to a [Failure].
   @override
@@ -139,35 +103,6 @@ class DocumentRepositoryImpl
   @override
   Future<Either<Failure, void>> permanentlyDelete(String id) =>
       guard('permanently delete', () => _localDatasource.deleteDocument(id));
-
-  @override
-  Future<Either<Failure, DocumentInfo>> duplicateDocument(
-    String id, {
-    required String Function(String title) copyTitle,
-  }) async {
-    // Document row and content are copied in one transaction.
-    final result = await guard('duplicate document', () async {
-      final original = await _localDatasource.getDocument(id);
-      final now = DateTime.now();
-      final duplicate = original.copyWith(
-        id: _uuid.v4(),
-        title: copyTitle(original.title),
-        createdAt: now,
-        updatedAt: now,
-        isFavorite: false, // Don't copy favorite status
-      );
-      final created = await _localDatasource.createDocument(duplicate);
-      final content = await _localDatasource.getDocumentContent(id);
-      if (content != null) {
-        // The content carries its own id; it must follow the copy's row id,
-        // or edits to the copy would be saved over the original.
-        await _localDatasource
-            .saveDocumentContent(created.id, {...content, 'id': created.id});
-      }
-      return created;
-    });
-    return result.map((m) => m.toEntity());
-  }
 
   @override
   Future<Either<Failure, void>> moveDocument(
