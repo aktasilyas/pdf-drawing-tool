@@ -31,6 +31,47 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('compact breadcrumb segments are labelled 48dp buttons (#622)',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final tapped = <BreadcrumbItem>[];
+    const items = [
+      BreadcrumbItem(label: 'Tümü'),
+      BreadcrumbItem(folderId: 'f1', label: 'Ders'),
+      BreadcrumbItem(folderId: 'f2', label: 'Biyoloji'),
+    ];
+    await tester.pumpWidget(
+      _host(
+        BreadcrumbNavigation(
+          items: items,
+          showBackButton: false,
+          padding: EdgeInsets.zero,
+          onItemTap: tapped.add,
+        ),
+      ),
+    );
+
+    for (final label in ['Tümü', 'Ders']) {
+      expect(
+        tester.getSemantics(find.bySemanticsLabel(label)),
+        isSemantics(label: label, isButton: true, hasTapAction: true),
+      );
+      final size = tester.getSize(find.bySemanticsLabel(label));
+      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, greaterThanOrEqualTo(48));
+    }
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Biyoloji')),
+      isSemantics(label: 'Biyoloji', isButton: false, hasTapAction: false),
+    );
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+
+    await tester.tap(find.bySemanticsLabel('Tümü'));
+    expect(tapped.single, items.first);
+    handle.dispose();
+  });
+
   testWidgets('folder color picker swatches are named and expose selected',
       (tester) async {
     final handle = tester.ensureSemantics();

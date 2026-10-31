@@ -181,24 +181,40 @@ class _BreadcrumbItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.xs),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xs,
-            vertical: AppSpacing.xxs,
-          ),
-          child: Text(
-            item.label,
-            style: AppTypography.bodyMedium.copyWith(
-              color: isActive
-                  ? context.palette.textPrimary
-                  : context.palette.textMuted,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+    final text = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
+      child: Text(
+        item.label,
+        style: AppTypography.bodyMedium.copyWith(
+          color: isActive
+              ? context.palette.textPrimary
+              : context.palette.textMuted,
+          fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+    );
+    // The current folder is plain text, not a button.
+    if (onTap == null) return text;
+    // Tappable segments get a 48dp hit area around unchanged text.
+    return Semantics(
+      label: item.label,
+      button: true,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.xs),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: AppSpacing.minTouchTarget,
+              minHeight: AppSpacing.minTouchTarget,
             ),
+            child: Align(widthFactor: 1, heightFactor: 1, child: text),
           ),
         ),
       ),
