@@ -81,8 +81,11 @@ class QuickTemplateThumbnail extends StatelessWidget {
   /// Size of the page preview inside the border.
   static const Size previewSize = Size(_previewWidth, 92);
 
-  /// Cell width: the preview plus the selected (thickest, 2dp) border.
-  static const double width = _previewWidth + ChromeSpacing.xs;
+  /// Room for the selected (thickest) border: 2dp on each side.
+  static const double _borderAllowance = 2 * ChromeSpacing.xxs;
+
+  /// Cell width: the preview plus the selected border.
+  static const double width = _previewWidth + _borderAllowance;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +101,8 @@ class QuickTemplateThumbnail extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Radii moved from 6/5 literals to the chrome scale (8, inner 6
+            // so the preview stays concentric inside the 2dp border).
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(ChromeRadius.sm),
