@@ -291,5 +291,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   void _handleFolderTap(Folder folder) =>
       handleFolderTap(folder, _navigateToFolder);
-  void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(doc);
+  void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(
+        doc,
+        inTrash: _selectedSection == SidebarSection.trash,
+      );
 }
