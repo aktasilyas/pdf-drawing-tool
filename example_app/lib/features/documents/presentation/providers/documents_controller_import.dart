@@ -7,8 +7,8 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/providers/imported_document_content.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 
-/// PDF import: creates a document from pre-rendered pages, and never leaves
-/// a half-imported (empty) notebook behind.
+/// PDF import: creates a document from pre-rendered pages in one write, so it
+/// never leaves a half-imported (empty) notebook behind.
 mixin DocumentsImportOperation on StateNotifier<AsyncValue<void>> {
   @protected
   DocumentRepository get repository;
@@ -26,11 +26,11 @@ mixin DocumentsImportOperation on StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
 
-    String? createdId;
     final paper = importedPaperFromPages(pages);
     try {
-      // 1. Create the document with a blank template.
-      final result = await repository.createDocument(
+      // Row and imported content are written in one transaction, so a failed
+      // save or the app closing mid-import leaves no blank notebook (#602).
+      final result = await repository.createDocumentWithContent(
         title: title,
         templateId: 'blank', // PDF needs no template
         folderId: folderId,
@@ -39,62 +39,30 @@ mixin DocumentsImportOperation on StateNotifier<AsyncValue<void>> {
         documentType: documentType,
         paperWidthMm: paper.widthMm,
         paperHeightMm: paper.heightMm,
+        pageCount: pageCount,
+        buildContent: (document) => buildImportedDocumentContent(
+          document: document,
+          pages: pages,
+          documentType: documentType,
+        ),
       );
 
-      return await result.fold(
+      return result.fold(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
           reportLibraryFailure(ref, failure, LibraryAction.importDocument);
           return null;
         },
-        (document) async {
-          createdId = document.id;
-          // 2. Save the V2 content with the imported pages.
-          final content = buildImportedDocumentContent(
-            document: document,
-            pages: pages,
-            documentType: documentType,
-          );
-
-          final saveResult = await repository.saveDocumentContent(
-            id: document.id,
-            content: content,
-            pageCount: pageCount,
-          );
-
-          if (saveResult.isLeft()) {
-            // Never leave an empty ghost notebook behind.
-            await _discardHalfImported(document.id);
-          }
-          return saveResult.fold(
-            (failure) {
-              state = AsyncValue.error(failure, StackTrace.current);
-              reportLibraryFailure(ref, failure, LibraryAction.importDocument);
-              return null;
-            },
-            (_) {
-              state = const AsyncValue.data(null);
-              invalidateAllDocumentLists(ref);
-              return document.id;
-            },
-          );
+        (document) {
+          state = const AsyncValue.data(null);
+          invalidateAllDocumentLists(ref);
+          return document.id;
         },
       );
     } catch (e) {
-      final id = createdId;
-      if (id != null) await _discardHalfImported(id);
       state = AsyncValue.error(e, StackTrace.current);
       reportLibraryError(ref, e, LibraryAction.importDocument);
       return null;
-    }
-  }
-
-  /// Best-effort removal of a document row whose imported content was not saved.
-  Future<void> _discardHalfImported(String id) async {
-    try {
-      await repository.permanentlyDelete(id);
-    } catch (_) {
-      // Nothing more to do; the original failure is reported by the caller.
     }
   }
 }
