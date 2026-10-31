@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get commonRestore;
 
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
   /// No description provided for @commonMenu.
   ///
   /// In en, this message translates to:
@@ -1009,6 +1015,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notebook moved'**
   String get libraryDocumentMoved;
+
+  /// No description provided for @libraryDocumentTrashed.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to Recently deleted'**
+  String get libraryDocumentTrashed;
 
   /// No description provided for @libraryDocumentRestored.
   ///

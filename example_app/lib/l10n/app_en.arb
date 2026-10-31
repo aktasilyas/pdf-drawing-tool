@@ -17,6 +17,7 @@
   "commonMove": "Move",
   "commonDuplicate": "Duplicate",
   "commonRestore": "Restore",
+  "commonUndo": "Undo",
   "commonMenu": "Menu",
   "commonErrorDetail": "Error: {error}",
   "@commonErrorDetail": {
@@ -331,6 +332,7 @@
   "libraryMoveToTrash": "Move to trash",
   "libraryDocumentDuplicated": "Notebook duplicated",
   "libraryDocumentMoved": "Notebook moved",
+  "libraryDocumentTrashed": "Moved to Recently deleted",
   "libraryDocumentRestored": "Notebook restored",
   "libraryDeleteDocumentForeverMessage": "This notebook will be deleted permanently. This can't be undone.",
   "libraryDocumentNameLabel": "Notebook name",

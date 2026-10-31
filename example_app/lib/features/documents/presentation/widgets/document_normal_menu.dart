@@ -112,9 +112,26 @@ void showNormalDocumentMenu(
         icon: Icons.delete_outline,
         label: l10n.libraryMoveToTrash,
         isDestructive: true,
-        onTap: () {
+        onTap: () async {
           Navigator.pop(ctx);
-          actions.moveToTrash(document);
+          // The tile is removed once the notebook is trashed, so read
+          // everything context-bound before awaiting.
+          final messenger = ScaffoldMessenger.of(context);
+          final keepUndoVisible = MediaQuery.accessibleNavigationOf(context);
+          // Failures are shown by LibraryErrorListener.
+          if (!await actions.moveToTrash(document)) return;
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.libraryDocumentTrashed),
+              behavior: SnackBarBehavior.floating,
+              // Auto-dismiss unless a screen reader needs time to reach Undo.
+              persist: keepUndoVisible,
+              action: SnackBarAction(
+                label: l10n.commonUndo,
+                onPressed: () => actions.restore(document),
+              ),
+            ),
+          );
         },
       ),
     ];

@@ -51,6 +51,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonRestore => 'Restore';
 
   @override
+  String get commonUndo => 'Undo';
+
+  @override
   String get commonMenu => 'Menu';
 
   @override
@@ -572,6 +575,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryDocumentMoved => 'Notebook moved';
+
+  @override
+  String get libraryDocumentTrashed => 'Moved to Recently deleted';
 
   @override
   String get libraryDocumentRestored => 'Notebook restored';
