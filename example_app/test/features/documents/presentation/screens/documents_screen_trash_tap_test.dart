@@ -82,14 +82,21 @@ void main() {
     return l10n;
   }
 
-  Finder firstTrashedCard() => find.byType(DocumentCard).first;
+  /// Taps the first trashed tile the way its cover does. Calls the tile's
+  /// callback so the test covers the Trash wiring, not the hit test of the
+  /// tile itself (`document_card_test.dart` covers that).
+  Future<void> tapFirstTrashedCard(WidgetTester tester) async {
+    final card = tester.widget<DocumentCard>(find.byType(DocumentCard).first);
+    expect(card.isInTrash, isTrue);
+    card.onTap();
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('tapping a trashed notebook shows trash actions, not the editor',
       (tester) async {
     final l10n = await pumpTrash(tester);
 
-    await tester.tap(firstTrashedCard());
-    await tester.pumpAndSettle();
+    await tapFirstTrashedCard(tester);
 
     expect(find.text(l10n.commonRestore), findsOneWidget);
     expect(find.text(l10n.libraryDeleteForever), findsOneWidget);
@@ -100,8 +107,7 @@ void main() {
       (tester) async {
     final l10n = await pumpTrash(tester);
 
-    await tester.tap(firstTrashedCard());
-    await tester.pumpAndSettle();
+    await tapFirstTrashedCard(tester);
     await tester.tap(find.text(l10n.commonRestore));
     await tester.pumpAndSettle();
 
@@ -119,8 +125,7 @@ void main() {
     container.read(selectionModeProvider.notifier).state = true;
     await tester.pumpAndSettle();
 
-    await tester.tap(firstTrashedCard());
-    await tester.pumpAndSettle();
+    await tapFirstTrashedCard(tester);
 
     expect(find.text(l10n.commonRestore), findsNothing);
     expect(container.read(selectedDocumentsProvider), {trashed.first.id});
