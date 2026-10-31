@@ -68,8 +68,8 @@ void main() {
     expect(isStorageFull(const CacheException('Document not found')), isFalse);
     expect(isStorageFull(null), isFalse);
     // Serialized remote causes are plain text.
-    expect(isStorageFull('SqliteException(13): database or disk is full'),
-        isTrue);
+    const remoteFull = 'SqliteException(13): database or disk is full';
+    expect(isStorageFull(remoteFull), isTrue);
     expect(isStorageFull('SqliteException(19): constraint failed'), isFalse);
   });
 

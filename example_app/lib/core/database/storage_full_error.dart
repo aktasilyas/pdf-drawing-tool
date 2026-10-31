@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:drift/native.dart' show SqliteException;
+// DriftRemoteException is how errors from the background database isolate
+// arrive; only its type is used here.
+// ignore: experimental_member_use
 import 'package:drift/remote.dart' show DriftRemoteException;
 import 'package:example_app/core/errors/exceptions.dart';
 import 'package:example_app/core/errors/failures.dart';
