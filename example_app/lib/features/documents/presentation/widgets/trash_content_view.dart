@@ -36,7 +36,7 @@ class TrashContentView extends ConsumerWidget {
         onRetry: () => ref.invalidate(trashItemsProvider),
       ),
       data: (items) {
-        if (items.isEmpty) return const DocumentsEmptyState();
+        if (items.isEmpty) return const TrashEmptyState();
         return _buildGrid(ref, items);
       },
     );
