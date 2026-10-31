@@ -154,6 +154,41 @@ void main() {
       expect(stored['currentPageIndex'], 0);
     });
 
+    test('never lands before a cover and keeps the current page', () async {
+      final d = await create('Doc');
+      final withCover = content(3);
+      (withCover['pages'] as List)[0] = {
+        'id': 'cover',
+        'index': 0,
+        'isCover': true
+      };
+      await fx.documents.saveDocumentContent(
+        id: d.id,
+        content: {...withCover, 'currentPageIndex': 1},
+        pageCount: 3,
+      );
+      final id = await trash(d.id, pageIndex: 0);
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final stored = (await fx.documentDs.getDocumentContent(d.id))!;
+      final pages = stored['pages'] as List<dynamic>;
+      expect((pages[0] as Map)['id'], 'cover');
+      expect((pages[1] as Map)['id'], 'gone');
+      expect(stored['currentPageIndex'], 2);
+      expect((pages[2] as Map)['id'], 'p1');
+    });
+
+    test('a coverless notebook still restores to the first position', () async {
+      final d = await create('Doc');
+      await fx.documents
+          .saveDocumentContent(id: d.id, content: content(2), pageCount: 2);
+      final id = await trash(d.id, pageIndex: 0);
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final stored = (await fx.documentDs.getDocumentContent(d.id))!;
+      expect(((stored['pages'] as List)[0] as Map)['id'], 'gone');
+    });
+
     test('clamps an index past the end to the last position', () async {
       final d = await create('Doc');
       await fx.documents
