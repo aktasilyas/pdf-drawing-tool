@@ -23,6 +23,7 @@ class _Runner extends PDFExportRunner {
     bool share = false,
     ExportOptions options = const ExportOptions(),
     int currentPageIndex = 0,
+    PDFPageFormat? pageFormat,
   }) async {
     runs.add(options);
     currentIndexes.add(currentPageIndex);

@@ -13,12 +13,16 @@ import 'package:example_app/features/editor/presentation/providers/editor_provid
 
 class MockLoadDocumentUseCase extends Mock implements LoadDocumentUseCase {}
 
+class MockDocumentRepository extends Mock implements DocumentRepository {}
+
 class MockPDFExportRunner extends Mock implements PDFExportRunner {}
 
 void main() {
   const strings = ExportStringsTr();
   late MockLoadDocumentUseCase load;
   late MockPDFExportRunner runner;
+  late MockDocumentRepository repo;
+  var infoMm = (210.0, 297.0);
   late ProviderContainer container;
 
   final now = DateTime(2026, 1, 1);
@@ -43,16 +47,32 @@ void main() {
   setUp(() {
     load = MockLoadDocumentUseCase();
     runner = MockPDFExportRunner();
+    repo = MockDocumentRepository();
+    infoMm = (210.0, 297.0);
+    when(() => repo.getDocument('doc-1')).thenAnswer((_) async => Right(
+          DocumentInfo(
+            id: 'doc-1',
+            title: 'Notes',
+            templateId: 'blank',
+            createdAt: now,
+            updatedAt: now,
+            pageCount: 3,
+            paperWidthMm: infoMm.$1,
+            paperHeightMm: infoMm.$2,
+          ),
+        ));
     when(() => runner.run(
           any(),
           any(),
           strings: any(named: 'strings'),
           share: any(named: 'share'),
           isInfiniteCanvas: any(named: 'isInfiniteCanvas'),
+          pageFormat: any(named: 'pageFormat'),
         )).thenAnswer((_) async {});
     container = ProviderContainer(overrides: [
       loadDocumentUseCaseProvider.overrideWithValue(load),
       pdfExportRunnerProvider.overrideWithValue(runner),
+      documentRepositoryProvider.overrideWithValue(repo),
     ]);
     addTearDown(container.dispose);
   });
@@ -72,6 +92,7 @@ void main() {
           strings: strings,
           share: true,
           isInfiniteCanvas: false,
+          pageFormat: any(named: 'pageFormat'),
         )).captured.single as DrawingDocument;
     expect(captured.pages, hasLength(3));
     expect(container.read(libraryErrorProvider), isNull);
@@ -91,6 +112,7 @@ void main() {
           strings: strings,
           share: true,
           isInfiniteCanvas: true,
+          pageFormat: any(named: 'pageFormat'),
         )).called(1);
   });
 
@@ -111,6 +133,46 @@ void main() {
           strings: any(named: 'strings'),
           share: any(named: 'share'),
           isInfiniteCanvas: any(named: 'isInfiniteCanvas'),
+          pageFormat: any(named: 'pageFormat'),
         ));
+  });
+
+  group('paper size (#611)', () {
+    PDFPageFormat? exportedFormat() => verify(() => runner.run(
+          any(),
+          any(),
+          strings: any(named: 'strings'),
+          share: any(named: 'share'),
+          isInfiniteCanvas: any(named: 'isInfiniteCanvas'),
+          pageFormat: captureAny(named: 'pageFormat'),
+        )).captured.single as PDFPageFormat?;
+
+    test('fresh container: an A4 notebook exports as A4 (595x842 pt)',
+        () async {
+      when(() => load('doc-1')).thenAnswer((_) async => Right(document));
+
+      await container
+          .read(documentExportActionsProvider)
+          .exportAsPdf('doc-1', strings: strings);
+
+      final format = exportedFormat()!;
+      expect(format.width, closeTo(595, 0.5));
+      expect(format.height, closeTo(842, 0.5));
+    });
+
+    test('the editor\'s global A5 format does not leak into the export',
+        () async {
+      when(() => load('doc-1')).thenAnswer((_) async => Right(document));
+      container.read(exportPageFormatProvider.notifier).state =
+          PDFPageFormat.a5;
+
+      await container
+          .read(documentExportActionsProvider)
+          .exportAsPdf('doc-1', strings: strings);
+
+      final format = exportedFormat()!;
+      expect(format.width, closeTo(595, 0.5));
+      expect(format.height, closeTo(842, 0.5));
+    });
   });
 }

@@ -26,6 +26,7 @@ class _RecordingRunner extends PDFExportRunner {
     bool share = false,
     ExportOptions options = const ExportOptions(),
     int currentPageIndex = 0,
+    PDFPageFormat? pageFormat,
   }) async {
     exported.add(document);
     shared.add(share);
