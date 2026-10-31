@@ -12,6 +12,7 @@ import 'package:example_app/features/documents/presentation/l10n/library_labels.
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/breadcrumb_navigation.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_trash_menu.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
@@ -187,7 +188,10 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
   }
 
   /// Handles document tap for selection mode or opening.
-  void handleDocumentTap(DocumentInfo doc) {
+  ///
+  /// A notebook in the trash ([inTrash] or [DocumentInfo.isInTrash]) is never
+  /// opened for editing; the tap offers Restore / Delete forever instead.
+  void handleDocumentTap(DocumentInfo doc, {bool inTrash = false}) {
     final isSelectionMode = ref.read(selectionModeProvider);
     if (isSelectionMode) {
       final current = ref.read(selectedDocumentsProvider);
@@ -198,6 +202,8 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
         updated.add(doc.id);
       }
       ref.read(selectedDocumentsProvider.notifier).state = updated;
+    } else if (inTrash || doc.isInTrash) {
+      showTrashDocumentMenu(context, ref, doc);
     } else {
       openDocument(doc.id);
     }
