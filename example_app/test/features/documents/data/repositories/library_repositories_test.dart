@@ -191,6 +191,28 @@ void main() {
     expect(live.map((x) => x.id), [outside.id]);
   });
 
+  test('deleting a folder trashes notes at every depth and returns the count',
+      () async {
+    final root = await folder('Okul');
+    final sub = await folder('Ders', parentId: root.id);
+    final subsub = await folder('Hafta', parentId: sub.id);
+    final a = await create('A', folderId: root.id);
+    final b = await create('B', folderId: sub.id);
+    final c = await create('C', folderId: subsub.id);
+
+    final r = await fx.folders.deleteFolder(root.id);
+    expect(r.getOrElse(() => -1), 3);
+    expect((await fx.folders.getFolders()).getOrElse(() => []), isEmpty);
+    final trash = (await fx.documents.getTrash()).getOrElse(() => []);
+    expect(trash.map((x) => x.id), unorderedEquals([a.id, b.id, c.id]));
+  });
+
+  test('deleting an empty folder returns zero', () async {
+    final root = await folder('Bos');
+    final r = await fx.folders.deleteFolder(root.id);
+    expect(r.getOrElse(() => -1), 0);
+  });
+
   test('folder delete rolls back when a document update fails', () async {
     final root = await folder('Okul');
     await create('A', folderId: root.id);

@@ -342,16 +342,15 @@
   "libraryFolderMoved": "Folder moved",
   "libraryFolderColorChanged": "Folder color changed",
   "libraryDeleteFolderTitle": "Delete folder",
-  "libraryDeleteFolderNonEmptyMessage": "{count, plural, =1{This folder contains 1 document. Deleting the folder also deletes that document. Continue?} other{This folder contains {count} documents. Deleting it also deletes them. Continue?}}",
-  "@libraryDeleteFolderNonEmptyMessage": {
+  "libraryFolderDeleted": "Folder deleted",
+  "libraryFolderDeletedNotesTrashed": "{count, plural, =1{Folder deleted. 1 note moved to Recently deleted} other{Folder deleted. {count} notes moved to Recently deleted}}",
+  "@libraryFolderDeletedNotesTrashed": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "libraryDeleteFolderMessage": "Delete this folder?",
-  "libraryFolderDeleted": "Folder deleted",
   "libraryRenameFolderTitle": "Rename folder",
   "libraryFolderNameLabel": "Folder name",
   "libraryFolderRenamed": "Folder renamed to \"{name}\"",
@@ -1084,11 +1083,14 @@
       }
     }
   },
-  "libraryDeleteFolderConfirm": "Delete the folder \"{name}\"?\nIts notes will be moved to the trash.",
+  "libraryDeleteFolderConfirm": "{count, plural, =0{Delete the folder \"{name}\"?} =1{Delete the folder \"{name}\"? The 1 note inside it (subfolders included) will be moved to Recently deleted, where you can restore it.} other{Delete the folder \"{name}\"? The {count} notes inside it (subfolders included) will be moved to Recently deleted, where you can restore them.}}",
   "@libraryDeleteFolderConfirm": {
     "placeholders": {
       "name": {
         "type": "String"
+      },
+      "count": {
+        "type": "int"
       }
     }
   },

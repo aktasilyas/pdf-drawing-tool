@@ -608,23 +608,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryDeleteFolderTitle => 'Delete folder';
 
   @override
-  String libraryDeleteFolderNonEmptyMessage(int count) {
+  String get libraryFolderDeleted => 'Folder deleted';
+
+  @override
+  String libraryFolderDeletedNotesTrashed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'This folder contains $count documents. Deleting it also deletes them. Continue?',
-      one:
-          'This folder contains 1 document. Deleting the folder also deletes that document. Continue?',
+      other: 'Folder deleted. $count notes moved to Recently deleted',
+      one: 'Folder deleted. 1 note moved to Recently deleted',
     );
     return '$_temp0';
   }
-
-  @override
-  String get libraryDeleteFolderMessage => 'Delete this folder?';
-
-  @override
-  String get libraryFolderDeleted => 'Folder deleted';
 
   @override
   String get libraryRenameFolderTitle => 'Rename folder';
@@ -2015,8 +2010,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String libraryDeleteFolderConfirm(String name) {
-    return 'Delete the folder \"$name\"?\nIts notes will be moved to the trash.';
+  String libraryDeleteFolderConfirm(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Delete the folder \"$name\"? The $count notes inside it (subfolders included) will be moved to Recently deleted, where you can restore them.',
+      one:
+          'Delete the folder \"$name\"? The 1 note inside it (subfolders included) will be moved to Recently deleted, where you can restore it.',
+      zero: 'Delete the folder \"$name\"?',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -9,7 +9,8 @@ class DeleteFolderUseCase {
 
   DeleteFolderUseCase(this._repository);
 
-  Future<Either<Failure, void>> call(
+  /// Returns how many notes were moved to the trash.
+  Future<Either<Failure, int>> call(
     String id, {
     bool deleteContents = false,
   }) {

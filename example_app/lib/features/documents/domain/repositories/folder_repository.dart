@@ -24,8 +24,9 @@ abstract class FolderRepository {
     int? sortOrder,
   });
 
-  /// Delete folder (and optionally contents)
-  Future<Either<Failure, void>> deleteFolder(
+  /// Deletes a folder and all its subfolders. Their notes move to the trash
+  /// (Recently deleted). Returns how many notes were moved to the trash.
+  Future<Either<Failure, int>> deleteFolder(
     String id, {
     bool deleteContents = false,
   });
