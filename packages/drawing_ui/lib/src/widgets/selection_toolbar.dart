@@ -1,5 +1,6 @@
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/widgets/dismissible_overlays.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
@@ -33,14 +34,14 @@ class SelectionToolbar extends ConsumerStatefulWidget {
 }
 
 class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
-  OverlayEntry? _overflowEntry;
+  DismissibleOverlayEntry? _overflowEntry;
   final _moreKey = GlobalKey();
 
   bool get _isOverflowOpen => _overflowEntry != null;
 
   @override
   void dispose() {
-    _overflowEntry?.remove();
+    _overflowEntry?.close();
     _overflowEntry = null;
     super.dispose();
   }
@@ -171,8 +172,13 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     if (top + estH > screen.height - pad) top = screen.height - estH - pad;
     if (top < pad) top = pad;
 
-    _overflowEntry = OverlayEntry(
-      builder: (_) => GestureDetector(
+    _overflowEntry = DismissibleOverlayEntry.show(
+      Overlay.of(context),
+      onClosed: () {
+        _overflowEntry = null;
+        if (mounted) setState(() {});
+      },
+      (_) => GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: _closeOverflow,
         child: SizedBox.expand(
@@ -199,14 +205,11 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
         ),
       ),
     );
-    Overlay.of(context).insert(_overflowEntry!);
     setState(() {});
   }
 
   void _closeOverflow() {
-    _overflowEntry?.remove();
-    _overflowEntry = null;
-    if (mounted) setState(() {});
+    _overflowEntry?.close();
   }
 
   double _estOverflowHeight(SelectionActionConfig config) {
@@ -234,13 +237,14 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
 
   void _openColorPicker() {
     final currentColor = Color(_getSelectedColor());
-    late OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (ctx) => Material(
+    late DismissibleOverlayEntry entry;
+    entry = DismissibleOverlayEntry.show(
+      Overlay.of(context),
+      (ctx) => Material(
         color: Theme.of(ctx).colorScheme.scrim.withValues(alpha: 0.54),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => entry.remove(),
+          onTap: () => entry.close(),
           child: Center(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -254,9 +258,9 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
                   selectedColor: currentColor,
                   onColorSelected: (color) {
                     executeColorChange(ref, widget.selection, color.toARGB32());
-                    entry.remove();
+                    entry.close();
                   },
-                  onClose: () => entry.remove(),
+                  onClose: () => entry.close(),
                 ),
               ),
             ),
@@ -264,6 +268,5 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
         ),
       ),
     );
-    Overlay.of(context).insert(entry);
   }
 }

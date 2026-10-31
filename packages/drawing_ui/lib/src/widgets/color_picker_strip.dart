@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/widgets/dismissible_overlays.dart';
 
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -71,15 +72,16 @@ class ColorPickerStrip extends StatelessWidget {
   void _showColorPalette(BuildContext context) {
     final overlay = Overlay.of(context);
     final scrim = ChromePalette.of(context).textPrimary.withValues(alpha: 0.12);
-    late OverlayEntry overlayEntry;
+    late DismissibleOverlayEntry overlayEntry;
 
-    overlayEntry = OverlayEntry(
-      builder: (overlayContext) {
+    overlayEntry = DismissibleOverlayEntry.show(
+      overlay,
+      (overlayContext) {
         return Material(
           color: scrim,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => overlayEntry.remove(),
+            onTap: () => overlayEntry.close(),
             child: Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -93,10 +95,10 @@ class ColorPickerStrip extends StatelessWidget {
                     selectedColor: selectedColor,
                     onColorSelected: (color) {
                       onColorSelected(color);
-                      overlayEntry.remove();
+                      overlayEntry.close();
                     },
                     showOpacity: isHighlighter,
-                    onClose: () => overlayEntry.remove(),
+                    onClose: () => overlayEntry.close(),
                   ),
                 ),
               ),
@@ -105,8 +107,6 @@ class ColorPickerStrip extends StatelessWidget {
         );
       },
     );
-
-    overlay.insert(overlayEntry);
   }
 
   static bool _colorsMatch(Color a, Color b) {
