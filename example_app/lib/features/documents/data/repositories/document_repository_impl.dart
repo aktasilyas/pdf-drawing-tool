@@ -133,6 +133,16 @@ class DocumentRepositoryImpl
   }
 
   @override
+  Future<Either<Failure, void>> updateCover(String id, String coverId) async {
+    final result = await _modify(
+      id,
+      'update cover',
+      (doc) => doc.copyWith(updatedAt: DateTime.now()).withCover(coverId),
+    );
+    return result.map((_) {});
+  }
+
+  @override
   Future<Either<Failure, void>> deleteDocument(String id) =>
       guard('delete document', () => _localDatasource.deleteDocument(id));
 

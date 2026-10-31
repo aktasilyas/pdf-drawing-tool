@@ -191,6 +191,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryExportAsPdf => 'PDF olarak dışa aktar';
 
   @override
+  String get libraryChangeCover => 'Kapağı değiştir';
+
+  @override
+  String get libraryErrorChangeCover => 'Kapak değiştirilemedi';
+
+  @override
   String get libraryErrorToggleFavorite => 'Favori durumu değiştirilemedi';
 
   @override
