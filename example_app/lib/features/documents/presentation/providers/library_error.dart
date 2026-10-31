@@ -30,6 +30,7 @@ enum LibraryAction {
   moveFolder,
   deleteFolder,
   exportDocument,
+  changeCover,
 }
 
 /// A failed library mutation (trash, rename, folder create, ...) waiting to

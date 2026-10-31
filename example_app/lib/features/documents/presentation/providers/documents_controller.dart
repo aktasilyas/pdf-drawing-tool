@@ -4,6 +4,7 @@ import 'package:example_app/features/documents/domain/entities/paper_color.dart'
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/document_list_providers.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_bulk.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_controller_cover.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_empty_trash.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_import.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_page_trash.dart';
@@ -18,6 +19,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
         DocumentsBulkOperations,
         DocumentsPageTrashOperations,
         DocumentsEmptyTrashOperation,
+        DocumentsCoverOperation,
         DocumentsImportOperation {
   @override
   final DocumentRepository repository;

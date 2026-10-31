@@ -50,6 +50,7 @@ extension LibraryActionL10n on LibraryAction {
         LibraryAction.moveFolder => l.libraryErrorMoveFolder,
         LibraryAction.deleteFolder => l.libraryErrorDeleteFolder,
         LibraryAction.exportDocument => l.libraryErrorExportDocument,
+        LibraryAction.changeCover => l.libraryErrorChangeCover,
       };
 }
 

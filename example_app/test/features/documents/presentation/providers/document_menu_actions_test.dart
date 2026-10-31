@@ -1,7 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:example_app/core/core.dart' show Failure;
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/premium/premium.dart';
@@ -171,5 +173,55 @@ void main() {
     final actions = build().read(documentMenuActionsProvider);
     await actions.deletePageForever(trashedPage);
     verify(() => pageTrash.permanentlyDeletePage('tp-1')).called(1);
+  });
+
+  group('changeCover', () {
+    late DocumentsHarness h;
+    final cover = CoverRegistry.byId('linen_sand')!;
+    final withCover = testDocument.copyWith(coverId: 'linen_sage');
+
+    setUp(() {
+      h = DocumentsHarness();
+      when(() => h.repo.getDocument('doc-1'))
+          .thenAnswer((_) async => Right(withCover));
+      when(() => h.repo.getDrawingDocument('doc-1'))
+          .thenAnswer((_) async => const Right(null));
+    });
+    tearDown(() => h.dispose());
+
+    test('success updates the cover and refreshes the document lists',
+        () async {
+      when(() => h.repo.updateCover('doc-1', 'linen_sand'))
+          .thenAnswer((_) async => const Right(null));
+      final actions = h.container.read(documentMenuActionsProvider);
+
+      late bool ok;
+      final rebuilt = await h.rebuiltBy(() async {
+        ok = await actions.changeCover(withCover, cover);
+      });
+
+      expect(ok, isTrue);
+      expect(rebuilt, {'documents', 'favorites', 'recent'});
+      verify(() => h.repo.updateCover('doc-1', 'linen_sand')).called(1);
+      expect(h.container.read(libraryErrorProvider), isNull);
+    });
+
+    test('failure publishes a LibraryError and refreshes nothing', () async {
+      when(() => h.repo.updateCover('doc-1', 'linen_sand'))
+          .thenAnswer((_) async => const Left(failure));
+      final actions = h.container.read(documentMenuActionsProvider);
+
+      late bool ok;
+      final rebuilt = await h.rebuiltBy(() async {
+        ok = await actions.changeCover(withCover, cover);
+      });
+
+      expect(ok, isFalse);
+      expect(rebuilt, isEmpty);
+      final error = h.container.read(libraryErrorProvider);
+      expect(error, isNotNull);
+      expect(error!.action, LibraryAction.changeCover);
+      expect(error.failure, isA<Failure>());
+    });
   });
 }

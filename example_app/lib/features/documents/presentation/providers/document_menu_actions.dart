@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -72,6 +73,11 @@ class DocumentMenuActions {
     _ref.invalidate(foldersProvider);
     _ref.invalidate(documentsProvider);
   }
+
+  /// Gives [document] the [cover] (cover page and library tile); ink on the
+  /// cover page is kept.
+  Future<bool> changeCover(DocumentInfo document, Cover cover) =>
+      _controller.changeCover(document.id, cover.id);
 
   Future<bool> toggleFavorite(DocumentInfo document) =>
       _controller.toggleFavorite(document.id);

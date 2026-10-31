@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart' show CoverRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/providers/document_export_actions.dart';
 import 'package:example_app/features/documents/presentation/providers/document_menu_actions.dart';
+import 'package:example_app/features/documents/presentation/widgets/change_cover_sheet.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_menu_common.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
@@ -33,6 +35,25 @@ void showNormalDocumentMenu(
         },
       ),
       softDivider(context),
+      if (hasChangeableCover(document)) ...[
+        MenuTile(
+          icon: Icons.style_outlined,
+          label: l10n.libraryChangeCover,
+          onTap: () async {
+            Navigator.pop(ctx);
+            final current = CoverRegistry.byId(document.coverId!) ??
+                CoverRegistry.defaultCover;
+            final picked = await showChangeCoverSheet(
+              context,
+              current: current,
+              title: document.title,
+            );
+            // Failures are shown by LibraryErrorListener.
+            if (picked != null) actions.changeCover(document, picked);
+          },
+        ),
+        softDivider(context),
+      ],
       MenuTile(
         icon: Icons.content_copy,
         label: l10n.commonDuplicate,
@@ -137,3 +158,7 @@ void showNormalDocumentMenu(
     ];
   });
 }
+
+/// Whether the library can change [document]'s cover (it has one to change).
+bool hasChangeableCover(DocumentInfo document) =>
+    document.hasCover && document.coverId != null;
