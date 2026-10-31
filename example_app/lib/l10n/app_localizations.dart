@@ -2318,6 +2318,12 @@ abstract class AppLocalizations {
   /// **'Template'**
   String get libraryTemplate;
 
+  /// No description provided for @libraryTemplateCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 template} other{{count} templates}}'**
+  String libraryTemplateCount(int count);
+
   /// No description provided for @libraryUntitledNote.
   ///
   /// In en, this message translates to:
