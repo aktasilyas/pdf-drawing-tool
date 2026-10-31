@@ -203,12 +203,16 @@ void main() {
       final id = layers()[0].id;
       final node = tester.getSemantics(byKey('layer-semantics-$id'));
 
+      // The hint is a custom action; the row node also holds the list's
+      // move actions, so check membership rather than the exact list.
+      expect(node, isSemantics(hasLongPressAction: true));
+      final hint = CustomSemanticsAction.overridingAction(
+        hint: const CanvasStringsTr().renameLayer,
+        action: SemanticsAction.longPress,
+      );
       expect(
-        node,
-        isSemantics(
-          hasLongPressAction: true,
-          onLongPressHint: const CanvasStringsTr().renameLayer,
-        ),
+        node.getSemanticsData().customSemanticsActionIds,
+        contains(CustomSemanticsAction.getIdentifier(hint)),
       );
       final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
       owner.performAction(node.id, SemanticsAction.longPress);
