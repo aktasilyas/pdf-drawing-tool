@@ -16,6 +16,7 @@ import 'package:example_app/features/documents/presentation/providers/bulk_resul
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
+import 'package:example_app/features/documents/presentation/widgets/selection_delete.dart';
 import 'package:example_app/features/premium/premium.dart';
 import 'package:example_app/l10n/l10n.dart';
 
@@ -48,7 +49,7 @@ class SelectionModeHeader extends ConsumerWidget {
             icon: ElyanotesIcons.libraryClose,
             variant: AppIconButtonVariant.ghost,
             tooltip: l10n.commonClose,
-            onPressed: () => _exitSelectionMode(ref),
+            onPressed: () => exitSelectionMode(ref),
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
@@ -67,7 +68,7 @@ class SelectionModeHeader extends ConsumerWidget {
               icon: ElyanotesIcons.libraryCopy,
               variant: AppIconButtonVariant.ghost,
               tooltip: l10n.commonDuplicate,
-              onPressed: hasSelection
+              onPressed: selectedDocs.isNotEmpty
                   ? () => _duplicateSelected(context, ref, selectedDocs)
                   : null,
             ),
@@ -88,18 +89,18 @@ class SelectionModeHeader extends ConsumerWidget {
             tooltip:
                 isTrashSection ? l10n.libraryDeleteForever : l10n.commonDelete,
             onPressed: hasSelection
-                ? () => _deleteSelected(context, ref, selectedDocs)
+                ? () => deleteSelection(
+                      context,
+                      ref,
+                      selectedDocs: selectedDocs,
+                      selectedFolders: selectedFolders,
+                      isTrashSection: isTrashSection,
+                    )
                 : null,
           ),
         ],
       ),
     );
-  }
-
-  void _exitSelectionMode(WidgetRef ref) {
-    ref.read(selectionModeProvider.notifier).state = false;
-    ref.read(selectedDocumentsProvider.notifier).state = {};
-    ref.read(selectedFoldersProvider.notifier).state = {};
   }
 
   Future<void> _duplicateSelected(
@@ -135,7 +136,7 @@ class SelectionModeHeader extends ConsumerWidget {
       copyTitle: context.l10n.libraryCopyTitle,
     );
     if (_keepOnlyFailedSelected(ref, result)) return;
-    _exitSelectionMode(ref);
+    exitSelectionMode(ref);
     if (context.mounted) {
       AppToast.success(
         context,
@@ -168,44 +169,7 @@ class SelectionModeHeader extends ConsumerWidget {
     if (result == true) {
       ref.invalidate(foldersProvider);
       ref.invalidate(documentsProvider);
-      _exitSelectionMode(ref);
-    }
-  }
-
-  Future<void> _deleteSelected(
-      BuildContext context, WidgetRef ref, Set<String> selectedDocs) async {
-    if (selectedDocs.isEmpty) return;
-
-    final l10n = context.l10n;
-    final count = selectedDocs.length;
-    final confirmed = await AppConfirmDialog.show(
-      context: context,
-      title: isTrashSection
-          ? l10n.libraryDeleteForeverTitle
-          : l10n.libraryDeleteDocumentsTitle,
-      message: isTrashSection
-          ? l10n.libraryDeleteDocumentsForeverMessage(count)
-          : l10n.libraryTrashDocumentsMessage(count),
-      confirmLabel: l10n.commonDelete,
-      isDestructive: true,
-    );
-
-    if (confirmed == true && context.mounted) {
-      final controller = ref.read(documentsControllerProvider.notifier);
-      final ids = selectedDocs.toList();
-      final result = isTrashSection
-          ? await controller.permanentlyDeleteDocuments(ids)
-          : await controller.moveDocumentsToTrash(ids);
-      if (_keepOnlyFailedSelected(ref, result)) return;
-      _exitSelectionMode(ref);
-      if (context.mounted) {
-        AppToast.success(
-          context,
-          isTrashSection
-              ? context.l10n.libraryDocumentsDeleted(count)
-              : context.l10n.libraryDocumentsTrashed(count),
-        );
-      }
+      exitSelectionMode(ref);
     }
   }
 }

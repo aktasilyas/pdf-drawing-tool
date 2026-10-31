@@ -2020,6 +2020,46 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String libraryDeleteFoldersMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'These $count folders will be deleted. Their notes will be moved to the trash.',
+      one: 'This folder will be deleted. Its notes will be moved to the trash.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDeleteSelectionMessage(int folders, int notes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders folders',
+      one: '1 folder',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      notes,
+      locale: localeName,
+      other: '$notes notes',
+      one: '1 note',
+    );
+    return '$_temp0 will be deleted and $_temp1 will be moved to the trash. Notes inside the folders also go to the trash.';
+  }
+
+  @override
+  String libraryFoldersDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count folders deleted',
+      one: '1 folder deleted',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get libraryFolderManagement => 'Folder management';
 
   @override
