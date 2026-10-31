@@ -117,43 +117,53 @@ class _CategoryHeader extends StatelessWidget {
     final l10n = context.l10n;
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
+    final name = localizedName(
+      l10n,
+      tr: category.displayName,
+      en: category.displayNameEn,
+    );
 
-    return InkWell(
+    // One node per header: name and count are read together, the chevron is
+    // decorative, and the expanded state is announced instead of only drawn.
+    return Semantics(
+      button: true,
+      expanded: isExpanded,
+      label: '$name, ${l10n.libraryTemplateCount(templateCount)}',
+      excludeSemantics: true,
       onTap: onToggle,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            AnimatedRotation(
-              turns: isExpanded ? 0.0 : -0.25,
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                Icons.expand_more,
-                size: AppIconSize.sm,
-                color: textSecondary,
+      child: InkWell(
+        onTap: onToggle,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppSpacing.minTouchTarget,
+          ),
+          child: Row(
+            children: [
+              AnimatedRotation(
+                turns: isExpanded ? 0.0 : -0.25,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  Icons.expand_more,
+                  size: AppIconSize.sm,
+                  color: textSecondary,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              localizedName(
-                l10n,
-                tr: category.displayName,
-                en: category.displayNameEn,
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                name,
+                style: AppTypography.labelLarge.copyWith(
+                  color: textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              style: AppTypography.labelLarge.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '($templateCount)',
+                style: AppTypography.caption.copyWith(color: textSecondary),
               ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              '($templateCount)',
-              style: AppTypography.caption.copyWith(color: textSecondary),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

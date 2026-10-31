@@ -1264,6 +1264,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryTemplate => 'Şablon';
 
   @override
+  String libraryTemplateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count şablon',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get libraryUntitledNote => 'İsimsiz Not';
 
   @override

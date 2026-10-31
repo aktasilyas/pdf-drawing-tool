@@ -425,6 +425,7 @@
   "libraryNoTemplatesInCategory": "Bu kategoride şablon yok",
   "libraryCreateNoteTitle": "Yeni not oluştur",
   "libraryTemplate": "Şablon",
+  "libraryTemplateCount": "{count, plural, other{{count} şablon}}",
   "libraryUntitledNote": "İsimsiz Not",
   "libraryPaperColorWhite": "Beyaz kağıt",
   "libraryPaperColorBlack": "Siyah kağıt",

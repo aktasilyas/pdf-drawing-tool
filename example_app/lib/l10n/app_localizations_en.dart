@@ -1284,6 +1284,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryTemplate => 'Template';
 
   @override
+  String libraryTemplateCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count templates',
+      one: '1 template',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get libraryUntitledNote => 'Untitled note';
 
   @override
