@@ -196,19 +196,22 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('rename custom action opens the name field', (tester) async {
+    testWidgets('long press action (hint: rename) opens the name field',
+        (tester) async {
       final handle = tester.ensureSemantics();
       await pumpList(tester);
       final id = layers()[0].id;
+      final node = tester.getSemantics(byKey('layer-semantics-$id'));
 
-      final rename =
-          CustomSemanticsAction(label: const CanvasStringsTr().renameLayer);
-      final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
-      owner.performAction(
-        tester.getSemantics(byKey('layer-semantics-$id')).id,
-        SemanticsAction.customAction,
-        CustomSemanticsAction.getIdentifier(rename),
+      expect(
+        node,
+        isSemantics(
+          hasLongPressAction: true,
+          onLongPressHint: const CanvasStringsTr().renameLayer,
+        ),
       );
+      final owner = tester.binding.renderViews.first.owner!.semanticsOwner!;
+      owner.performAction(node.id, SemanticsAction.longPress);
       await tester.pumpAndSettle();
 
       expect(byKey('layer-rename-$id'), findsOneWidget);

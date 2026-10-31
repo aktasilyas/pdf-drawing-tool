@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
@@ -11,12 +10,13 @@ import 'package:drawing_ui/src/theme/theme.dart';
 /// Divider line width; row heights add it so targets stay 48dp.
 const double _line = 0.5;
 
-/// One row of the layers panel: drag handle, name (double tap to rename),
+/// One row of the layers panel: drag handle, name (double tap or long press
+/// to rename),
 /// visibility and lock toggles. Tapping the row activates the layer.
 ///
 /// Semantics: the row is one button node (label = layer name, selected =
-/// active, tap activates) with a custom "Rename" action next to the list's
-/// reorder actions. The toggles are separate nodes that announce state.
+/// active, tap activates, long press renames) that keeps the list's reorder
+/// actions. The toggles are separate nodes that announce state.
 class LayerRow extends ConsumerStatefulWidget {
   const LayerRow({
     super.key,
@@ -163,10 +163,11 @@ class _LayerRowState extends ConsumerState<LayerRow> {
     }
     final base = widget.isActive ? textTheme.titleSmall : textTheme.bodySmall;
     final nameStyle = base?.copyWith(fontSize: 13, color: cs.onSurface);
-    // A screen reader's double tap is one activation, so rename gets a
-    // custom action; the row tap (activate) is the node's default action.
-    // Not a container: these properties merge into the list item's node, so
-    // the row is one node that also carries the list's move up/down actions.
+    // A screen reader's double tap is one activation, so rename is the
+    // node's long press ("double tap and hold to rename"). Not a container:
+    // these properties merge into the list item's node, so the row is one
+    // node that also carries the list's move custom actions. A rename custom
+    // action would conflict with those and split the row into two nodes.
     return Semantics(
       key: ValueKey('layer-semantics-${layer.id}'),
       button: true,
@@ -174,13 +175,13 @@ class _LayerRowState extends ConsumerState<LayerRow> {
       label: layer.name,
       excludeSemantics: true,
       onTap: _activate,
-      customSemanticsActions: {
-        CustomSemanticsAction(label: strings.renameLayer): _startEditing,
-      },
+      onLongPress: _startEditing,
+      onLongPressHint: strings.renameLayer,
       child: GestureDetector(
         key: ValueKey('layer-name-${layer.id}'),
         behavior: HitTestBehavior.opaque,
         onDoubleTap: _startEditing,
+        onLongPress: _startEditing,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Padding(
