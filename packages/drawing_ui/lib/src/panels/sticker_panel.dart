@@ -80,7 +80,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: ChromeSpacing.sm),
 
           // Sticker grid
           SizedBox(
@@ -100,7 +100,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: ChromeSpacing.sm),
 
           // Insert button
           StickerActionButton(
