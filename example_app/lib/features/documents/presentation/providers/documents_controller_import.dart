@@ -47,7 +47,7 @@ mixin DocumentsImportOperation on StateNotifier<AsyncValue<void>> {
         ),
       );
 
-      return result.fold(
+      return result.fold<String?>(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
           reportLibraryFailure(ref, failure, LibraryAction.importDocument);
