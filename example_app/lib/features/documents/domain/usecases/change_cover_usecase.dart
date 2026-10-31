@@ -38,12 +38,12 @@ class ChangeCoverUseCase {
 
       // Never opened: LoadDocumentUseCase builds the cover page from the row.
       if (doc == null || doc.pages.isEmpty) {
-        return _repository.updateCover(documentId, coverId);
+        return await _repository.updateCover(documentId, coverId);
       }
 
       final updated = _withCover(doc, cover);
       final content = await _slicer.toJson(updated);
-      return _repository.saveDocumentContent(
+      return await _repository.saveDocumentContent(
         id: documentId,
         content: content,
         pageCount: updated.pageCount,

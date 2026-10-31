@@ -3,7 +3,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:example_app/core/core.dart';
+import 'package:example_app/core/core.dart' show Failure;
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/premium/premium.dart';
