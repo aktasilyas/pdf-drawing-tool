@@ -1,6 +1,7 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_sections.dart';
+import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
