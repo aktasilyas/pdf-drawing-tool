@@ -1,6 +1,7 @@
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 
@@ -21,20 +22,35 @@ class DocumentExportActions {
   }) async {
     final result = await _ref.read(loadDocumentUseCaseProvider)(documentId);
     return result.fold(
-      (failure) {
+      (failure) async {
         reportLibraryFailure(_ref, failure, LibraryAction.exportDocument);
         return false;
       },
-      (document) {
+      (document) async {
+        // The editor's global format belongs to whichever notebook was opened
+        // last; a library export uses the exported notebook's own size.
+        final pageFormat = await _paperFormat(documentId);
         _ref.read(pdfExportRunnerProvider).run(
               _ref.read(exportProgressProvider.notifier),
               document,
               strings: strings,
               share: true,
               isInfiniteCanvas: document.isInfiniteCanvas,
+              pageFormat: pageFormat,
             );
         return true;
       },
+    );
+  }
+
+  /// The notebook's stored paper size (orientation already applied); A4 when
+  /// it cannot be read, matching the stored default.
+  Future<PDFPageFormat> _paperFormat(String documentId) async {
+    final info =
+        await _ref.read(documentRepositoryProvider).getDocument(documentId);
+    return info.fold(
+      (_) => PDFPageFormat.millimeters(210, 297),
+      (i) => PDFPageFormat.millimeters(i.paperWidthMm, i.paperHeightMm),
     );
   }
 }

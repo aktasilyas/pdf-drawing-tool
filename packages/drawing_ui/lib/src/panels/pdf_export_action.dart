@@ -28,6 +28,9 @@ class PDFExportRunner {
   final PdfPathResolver pdfPaths;
 
   /// Paper size for notebook pages; see [exportPageFormatProvider].
+  ///
+  /// A `pageFormat` passed to [run] takes precedence, for exports that are
+  /// not started from the open editor (library menu).
   final PDFPageFormat? pageFormat;
 
   Future<void> run(
@@ -39,6 +42,7 @@ class PDFExportRunner {
     bool share = false,
     ExportOptions options = const ExportOptions(),
     int currentPageIndex = 0,
+    PDFPageFormat? pageFormat,
   }) {
     return performPDFExport(
       progress,
@@ -51,7 +55,7 @@ class PDFExportRunner {
       share: share,
       shareService: shareService,
       pdfPaths: pdfPaths,
-      pageFormat: pageFormat,
+      pageFormat: pageFormat ?? this.pageFormat,
     );
   }
 }
