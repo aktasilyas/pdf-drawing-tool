@@ -2062,4 +2062,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryFolderColorStone => 'Stone';
+
+  @override
+  String templateCategoryHeaderLabel(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count templates',
+      one: '1 template',
+    );
+    return '$name, $_temp0';
+  }
 }

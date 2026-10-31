@@ -1108,5 +1108,13 @@
   "libraryFolderColorCyan": "Cyan",
   "libraryFolderColorBlue": "Blue",
   "libraryFolderColorGray": "Gray",
-  "libraryFolderColorStone": "Stone"
+  "libraryFolderColorStone": "Stone",
+  "templateCategoryHeaderLabel": "{name}, {count, plural, =1{1 template} other{{count} templates}}",
+  "@templateCategoryHeaderLabel": {
+    "description": "Screen-reader label of a collapsible template category header in the new-notebook list.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  }
 }

@@ -2034,4 +2034,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryFolderColorStone => 'Taş';
+
+  @override
+  String templateCategoryHeaderLabel(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count şablon',
+    );
+    return '$name, $_temp0';
+  }
 }

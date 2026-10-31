@@ -51,6 +51,7 @@ class _TemplateGroupedListState extends State<TemplateGroupedList> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _CategoryHeader(
+              key: Key('template_category_header_$index'),
               category: category,
               templateCount: templates.length,
               isExpanded: !isCollapsed,
@@ -106,6 +107,7 @@ class _CategoryHeader extends StatelessWidget {
   final VoidCallback onToggle;
 
   const _CategoryHeader({
+    super.key,
     required this.category,
     required this.templateCount,
     required this.isExpanded,
@@ -118,42 +120,53 @@ class _CategoryHeader extends StatelessWidget {
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
 
-    return InkWell(
+    final name = localizedName(
+      l10n,
+      tr: category.displayName,
+      en: category.displayNameEn,
+    );
+
+    return Semantics(
+      container: true,
+      button: true,
+      expanded: isExpanded,
+      label: l10n.templateCategoryHeaderLabel(name, templateCount),
       onTap: onToggle,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            AnimatedRotation(
-              turns: isExpanded ? 0.0 : -0.25,
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                Icons.expand_more,
-                size: AppIconSize.sm,
-                color: textSecondary,
-              ),
+      child: ExcludeSemantics(
+        child: InkWell(
+          onTap: onToggle,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.minTouchTarget,
             ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              localizedName(
-                l10n,
-                tr: category.displayName,
-                en: category.displayNameEn,
-              ),
-              style: AppTypography.labelLarge.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Row(
+              children: [
+                AnimatedRotation(
+                  turns: isExpanded ? 0.0 : -0.25,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.expand_more,
+                    size: AppIconSize.sm,
+                    color: textSecondary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  name,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '($templateCount)',
+                  style: AppTypography.caption.copyWith(color: textSecondary),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.xs),
-            Text(
-              '($templateCount)',
-              style: AppTypography.caption.copyWith(color: textSecondary),
-            ),
-          ],
+          ),
         ),
       ),
     );

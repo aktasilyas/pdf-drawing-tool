@@ -689,5 +689,6 @@
   "libraryFolderColorCyan": "Camgöbeği",
   "libraryFolderColorBlue": "Mavi",
   "libraryFolderColorGray": "Gri",
-  "libraryFolderColorStone": "Taş"
+  "libraryFolderColorStone": "Taş",
+  "templateCategoryHeaderLabel": "{name}, {count, plural, other{{count} şablon}}"
 }

@@ -3697,6 +3697,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stone'**
   String get libraryFolderColorStone;
+
+  /// Screen-reader label of a collapsible template category header in the new-notebook list.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {count, plural, =1{1 template} other{{count} templates}}'**
+  String templateCategoryHeaderLabel(String name, int count);
 }
 
 class _AppLocalizationsDelegate
